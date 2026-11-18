@@ -1,6 +1,8 @@
-# Caisse Lightning pour petits commerçants
+# Passeport de revenus : la caisse qui ouvre l'accès au microcrédit
 
 Projet pour le **Dakar Bitcoin Hack 2026** (Btrust) : https://dakar-bitcoin-hack-2026.devpost.com/
+
+> Nom de travail. Le produit était d'abord pensé comme une « caisse Lightning ». L'étude de marché (voir `docs/ETUDE_MARCHE.md`) a montré que ce positionnement est déjà très occupé. Le projet vend désormais une **preuve de revenus vérifiable**, la caisse Lightning n'étant que la source des données.
 
 ## 1. Récap du hackathon
 
@@ -9,78 +11,133 @@ Projet pour le **Dakar Bitcoin Hack 2026** (Btrust) : https://dakar-bitcoin-hack
 | Thème | Outils pour améliorer la vie des Africains, autour de Bitcoin, Lightning, Nostr et IA |
 | Format | 100 % en ligne, public, open-source |
 | Deadline | **20 nov 2026, 21h (GMT+1)** |
-| Prix | 500 $ / 250 $ / 150 $ en BTC |
+| Prix | 500 $ / 250 $ / 150 $ en BTC (le règlement indique 500k / 250k / 100k sats : à confirmer) |
 | Rendu obligatoire | Présentation (texte ou vidéo) + prototype/MVP/PoC + **au minimum une implémentation de wallet Bitcoin/Lightning** |
 
 ### Critères du jury
 1. **Utilité et impact local** : problème réel, utilisateur précis, portée estimée.
 2. **Sécurité by design** : modèle de menace, moindres privilèges, secrets protégés, entrées validées, pas de données personnelles dans les logs.
 3. **UX/UI** : fluide sur faible débit et téléphone moyen de gamme, textes simples.
-4. **MVP fonctionnel** : démo de bout en bout, installation en une commande, données d'exemple.
+4. **MVP fonctionnel** : démo de bout en bout, installation en une commande, données d'exemple, pas de maquette.
 5. **Pitch et docs** : démo de 3 min (problème, solution, impact, suite), README avec schéma d'architecture.
+6. **Originalité** (citée dans le règlement).
 
-## 2. Description du projet
+## 2. Le projet
 
-**Problème** : les petits commerçants (marchés, boutiques de quartier) encaissent surtout en espèces ou en mobile money, avec des frais, des délais et peu de traçabilité. Bitcoin/Lightning permet des paiements instantanés à faible coût, mais les outils existants sont trop techniques pour eux.
+**Problème** : au Sénégal, le crédit manque pour les petits commerçants, pas les moyens de paiement. Seuls 20,3 % des adultes ont accès à la microfinance, et les prêteurs informels prennent parfois plus de 30 % par mois. Faute de relevé de revenus, un vendeur de marché ne peut rien prouver à un prêteur. Les paiements, eux, sont déjà peu coûteux (Wave est gratuit pour le marchand jusqu'à 20 000 FCFA par jour, puis 1 %).
 
-**Solution** : une application web légère (PWA) qui transforme le téléphone du commerçant en caisse Lightning. Il saisit un montant en FCFA, l'application génère un QR code de paiement, confirme la réception en temps réel et tient le journal des ventes. Une assistance IA permet d'enregistrer les ventes en langage naturel et résume la journée.
+**Solution** : une application web légère (PWA) qui tient le journal des ventes du commerçant et le transforme en **passeport de revenus signé**, vérifiable par un prêteur en scannant un QR code.
+- Les ventes encaissées en **Lightning** sont **prouvées** (hash de paiement et préimage).
+- Les ventes en espèces ou Wave sont **déclarées**, saisies en langage naturel avec l'IA (« 2 sacs de riz, 15 000 »).
+- Le relevé est signé avec la clé Nostr du commerçant. Une page « vue prêteur » vérifie la signature, recalcule le total prouvé et affiche un plafond de prêt indicatif (20 % du flux mensuel, règle inspirée d'une banque de microfinance nigériane).
+- Le client peut **contresigner son reçu** (Nostr), ce qui rend plus coûteux de fabriquer de fausses ventes.
+- Le commerçant peut donner à ses **vendeurs une connexion NWC à budget plafonné et révocable**.
 
 **Utilisateur cible** : un vendeur de marché ou un petit commerçant de Dakar, avec un smartphone d'entrée ou de moyenne gamme et une connexion irrégulière.
 
-**Impact visé** : encaisser instantanément sans intermédiaire, réduire les frais, obtenir un historique des ventes. Indicateurs à suivre : nombre de marchands actifs par semaine, nombre de paiements, montant moyen, temps jusqu'à la confirmation.
+**Acteurs** : commerçant, client payeur, vendeur/employé, agent de microfinance (vérificateur). Voir `docs/PARCOURS_ET_ECRANS.md`.
 
-## 3. Features attendues
+**Ce que le projet ne promet pas** : un prêt réel. Aucune institution de microfinance n'a validé le principe. C'est un pilote à proposer à une IMF, et le pitch doit le dire.
+
+**Indicateurs à suivre** : nombre de marchands actifs par semaine, nombre de passeports générés, part de ventes prouvées, nombre de vérifications côté prêteur, temps jusqu'à la confirmation d'un paiement.
+
+## 3. Pourquoi ce choix (résumé de l'étude)
+
+- La caisse Lightning de base existe déjà en open source (Alby BuzzPay, Blink Terminal).
+- Environ 8 des 49 projets Devpost de ce hackathon sont des outils marchands (dont Jaay et SunuSats). Aucun ne revendique le relevé de revenus vérifiable.
+- Très peu de commerçants acceptent le bitcoin au Sénégal (8 lieux sur BTC Map), et même au Salvador, où c'était obligatoire, seulement 4,9 % des ventes se faisaient en bitcoin. Le produit doit donc rester utile le jour où le commerçant n'a reçu aucun sat, d'où les ventes déclarées.
+- Risque principal : la fraude par auto-paiement. Elle est traitée dans le modèle de menace (niveaux de preuve, contresignature client, plafond prudent).
+
+Détails et sources : `docs/ETUDE_MARCHE.md`.
+
+## 4. Features
 
 ### MVP (à livrer impérativement)
 - [ ] **Connexion wallet via NWC** (Nostr Wallet Connect) vers Alby Hub, LNbits ou un nœud de test. C'est l'implémentation de wallet exigée.
 - [ ] **Saisie du montant en FCFA** avec conversion en sats (taux de change, repli en cache hors ligne).
-- [ ] **Génération de facture Lightning** et affichage en QR code.
-- [ ] **Confirmation de paiement en temps réel** (notification écran).
-- [ ] **Historique des ventes** (stockage local, export simple).
+- [ ] **Facture Lightning** en QR code et **confirmation de paiement en temps réel**, avec un vrai paiement de quelques sats en démo.
+- [ ] **Ventes déclarées** (espèces ou Wave) saisies en texte, avec analyse par l'IA en langage naturel.
+- [ ] **Historique des ventes** (stockage local), avec la distinction **prouvé / déclaré**.
+- [ ] **Passeport de revenus** : événement Nostr signé (totaux journaliers, séparation prouvé/déclaré, hash des paiements Lightning).
+- [ ] **Page « vue prêteur »** : vérification de la signature, total prouvé recalculé, plafond de prêt indicatif.
 - [ ] **Interface mobile** : un écran principal, gros boutons, textes sans jargon, français.
-- [ ] **Installation en une commande** (`docker compose up` ou script) avec données d'exemple.
+- [ ] **Installation en une commande** (`docker compose up`) avec données d'exemple.
 
 ### Sécurité (attendu par le jury)
-- [ ] Secret NWC stocké localement, jamais envoyé à un serveur tiers.
-- [ ] Plafond de budget et permissions minimales sur la connexion NWC.
+- [ ] Secret NWC et clé de signature stockés localement, jamais envoyés à un serveur tiers.
+- [ ] Connexion NWC de la caisse limitée à la création et à la consultation de factures, sans droit de paiement.
+- [ ] Connexions NWC des vendeurs avec plafond de budget, expiration et révocation.
 - [ ] Validation de toutes les entrées (montants, texte libre).
 - [ ] Aucune donnée personnelle dans les logs.
-- [ ] Section « modèle de menace » dans le README.
+- [ ] Section « modèle de menace » dans ce README (fraude au relevé, vol de clé, fausse contresignature).
 
 ### Bonus (si le temps le permet)
-- [ ] **IA** : saisie d'une vente en langage naturel (« 2 sacs de riz, 15 000 ») et résumé de la journée en français simple.
-- [ ] **Nostr** : envoi d'un reçu signé au client en message chiffré.
+- [ ] **Contresignature du reçu par le client** (Nostr, message chiffré).
+- [ ] **Résumé de la journée** en français simple (IA).
+- [ ] Budgets NWC par vendeur (écran patron/vendeur).
 - [ ] Mode PWA installable, utilisable avec une connexion faible.
-- [ ] Wolof ou autre langue locale pour l'interface.
+- [ ] Saisie vocale en wolof (piste de la prochaine itération).
 
-## 4. Livrables de soumission Devpost
+### Prochaine itération (à citer dans le pitch, sans la simuler)
+- Règlement en FCFA via un partenaire comme Banxaas, soumis à l'agrément PSAV (loi 2024-08).
+- Pilote avec une institution de microfinance (Pamecas, CMS, ACEP).
+- Caisse vocale en wolof.
+
+## 4 bis. Lancer l'application (état au 18 nov)
+
+```bash
+cd app
+npm install
+npm run dev        # http://localhost:5173, ouvrable sur le téléphone via l'adresse réseau affichée
+npm run build      # build de production
+```
+
+Dans les **Réglages**, collez le lien de connexion NWC d'Alby Hub ou LNbits, ou choisissez le **mode démonstration** (paiement simulé, signalé à l'écran, à ne pas utiliser pour la démo finale).
+
+| Fonction | État |
+|---|---|
+| Design system (tokens, primitives, page `#/apercu-design-system`) | fait |
+| Caisse : montant FCFA, conversion en sats avec cache, facture NWC, QR, confirmation | fait (à tester avec un vrai wallet) |
+| Vente déclarée avec analyse locale du texte et confirmation obligatoire | fait (analyse par règle ; appel à Claude à brancher côté serveur) |
+| Historique prouvé / déclaré, export | fait |
+| Passeport signé (Nostr), lien et QR | fait |
+| Vue prêteur : signature, préimages, plafond indicatif | fait (testé sur signature et falsification) |
+| Contresignature client, budgets vendeurs (écrans C12, C13, P1) | à faire |
+| Résumé du jour par IA, wolof, `docker compose up` | à faire |
+
+## 5. Livrables de soumission Devpost
 - [ ] Description du projet (texte ou vidéo).
-- [ ] Dépôt public avec le code et un **README** (installation, schéma d'architecture, contraintes, indicateurs, prochaine itération).
-- [ ] **Vidéo de démo de 3 minutes** : problème, solution, impact, suite.
+- [ ] Dépôt public avec le code et ce **README** (installation, schéma d'architecture, contraintes, indicateurs, prochaine itération).
+- [ ] **Vidéo de démo de 3 minutes** : ouvrir sur le chiffre « 20,3 % d'accès à la microfinance contre plus de 30 % par mois chez les prêteurs informels », puis problème, solution, impact, suite.
 - [ ] Soumission faite avant le **20 nov, 21h (GMT+1)**, avec une marge de sécurité.
 
-## 5. Planning
+## 6. Planning
 
 | Date | Objectif |
 |---|---|
-| 18 nov | Choix de l'idée, squelette du projet, facture NWC et QR code qui fonctionnent |
-| 19 nov | Conversion FCFA/sats, historique, IA, interface soignée |
-| 20 nov, jusqu'à 15h | Tests, README, schéma d'architecture, vidéo de démo |
+| 18 nov | Squelette du projet, caisse NWC avec vrai paiement et QR, design system et écrans principaux |
+| 19 nov | Saisie IA des ventes déclarées, événement passeport signé, page « vue prêteur », historique |
+| 20 nov, jusqu'à 15h | Tests, modèle de menace, README, schéma d'architecture, vidéo de démo |
 | 20 nov, 15h à 21h | Soumission Devpost |
 
-## 6. Stack proposée
+## 7. Stack proposée
 - **Front** : TypeScript, Vite ou Next.js, PWA.
 - **Lightning** : `@getalby/sdk` (NWC), Alby Hub ou LNbits pour la démo.
-- **IA** : API Claude pour l'analyse des ventes en langage naturel et le résumé.
-- **Nostr** : `nostr-tools` (reçus chiffrés).
-- **Déploiement** : Docker Compose.
+- **Signature et partage** : `nostr-tools` (événement passeport, reçus et contresignatures).
+- **IA** : API Claude pour l'analyse des ventes déclarées en langage naturel et le résumé.
+- **Déploiement** : Docker Compose ; front sur Vercel, backend éventuel sur Railway ou Render.
 
-## 7. Répartition de l'équipe
+## 8. Documentation
+- [`docs/PARCOURS_ET_ECRANS.md`](docs/PARCOURS_ET_ECRANS.md) : acteurs, parcours et écrans.
+- [`docs/ECRANS_APP.md`](docs/ECRANS_APP.md) : écrans réels de l'application, décision PWA, issues proposées.
+- [`docs/ETUDE_MARCHE.md`](docs/ETUDE_MARCHE.md) : synthèse de l'étude de marché et de concurrence.
+
+## 9. Répartition de l'équipe
 À compléter une fois les compétences de chacun connues.
 
 | Rôle | Personne | Tâches |
 |---|---|---|
 | Wallet / backend | ? | NWC, factures, confirmation de paiement |
-| Front / UX | ? | Interface PWA, QR code, historique |
-| IA / Nostr | ? | Saisie en langage naturel, résumé, reçus |
+| Front / UX | ? | Interface PWA, QR code, historique, passeport |
+| IA / Nostr | ? | Saisie en langage naturel, signature, contresignature, vérification |
 | Docs / pitch | ? | README, schéma, vidéo, soumission Devpost |

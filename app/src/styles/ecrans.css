@@ -12,60 +12,84 @@
 }
 .barre__lien {
   display: grid; justify-items: center; gap: var(--e-1); padding: var(--e-3) var(--e-1);
-  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-xs); font-weight: 600;
+  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-secondaire); font-weight: 600;
 }
 .barre__lien[aria-current="page"] { color: var(--c-primaire); }
 
 .page-titre { display: grid; gap: var(--e-1); }
-.page-titre p { color: var(--c-texte-doux); font-size: var(--t-sm); }
+.page-titre p { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
 
 /* ---- Caisse ---- */
 .montant { display: grid; gap: var(--e-1); justify-items: center; padding: var(--e-2) 0; text-align: center; }
-.montant__valeur { font-family: var(--f-chiffres); font-size: var(--t-montant); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+.montant__valeur { font-family: var(--f-titre); font-size: var(--t-montant); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
 .montant__valeur--vide { color: var(--c-texte-doux); }
-.montant__sats { color: var(--c-texte-doux); font-size: var(--t-sm); min-height: 1.5em; }
+.montant__sats { color: var(--c-texte-doux); font-size: var(--t-secondaire); min-height: 1.5em; }
 
 .pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
 .pave__touche {
   min-height: 3.5rem; border-radius: var(--rayon); border: 1px solid var(--c-bord);
-  background: var(--c-surface); font-family: var(--f-chiffres); font-size: var(--t-xl); font-weight: 600;
-  transition: transform var(--d-rapide) var(--ease), background var(--d-rapide) var(--ease);
+  background: var(--c-surface); font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 600;
+  transition: transform var(--d-rapide) var(--ease-sortie), background var(--d-rapide) var(--ease-sortie);
 }
 .pave__touche:active { transform: scale(0.96); background: var(--c-surface-h); }
-.pave__touche--action { color: var(--c-texte-doux); font-family: var(--f-texte); font-size: var(--t-base); }
+.pave__touche--action { color: var(--c-texte-doux); font-family: var(--f-texte); font-size: var(--t-texte); }
 
 .actions { display: grid; gap: var(--e-3); }
 
 .qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }
-.qr__image { width: min(100%, 18rem); aspect-ratio: 1; background: #fff; padding: var(--e-3); border-radius: var(--rayon); border: 1px solid var(--c-bord); }
-.qr__image img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
 
 .recu { display: grid; gap: var(--e-4); justify-items: center; text-align: center; padding: var(--e-6) var(--e-4); background: var(--c-prouve-fond); color: var(--c-prouve-texte); border-radius: var(--rayon); }
-.recu__montant { font-family: var(--f-chiffres); font-size: var(--t-montant); font-weight: 700; line-height: 1.1; }
+.recu__montant { font-family: var(--f-titre); font-size: var(--t-montant); font-weight: 700; line-height: 1.1; }
 
 /* ---- Historique ---- */
 .totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
 .total { display: grid; gap: var(--e-1); padding: var(--e-4); border-radius: var(--rayon); }
 .total--prouve { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
 .total--declare { background: var(--c-declare-fond); color: var(--c-declare-texte); }
-.total__valeur { font-family: var(--f-chiffres); font-size: var(--t-lg); font-weight: 700; }
-.total__libelle { font-size: var(--t-xs); font-weight: 700; }
+.total__valeur { font-family: var(--f-titre); font-size: var(--t-titre-section); font-weight: 700; }
+.total__libelle { font-size: var(--t-secondaire); font-weight: 700; }
 
 .jour { display: grid; gap: var(--e-2); }
-.jour__titre { font-size: var(--t-sm); font-weight: 700; color: var(--c-texte-doux); text-transform: capitalize; padding-top: var(--e-2); }
+.jour__titre { font-size: var(--t-secondaire); font-weight: 700; color: var(--c-texte-doux); text-transform: capitalize; padding-top: var(--e-2); }
 .ligne { display: grid; grid-template-columns: 1fr auto; gap: var(--e-1) var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
-.ligne__montant { font-family: var(--f-chiffres); font-weight: 700; text-align: right; }
-.ligne__meta { grid-column: 1 / -1; display: flex; gap: var(--e-2); align-items: center; color: var(--c-texte-doux); font-size: var(--t-xs); }
+.ligne__montant { font-family: var(--f-titre); font-weight: 700; text-align: right; }
+.ligne__meta { grid-column: 1 / -1; display: flex; gap: var(--e-2); align-items: center; color: var(--c-texte-doux); font-size: var(--t-secondaire); }
 
 /* ---- Passeport et vue prêteur ---- */
 .chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
-.chiffre-cle__valeur { font-family: var(--f-chiffres); font-size: var(--t-xl); font-weight: 700; }
-.chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-sm); }
+.chiffre-cle__valeur { font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 700; }
+.chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
 .segments { display: grid; grid-auto-flow: column; gap: var(--e-2); }
-.lien-partage { word-break: break-all; font-family: var(--f-chiffres); font-size: var(--t-xs); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
+.lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
 .liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
 
 .rubrique { display: grid; gap: var(--e-3); }
-.apercu-bloc { display: grid; gap: var(--e-3); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+/* ---- Aperçu du design system (#/apercu-design-system) ---- */
+.apercu {
+  max-width: var(--largeur-app); margin-inline: auto;
+  padding: 0 var(--gouttiere) var(--e-7); display: grid; gap: var(--e-5);
+}
+.apercu__entete {
+  position: sticky; inset-block-start: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e-3);
+  padding-block: calc(env(safe-area-inset-top) + var(--e-3)) var(--e-3);
+  background: var(--c-fond);
+}
+.apercu-bloc { display: grid; gap: var(--e-3); }
+.apercu-bloc > h2 { padding-block-end: var(--e-2); border-block-end: 1px solid var(--c-bord); }
+.apercu-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.apercu-centre { display: grid; justify-items: center; }
+.apercu-grille { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.apercu-nuancier { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: var(--e-2); font-size: var(--t-secondaire); }
+.apercu-nuancier li { display: flex; align-items: center; gap: var(--e-2); }
+.apercu-nuancier__pastille { flex: none; width: var(--e-6); height: var(--e-6); border-radius: var(--rayon-s); background: var(--nuance); border: 1px solid var(--c-bord); }
+.apercu-typo { font-family: var(--f-titre); color: var(--c-primaire); }
+.apercu-typo--ecran { font-size: var(--t-titre-ecran); font-weight: 700; letter-spacing: var(--interlettrage-titre); }
+.apercu-typo--section { font-size: var(--t-titre-section); font-weight: 600; }
+.apercu-typo--sous-titre { font-size: var(--t-sous-titre); font-weight: 500; font-family: var(--f-texte); color: var(--c-texte); }
+.apercu-squelette-vente {
+  display: grid; grid-template-columns: 1fr auto; gap: var(--e-2) var(--e-3);
+  padding: var(--e-3) var(--e-4); border: 1px solid var(--c-bord); border-radius: var(--rayon); background: var(--c-surface);
+}
 .coque--libre { max-width: var(--largeur-app); margin-inline: auto; padding: var(--e-5) var(--e-4) var(--e-7); display: grid; gap: var(--e-5); }

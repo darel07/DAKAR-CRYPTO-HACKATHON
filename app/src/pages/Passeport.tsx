@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, Button, EmptyState } from "../components/ui";
-import { QrCode } from "../components/QrCode";
+import { Alert, Button, EmptyState, QrCode } from "../components/ui";
 import { formatFcfa } from "../lib/domain/format";
 import { useVentes } from "../lib/domain/ventesStore";
 import { construireContenu, encoder, signerPasseport, verifier } from "../lib/nostr/passeport";
@@ -67,13 +66,13 @@ export function Passeport() {
       {total === 0 && <Alert niveau="info">Aucune vente sur cette période.</Alert>}
       {erreur && <Alert niveau="erreur">{erreur}</Alert>}
 
-      <Button grand bloc onClick={generer} disabled={total === 0}>Générer mon passeport</Button>
+      <Button taille="lg" bloc onClick={generer} disabled={total === 0}>Générer mon passeport</Button>
 
       {lien && (
         <section className="rubrique" aria-live="polite">
           <Alert niveau="succes" titre="Passeport signé">Montrez le code ou envoyez le lien à l'agent de microfinance.</Alert>
           {lien.length <= LIMITE_QR
-            ? <div className="qr"><QrCode valeur={lien} alt="Code QR du passeport de revenus" /></div>
+            ? <div className="qr"><QrCode valeur={lien} label="QR code du passeport de revenus" /></div>
             : <Alert niveau="info">Votre passeport est trop détaillé pour un code QR. Envoyez le lien.</Alert>}
           <p className="lien-partage">{lien}</p>
           <Button variante="secondaire" bloc onClick={copier}>{copie ? "Lien copié" : "Copier le lien"}</Button>

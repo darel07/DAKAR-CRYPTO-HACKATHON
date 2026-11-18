@@ -1,115 +1,144 @@
-/* Tokens du design system. TOUTES les valeurs visuelles vivent ici :
-   aucun composant ne contient un #hex, un px magique ou une durée en dur.
-   Chaque ratio de contraste est mesuré (WCAG, script de calcul) et noté
-   à côté de la valeur. */
+/* Design tokens (assets/PROMPT_FRONTEND.md §4). EVERY visual value lives here
+   (or in signature.css for the signature animations): no component holds a
+   #hex, a magic px value or a hard-coded duration.
+   Contrast ratios are measured (WCAG 2.1 formula, scripts/contraste.mjs) and
+   noted next to each value. Text pairs must be >= 4.5:1, icons and field
+   borders >= 3:1. */
 
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
+/* Self-hosted OFL fonts. One variable file per family covers every weight;
+   unicode-range means the phone only downloads the latin subset (~28 kB each). */
+@import "@fontsource-variable/plus-jakarta-sans/wght.css";
+@import "@fontsource-variable/manrope/wght.css";
 
+/* ---------- Light theme (default, does NOT follow the system) ---------- */
 :root {
-  /* ---- Couleurs : thème clair (lisible en plein soleil sur un marché) ---- */
-  --c-fond:        #F2F5F1;
-  --c-surface:     #FAFBF9;  /* évite le blanc pur */
-  --c-surface-h:   #E7ECE5;  /* ce qui se soulève : survol, élément actif */
-  --c-texte:       #14201A;  /* 15,3:1 sur le fond */
-  --c-texte-doux:  #4A5A51;  /* 6,7:1 sur le fond, 7,0:1 sur la surface */
-  --c-bord:        #CAD4CA;  /* décor seulement, jamais seul pour porter un sens */
-  --c-bord-champ:  #6B7A71;  /* 4,4:1 sur la surface : bordure des champs (3:1 requis) */
+  color-scheme: light;
 
-  /* Une seule famille chromatique (vert profond). Le vert lisible (texte, liens)
-     et le vert d'aplat (fond de bouton) sont deux tokens distincts. */
-  --c-primaire:       #0B5D44;  /* 7,2:1 sur le fond : texte, liens */
-  --c-primaire-cta:   #0B5D44;  /* fond de bouton */
-  --c-sur-primaire:   #FAFBF9;  /* 7,6:1 sur le fond de bouton */
+  --c-fond:          #F5F7F9; /* Warm Cloud: main background */
+  --c-surface:       #FFFFFF; /* Pure White: cards */
+  --c-surface-2:     #FBFAF7; /* Soft Ivory: breathing areas */
+  --c-surface-h:     #EEF2F6; /* hover, press, discreet active element */
+  --c-texte:         #172635; /* Midnight Ink: 14.32:1 on fond, 15.38:1 on white */
+  --c-texte-doux:    #5B6B7B; /* FIXED (brief #647484 = 4.5:1 borderline): 5.10:1 on fond, 5.48:1 on white */
+  --c-bord:          #E3E9EF; /* Soft Border: decoration only, never carries meaning */
+  --c-bord-champ:    #84909C; /* FIXED (prompt #8B97A3 = 2.98:1, fails 3:1): 3.26:1 on white, 3.03:1 on fond */
+  --c-primaire:      #18324A; /* Deep Navy: titles, active nav, 12.27:1 on fond */
+  --c-primaire-cta:  #18324A; /* primary button background */
+  --c-sur-primaire:  #FFFFFF; /* 13.17:1 on navy */
+  --c-ambre:         #D99A45; /* Champagne Amber: ACCENT ONLY, never text (2.4:1) */
+  --c-btc:           #F7931A; /* Bitcoin Orange: ACCENT ONLY, never text (2.3:1) */
+  --c-sur-ambre:     #172635; /* text on amber: 6.34:1 */
+  --c-succes:        #16865B; /* solid "success" background with white text: 4.57:1 */
+  --c-prouve-fond:   #E3F4EC; --c-prouve-texte:  #0F6B48; /* 5.73:1 */
+  --c-declare-fond:  #FBF1E1; --c-declare-texte: #8A5A12; /* 5.28:1 */
+  --c-erreur-fond:   #FDECEA; --c-erreur-texte:  #B42318; /* 5.75:1 */
 
-  /* États sémantiques : seules couleurs hors famille, et toujours doublées
-     d'un libellé ou d'une icône (jamais la couleur seule, WCAG 1.4.1). */
-  --c-prouve-fond:    #DCEFE5;
-  --c-prouve-texte:   #0B5D44;  /* 6,6:1 sur son fond */
-  --c-declare-fond:   #FBEBC8;
-  --c-declare-texte:  #7A4B00;  /* 6,3:1 sur son fond */
-  --c-erreur-fond:    #FBE3E0;
-  --c-erreur-texte:   #A3231B;  /* 6,1:1 sur son fond, 6,8:1 sur le fond */
+  /* Translucent layers derived from the palette (no new hue). */
+  --c-voile:         color-mix(in srgb, var(--c-fond) 70%, transparent); /* text veil over ribbons */
+  --c-verre:         rgb(255 255 255 / 0.72); /* glass navigation bar */
+  --c-verre-bord:    rgb(227 233 239 / 0.9);
+  --c-verre-reflet:  rgb(255 255 255 / 0.8);
+  --c-scrim:         rgb(23 38 53 / 0.45);    /* behind sheets and modals */
+  --c-qr-fond:       #FFFFFF; /* QR: black on white in BOTH themes (scanners expect it) */
+  --c-qr-module:     #000000;
 
-  /* Lueur d'accent : sert d'élévation (une ombre noire ne se voit pas en sombre). */
-  --lueur-focus: 0 0 0 3px color-mix(in srgb, var(--c-primaire) 45%, transparent);
+  --ombre-1:   0 1px 2px rgb(23 38 53 / 0.06), 0 4px 12px rgb(23 38 53 / 0.05);
+  --ombre-nav: 0 8px 24px rgb(23 38 53 / 0.10);
+  --ombre-sheet: 0 -8px 32px rgb(23 38 53 / 0.14);
 
-  /* ---- Typographie ---- */
-  --f-texte: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-chiffres: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --t-xs: 0.8125rem;
-  --t-sm: 0.9375rem;
-  --t-base: 1.0625rem;   /* 17 px : lisible sur un petit écran */
-  --t-lg: 1.25rem;
-  --t-xl: 1.75rem;
-  --t-montant: 3rem;     /* le montant de la caisse : le plus grand élément */
+  /* ---------- Typography (§4.3) ---------- */
+  --f-titre: "Plus Jakarta Sans Variable", "Manrope Variable", system-ui, sans-serif;
+  --f-texte: "Manrope Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --t-montant: clamp(2.5rem, 11vw, 3rem); /* 40 to 48 px, weight 700 */
+  --t-montant-2: 2rem;        /* 32 px: amount on secondary screens */
+  --t-titre-ecran: 1.75rem;   /* 28 px, 700, letter-spacing -0.02em */
+  --t-titre-section: 1.25rem; /* 20 px, 600 */
+  --t-stat: 1.5rem;           /* 24 px: StatCard value */
+  --t-touche: 1.5rem;         /* 24 px: keypad digits */
+  --t-sous-titre: 1rem;       /* 16 px, 500 */
+  --t-texte: 0.9375rem;       /* 15 px, 400, line-height 1.5 */
+  --t-secondaire: 0.8125rem;  /* 13 px: never smaller */
+  --t-nav: 0.75rem;           /* 12 px, 600: nav labels only (bold, short, always paired with an icon) */
+  --t-bouton: 1rem;           /* 16 px, 600 */
   --interligne: 1.5;
+  --interligne-titre: 1.15;
+  --interlettrage-titre: -0.02em;
 
-  /* ---- Espacements, rayons, tailles ---- */
-  --e-1: 0.25rem;
-  --e-2: 0.5rem;
-  --e-3: 0.75rem;
-  --e-4: 1rem;
-  --e-5: 1.5rem;
-  --e-6: 2rem;
-  --e-7: 3rem;
-  --rayon: 0.875rem;       /* une seule échelle : tout est en 14 px */
-  --rayon-rond: 999px;
-  --cible-min: 3rem;       /* 48 px : cible tactile minimale */
-  --largeur-app: 30rem;
+  /* ---------- Spacing, radii, sizes (§4.4) ---------- */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+  --rayon-s: 10px;      /* fields, square pills */
+  --rayon: 16px;        /* cards, buttons, keypad keys: ONE scale */
+  --rayon-rond: 999px;  /* pills, navigation bar */
+  --cible-min: 48px;
+  --gouttiere: 16px;    /* screen side margin */
+  --largeur-app: 480px; /* desktop: content column */
+  --bouton-md: 48px;
+  --bouton-lg: 56px;
+  --touche: 64px;       /* keypad key height (56 px on short screens, see below) */
+  --nav-hauteur: 72px;
+  --nav-marge: 12px;
+  --icone: 24px;
+  --icone-s: 20px;
+  --trait: 1.75;        /* Lucide stroke width everywhere */
+  --qr: 280px;
+  --anneau-focus: 3px;
+  --interrupteur-l: 52px;
+  --interrupteur-h: 32px;
+  --graphe-h: 88px;      /* MiniBarChart bars area */
+  --poignee-l: 40px;     /* sheet drag handle */
 
-  /* ---- Mouvement ---- */
-  --d-rapide: 120ms;
-  --d-normale: 220ms;
-  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* ---------- Motion (§4.4) ---------- */
+  --d-instant: 80ms;
+  --d-rapide: 140ms;
+  --d-apparition: 160ms; /* QR code fade-in */
+  --d-normale: 240ms;
+  --d-lente: 420ms;
+  --d-reflet: 1400ms;    /* skeleton shimmer loop (off under reduced motion) */
+  --ease-sortie: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Light spring (~4 % overshoot), no library: */
+  --ease-ressort: linear(0, 0.18 7%, 0.6 18%, 0.92 30%, 1.03 42%, 1.04 50%, 1.01 64%, 1);
+  --echelle-appui: 0.98;
+  --echelle-touche: 0.96;
 }
 
-/* Thème sombre : suit le système, sauf si l'utilisateur impose l'un des deux. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="clair"]) { color-scheme: dark; --_sombre: 1; }
+/* Short screens (360 x 740 and below): keypad keys drop to 56 px so the home
+   screen still fits without scrolling. */
+@media (max-height: 740px) {
+  :root { --touche: 56px; --qr: 240px; }
 }
-:root[data-theme="sombre"] { color-scheme: dark; }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="clair"]) {
-    --c-fond: #0C1511;
-    --c-surface: #121E18;
-    --c-surface-h: #1B2A22;
-    --c-texte: #E8EFE9;        /* 15,9:1 sur le fond */
-    --c-texte-doux: #A5B5AB;   /* 8,7:1 sur le fond, 8,0:1 sur la surface */
-    --c-bord: #2C3F34;
-    --c-bord-champ: #7E9187;
-    --c-primaire: #5FD3A4;     /* 10,0:1 sur le fond */
-    --c-primaire-cta: #5FD3A4;
-    --c-sur-primaire: #08140F; /* 10,1:1 sur le fond de bouton */
-    --c-prouve-fond: #16352A;
-    --c-prouve-texte: #8FE3C0; /* 8,8:1 sur son fond */
-    --c-declare-fond: #3A2A07;
-    --c-declare-texte: #F5C86B; /* 8,8:1 sur son fond */
-    --c-erreur-fond: #3F1512;
-    --c-erreur-texte: #FF9E96;  /* 8,0:1 sur son fond */
-  }
-}
+/* ---------- Dark theme (opt-in from Settings only) ---------- */
 :root[data-theme="sombre"] {
-  --c-fond: #0C1511;
-  --c-surface: #121E18;
-  --c-surface-h: #1B2A22;
-  --c-texte: #E8EFE9;
-  --c-texte-doux: #A5B5AB;
-  --c-bord: #2C3F34;
-  --c-bord-champ: #7E9187;
-  --c-primaire: #5FD3A4;
-  --c-primaire-cta: #5FD3A4;
-  --c-sur-primaire: #08140F;
-  --c-prouve-fond: #16352A;
-  --c-prouve-texte: #8FE3C0;
-  --c-declare-fond: #3A2A07;
-  --c-declare-texte: #F5C86B;
-  --c-erreur-fond: #3F1512;
-  --c-erreur-texte: #FF9E96;
+  color-scheme: dark;
+
+  --c-fond: #101820;  --c-surface: #172433;  --c-surface-2: #1D2E40;  --c-surface-h: #22364B;
+  --c-texte: #F3F6F8;       /* 16.49:1 on fond */
+  --c-texte-doux: #9EABB8;  /* 7.64:1 on fond, 6.71:1 on surface */
+  --c-bord: #2B3B4B;
+  --c-bord-champ: #6E7F90;  /* 3.82:1 on surface */
+  --c-primaire: #F2B35C;    /* amber becomes the main accent in dark: 9.70:1 on fond */
+  --c-primaire-cta: #F2B35C;
+  --c-sur-primaire: #101820; /* 9.70:1 on amber */
+  --c-ambre: #F2B35C;  --c-btc: #F7931A;  --c-sur-ambre: #101820;
+  --c-succes: #46B98A;      /* 7.30:1 on fond */
+  --c-prouve-fond: #133A2C;  --c-prouve-texte: #7FD8B0;  /* 7.40:1 */
+  --c-declare-fond: #3A2A0F; --c-declare-texte: #F5C97E; /* 8.92:1 */
+  --c-erreur-fond: #3F1714;  --c-erreur-texte: #FF9E96;  /* 7.87:1 */
+
+  --c-verre: rgb(23 36 51 / 0.72);
+  --c-verre-bord: var(--c-bord);
+  --c-verre-reflet: rgb(255 255 255 / 0.06);
+  --c-scrim: rgb(0 0 0 / 0.55);
+
+  --ombre-1: none;
+  --ombre-nav: 0 8px 24px rgb(0 0 0 / 0.35);
+  --ombre-sheet: 0 -8px 32px rgb(0 0 0 / 0.45);
 }
 
-/* Mouvement réduit : toutes les durées tombent à zéro. */
+/* ---------- Reduced motion: every duration drops to zero ---------- */
 @media (prefers-reduced-motion: reduce) {
-  :root { --d-rapide: 0ms; --d-normale: 0ms; }
+  :root {
+    --d-instant: 0ms; --d-rapide: 0ms; --d-apparition: 0ms; --d-normale: 0ms; --d-lente: 0ms;
+    --echelle-appui: 1; --echelle-touche: 1;
+  }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle, WarningCircle } from "@phosphor-icons/react";
+import { CircleCheck, TriangleAlert } from "lucide-react";
 import { Alert, Badge, Skeleton } from "../components/ui";
 import { formatFcfa } from "../lib/domain/format";
 import { decoder, PART_PLAFOND, verifier } from "../lib/nostr/passeport";
@@ -68,10 +68,10 @@ function Resultat({ v }: { v: Verification }) {
       <section className="rubrique">
         <h2>Ce qui a été vérifié</h2>
         <ul className="liste-verif">
-          <li>{v.signatureValide ? <CheckCircle size={22} weight="fill" aria-hidden="true" /> : <WarningCircle size={22} weight="fill" aria-hidden="true" />}
+          <li>{v.signatureValide ? <CircleCheck size={22} aria-hidden="true" /> : <TriangleAlert size={22} aria-hidden="true" />}
             Signature Nostr de l'auteur <Badge ton="neutre">{v.auteur.slice(0, 8)}…</Badge></li>
-          <li><CheckCircle size={22} weight="fill" aria-hidden="true" /> Chaque paiement prouvé : la préimage correspond à la facture.</li>
-          <li><WarningCircle size={22} weight="fill" aria-hidden="true" /> Non vérifié : les ventes déclarées reposent sur la parole du commerçant. Un commerçant peut se payer lui-même : comparez avec ce que vous voyez sur place.</li>
+          <li><CircleCheck size={22} aria-hidden="true" /> Chaque paiement prouvé : la préimage correspond à la facture.</li>
+          <li><TriangleAlert size={22} aria-hidden="true" /> Non vérifié : les ventes déclarées reposent sur la parole du commerçant. Un commerçant peut se payer lui-même : comparez avec ce que vous voyez sur place.</li>
         </ul>
       </section>
     </>

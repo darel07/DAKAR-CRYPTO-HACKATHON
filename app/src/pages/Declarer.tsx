@@ -50,7 +50,7 @@ export function Declarer() {
             onChange={(e) => setProposition({ ...proposition, montant: e.target.value.replace(/\D/g, "") })}
             erreur={montantValide ? null : "Entrez un montant supérieur à zéro."} />
           <p>Cette vente sera marquée <Badge ton="declare">Déclaré</Badge> : elle compte moins qu'un paiement prouvé.</p>
-          <Button grand bloc onClick={confirmer} disabled={!montantValide}>
+          <Button taille="lg" bloc onClick={confirmer} disabled={!montantValide}>
             Enregistrer {montantValide ? formatFcfa(montantNombre) : ""}
           </Button>
         </section>

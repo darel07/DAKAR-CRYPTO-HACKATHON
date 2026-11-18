@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle } from "@phosphor-icons/react";
-import { Alert, Badge, Button, Skeleton } from "../components/ui";
-import { Pave } from "../components/Pave";
-import { QrCode } from "../components/QrCode";
+import { CircleCheck } from "lucide-react";
+import { Alert, Badge, Button, NumericKeypad, PaymentQRCode, Skeleton } from "../components/ui";
 import { formatFcfa, formatNombreSimple } from "../lib/domain/format";
 import { ajouterVente } from "../lib/domain/ventesStore";
 import { fcfaVersSats } from "../lib/fx/taux";
@@ -29,11 +27,6 @@ export function Caisse() {
   const montant = chiffres ? Number(chiffres) : 0;
 
   useEffect(() => () => annulation.current?.abort(), []);
-
-  const ajouter = (c: string) => setChiffres((cur) => {
-    const suivant = (cur + c).replace(/^0+/, "");
-    return Number(suivant) > MONTANT_MAX ? cur : suivant;
-  });
 
   const encaisser = useCallback(async () => {
     if (!portefeuille || !taux || montant <= 0) return;
@@ -84,10 +77,10 @@ export function Caisse() {
         </p>
       </section>
 
-      <Pave onChiffre={ajouter} onEffacer={() => setChiffres((c) => c.slice(0, -1))} />
+      <NumericKeypad valeur={chiffres} onChange={setChiffres} plafond={MONTANT_MAX} />
 
       <div className="actions">
-        <Button grand bloc onClick={encaisser} disabled={!portefeuille || !taux || montant <= 0 || phase.nom === "creation"}>
+        <Button taille="lg" bloc onClick={encaisser} disabled={!portefeuille || !taux || montant <= 0 || phase.nom === "creation"}>
           {phase.nom === "creation" ? "Création de la facture…" : "Encaisser en Lightning"}
         </Button>
         <a className="btn btn--secondaire btn--bloc" href="#/declarer">Vente en espèces ou Wave</a>
@@ -101,7 +94,7 @@ function Attente({ facture, fcfa, onAnnuler, demo }: { facture: Facture; fcfa: n
     <section className="qr" aria-live="polite">
       <h1>{formatFcfa(fcfa)}</h1>
       <p>Montrez ce code au client. Il paie avec son wallet Lightning.</p>
-      <QrCode valeur={`lightning:${facture.bolt11.toUpperCase()}`} alt="Code QR de paiement Lightning" />
+      <PaymentQRCode facture={facture.bolt11} />
       <p><strong>En attente du paiement…</strong></p>
       {demo && <Alert niveau="info">Mode démonstration : le paiement sera simulé dans quelques secondes.</Alert>}
       <Button variante="secondaire" bloc onClick={onAnnuler}>Annuler</Button>
@@ -113,11 +106,11 @@ function Recu({ fcfa, onNouveau }: { fcfa: number; onNouveau(): void }) {
   useEffect(() => { navigator.vibrate?.(200); }, []);
   return (
     <section className="recu" role="status">
-      <CheckCircle size={72} weight="fill" aria-hidden="true" />
+      <CircleCheck size={72} aria-hidden="true" />
       <h1>Paiement reçu</h1>
       <p className="recu__montant">{formatFcfa(fcfa)}</p>
       <Badge ton="prouve">Prouvé</Badge>
-      <Button grand bloc onClick={onNouveau}>Nouvelle vente</Button>
+      <Button taille="lg" bloc onClick={onNouveau}>Nouvelle vente</Button>
     </section>
   );
 }

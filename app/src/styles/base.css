@@ -1,29 +1,52 @@
-/* Base : remise à zéro minimale et styles des éléments nus.
-   Ne contient aucune classe de composant (voir ui.css et ecrans.css). */
+/* Base: minimal reset and bare element styles.
+   No component classes here (see ui.css, ecrans.css, signature.css). */
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--c-fond);
+  transition: background-color var(--d-normale) var(--ease-sortie);
+}
 body {
   margin: 0;
   background: var(--c-fond);
   color: var(--c-texte);
   font-family: var(--f-texte);
-  font-size: var(--t-base);
+  font-size: var(--t-texte);
+  font-weight: 400;
   line-height: var(--interligne);
   min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--d-normale) var(--ease-sortie), color var(--d-normale) var(--ease-sortie);
 }
-h1, h2, h3, p { margin: 0; }
-h1 { font-size: var(--t-xl); line-height: 1.15; letter-spacing: -0.02em; }
-h2 { font-size: var(--t-lg); line-height: 1.25; letter-spacing: -0.01em; }
-a { color: var(--c-primaire); }
-button, input, textarea { font: inherit; color: inherit; }
+h1, h2, h3, p, figure, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+h1, h2, h3 { font-family: var(--f-titre); color: var(--c-primaire); }
+h1 {
+  font-size: var(--t-titre-ecran);
+  font-weight: 700;
+  line-height: var(--interligne-titre);
+  letter-spacing: var(--interlettrage-titre);
+}
+h2 { font-size: var(--t-titre-section); font-weight: 600; line-height: 1.25; }
+h3 { font-size: var(--t-sous-titre); font-weight: 600; }
+a { color: var(--c-primaire); text-underline-offset: 0.18em; }
+button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
+svg { flex-shrink: 0; }
 
-/* Anneau de focus visible partout, jamais supprimé. */
-:focus-visible { outline: 3px solid var(--c-primaire); outline-offset: 2px; }
+/* Visible focus ring everywhere, never removed. */
+:focus-visible {
+  outline: var(--anneau-focus) solid var(--c-primaire);
+  outline-offset: 2px;
+}
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.chiffres { font-family: var(--f-chiffres); font-variant-numeric: tabular-nums; }
+
+/* Every changing figure (amount, sats, countdown, totals): tabular digits. */
+.chiffres { font-family: var(--f-titre); font-variant-numeric: tabular-nums; }
+.texte-doux { color: var(--c-texte-doux); }
+.texte-secondaire { font-size: var(--t-secondaire); color: var(--c-texte-doux); }

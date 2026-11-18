@@ -1,0 +1,63 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { ErreurWallet, ouvrirDemo, ouvrirNwc } from "./portefeuille";
+import type { Portefeuille } from "./portefeuille";
+
+// Le lien NWC est un secret : il reste sur cet appareil (localStorage) et n'est
+// jamais envoyé à un serveur. Compromis assumé pour le hackathon, voir le modèle de menace.
+const CLE = "passeport.nwc.v1";
+
+interface Contexte {
+  portefeuille: Portefeuille | null;
+  connecter(url: string): void;
+  activerDemo(): void;
+  deconnecter(): void;
+}
+
+const Ctx = createContext<Contexte | null>(null);
+
+function lireLien(): string | null {
+  try { return localStorage.getItem(CLE); } catch { return null; }
+}
+
+export function WalletProvider({ children }: { children: ReactNode }) {
+  const [portefeuille, setPortefeuille] = useState<Portefeuille | null>(null);
+  const courant = useRef<Portefeuille | null>(null);
+
+  const remplacer = useCallback((p: Portefeuille | null) => {
+    courant.current?.fermer();
+    courant.current = p;
+    setPortefeuille(p);
+  }, []);
+
+  useEffect(() => {
+    const lien = lireLien();
+    if (!lien) return;
+    try { remplacer(ouvrirNwc(lien)); } catch { /* lien enregistré devenu invalide : on l'ignore */ }
+    return () => courant.current?.fermer();
+  }, [remplacer]);
+
+  const valeur = useMemo<Contexte>(() => ({
+    portefeuille,
+    connecter(url) {
+      const p = ouvrirNwc(url); // lève ErreurWallet si le lien est invalide
+      try { localStorage.setItem(CLE, url.trim()); } catch { /* ignoré */ }
+      remplacer(p);
+    },
+    activerDemo() { remplacer(ouvrirDemo()); },
+    deconnecter() {
+      try { localStorage.removeItem(CLE); } catch { /* ignoré */ }
+      remplacer(null);
+    },
+  }), [portefeuille, remplacer]);
+
+  return <Ctx.Provider value={valeur}>{children}</Ctx.Provider>;
+}
+
+export function useWallet(): Contexte {
+  const c = useContext(Ctx);
+  if (!c) throw new Error("useWallet doit être utilisé dans un <WalletProvider>.");
+  return c;
+}
+
+export { ErreurWallet };

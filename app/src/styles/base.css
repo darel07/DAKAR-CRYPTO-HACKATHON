@@ -1,0 +1,29 @@
+/* Base : remise à zéro minimale et styles des éléments nus.
+   Ne contient aucune classe de composant (voir ui.css et ecrans.css). */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--c-fond);
+  color: var(--c-texte);
+  font-family: var(--f-texte);
+  font-size: var(--t-base);
+  line-height: var(--interligne);
+  min-height: 100dvh;
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: var(--t-xl); line-height: 1.15; letter-spacing: -0.02em; }
+h2 { font-size: var(--t-lg); line-height: 1.25; letter-spacing: -0.01em; }
+a { color: var(--c-primaire); }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* Anneau de focus visible partout, jamais supprimé. */
+:focus-visible { outline: 3px solid var(--c-primaire); outline-offset: 2px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.chiffres { font-family: var(--f-chiffres); font-variant-numeric: tabular-nums; }

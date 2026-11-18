@@ -1,0 +1,71 @@
+/* Styles propres aux écrans et au cadre de l'application.
+   Les couleurs et espacements viennent exclusivement de tokens.css. */
+
+.coque { max-width: var(--largeur-app); margin-inline: auto; min-height: 100dvh; display: flex; flex-direction: column; }
+.coque__contenu { flex: 1; padding: var(--e-4) var(--e-4) calc(5.5rem + env(safe-area-inset-bottom)); display: grid; gap: var(--e-4); align-content: start; }
+
+.barre {
+  position: fixed; inset: auto 0 0 0; max-width: var(--largeur-app); margin-inline: auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--c-surface); border-top: 1px solid var(--c-bord);
+}
+.barre__lien {
+  display: grid; justify-items: center; gap: var(--e-1); padding: var(--e-3) var(--e-1);
+  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-xs); font-weight: 600;
+}
+.barre__lien[aria-current="page"] { color: var(--c-primaire); }
+
+.page-titre { display: grid; gap: var(--e-1); }
+.page-titre p { color: var(--c-texte-doux); font-size: var(--t-sm); }
+
+/* ---- Caisse ---- */
+.montant { display: grid; gap: var(--e-1); justify-items: center; padding: var(--e-2) 0; text-align: center; }
+.montant__valeur { font-family: var(--f-chiffres); font-size: var(--t-montant); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+.montant__valeur--vide { color: var(--c-texte-doux); }
+.montant__sats { color: var(--c-texte-doux); font-size: var(--t-sm); min-height: 1.5em; }
+
+.pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
+.pave__touche {
+  min-height: 3.5rem; border-radius: var(--rayon); border: 1px solid var(--c-bord);
+  background: var(--c-surface); font-family: var(--f-chiffres); font-size: var(--t-xl); font-weight: 600;
+  transition: transform var(--d-rapide) var(--ease), background var(--d-rapide) var(--ease);
+}
+.pave__touche:active { transform: scale(0.96); background: var(--c-surface-h); }
+.pave__touche--action { color: var(--c-texte-doux); font-family: var(--f-texte); font-size: var(--t-base); }
+
+.actions { display: grid; gap: var(--e-3); }
+
+.qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }
+.qr__image { width: min(100%, 18rem); aspect-ratio: 1; background: #fff; padding: var(--e-3); border-radius: var(--rayon); border: 1px solid var(--c-bord); }
+.qr__image img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+.recu { display: grid; gap: var(--e-4); justify-items: center; text-align: center; padding: var(--e-6) var(--e-4); background: var(--c-prouve-fond); color: var(--c-prouve-texte); border-radius: var(--rayon); }
+.recu__montant { font-family: var(--f-chiffres); font-size: var(--t-montant); font-weight: 700; line-height: 1.1; }
+
+/* ---- Historique ---- */
+.totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.total { display: grid; gap: var(--e-1); padding: var(--e-4); border-radius: var(--rayon); }
+.total--prouve { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
+.total--declare { background: var(--c-declare-fond); color: var(--c-declare-texte); }
+.total__valeur { font-family: var(--f-chiffres); font-size: var(--t-lg); font-weight: 700; }
+.total__libelle { font-size: var(--t-xs); font-weight: 700; }
+
+.jour { display: grid; gap: var(--e-2); }
+.jour__titre { font-size: var(--t-sm); font-weight: 700; color: var(--c-texte-doux); text-transform: capitalize; padding-top: var(--e-2); }
+.ligne { display: grid; grid-template-columns: 1fr auto; gap: var(--e-1) var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.ligne__montant { font-family: var(--f-chiffres); font-weight: 700; text-align: right; }
+.ligne__meta { grid-column: 1 / -1; display: flex; gap: var(--e-2); align-items: center; color: var(--c-texte-doux); font-size: var(--t-xs); }
+
+/* ---- Passeport et vue prêteur ---- */
+.chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.chiffre-cle__valeur { font-family: var(--f-chiffres); font-size: var(--t-xl); font-weight: 700; }
+.chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-sm); }
+.segments { display: grid; grid-auto-flow: column; gap: var(--e-2); }
+.lien-partage { word-break: break-all; font-family: var(--f-chiffres); font-size: var(--t-xs); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
+.liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
+.liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
+
+.rubrique { display: grid; gap: var(--e-3); }
+.apercu-bloc { display: grid; gap: var(--e-3); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.coque--libre { max-width: var(--largeur-app); margin-inline: auto; padding: var(--e-5) var(--e-4) var(--e-7); display: grid; gap: var(--e-5); }

@@ -1,0 +1,66 @@
+/* Primitives : boutons, champs, pastilles, alertes, squelettes, états vides.
+   Ne contient aucune règle propre à un écran. */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2);
+  min-height: var(--cible-min); padding: var(--e-3) var(--e-5);
+  border: 2px solid transparent; border-radius: var(--rayon);
+  font-weight: 650; font-size: var(--t-base); line-height: 1.2; text-decoration: none;
+  white-space: nowrap;
+  transition: transform var(--d-rapide) var(--ease), background var(--d-rapide) var(--ease);
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn--bloc { width: 100%; }
+.btn--grand { min-height: 3.75rem; font-size: var(--t-lg); }
+.btn--primaire { background: var(--c-primaire-cta); color: var(--c-sur-primaire); }
+.btn--secondaire { background: var(--c-surface); color: var(--c-texte); border-color: var(--c-bord-champ); }
+.btn--discret { background: transparent; color: var(--c-primaire); }
+.btn--danger { background: var(--c-erreur-fond); color: var(--c-erreur-texte); border-color: var(--c-erreur-texte); }
+@media (hover: hover) {
+  .btn--secondaire:hover, .btn--discret:hover { background: var(--c-surface-h); }
+}
+
+.champ { display: grid; gap: var(--e-2); }
+.champ__label { font-weight: 600; font-size: var(--t-sm); }
+.champ__aide { color: var(--c-texte-doux); font-size: var(--t-xs); }
+.champ__entree {
+  width: 100%; min-height: var(--cible-min); padding: var(--e-3) var(--e-4);
+  background: var(--c-surface); border: 2px solid var(--c-bord-champ); border-radius: var(--rayon);
+}
+.champ__entree:focus-visible { outline: none; box-shadow: var(--lueur-focus); border-color: var(--c-primaire); }
+.champ--erreur .champ__entree { border-color: var(--c-erreur-texte); }
+.champ__erreur { color: var(--c-erreur-texte); font-size: var(--t-sm); font-weight: 600; }
+
+.pastille {
+  display: inline-flex; align-items: center; gap: var(--e-1);
+  padding: var(--e-1) var(--e-3); border-radius: var(--rayon-rond);
+  font-size: var(--t-xs); font-weight: 700; line-height: 1.3;
+}
+.pastille--prouve { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
+.pastille--declare { background: var(--c-declare-fond); color: var(--c-declare-texte); }
+.pastille--neutre { background: var(--c-surface-h); color: var(--c-texte-doux); }
+
+.alerte {
+  display: grid; gap: var(--e-1); padding: var(--e-4);
+  border-radius: var(--rayon); border: 2px solid transparent; font-size: var(--t-sm);
+}
+.alerte__titre { font-weight: 700; }
+.alerte--erreur { background: var(--c-erreur-fond); color: var(--c-erreur-texte); border-color: var(--c-erreur-texte); }
+.alerte--info { background: var(--c-surface-h); color: var(--c-texte); }
+.alerte--succes { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
+
+.squelette {
+  display: block; min-height: 1.25rem; border-radius: var(--rayon);
+  background: linear-gradient(90deg, var(--c-surface-h), var(--c-surface), var(--c-surface-h));
+  background-size: 200% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .squelette { animation: squelette 1.4s linear infinite; }
+}
+@keyframes squelette { to { background-position: -200% 0; } }
+
+.vide { display: grid; gap: var(--e-3); justify-items: center; text-align: center; padding: var(--e-6) var(--e-4); color: var(--c-texte-doux); }
+.vide__titre { color: var(--c-texte); font-weight: 700; font-size: var(--t-lg); }
+
+.carte { background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); padding: var(--e-4); }

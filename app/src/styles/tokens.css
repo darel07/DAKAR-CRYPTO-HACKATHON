@@ -1,0 +1,115 @@
+/* Tokens du design system. TOUTES les valeurs visuelles vivent ici :
+   aucun composant ne contient un #hex, un px magique ou une durée en dur.
+   Chaque ratio de contraste est mesuré (WCAG, script de calcul) et noté
+   à côté de la valeur. */
+
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+:root {
+  /* ---- Couleurs : thème clair (lisible en plein soleil sur un marché) ---- */
+  --c-fond:        #F2F5F1;
+  --c-surface:     #FAFBF9;  /* évite le blanc pur */
+  --c-surface-h:   #E7ECE5;  /* ce qui se soulève : survol, élément actif */
+  --c-texte:       #14201A;  /* 15,3:1 sur le fond */
+  --c-texte-doux:  #4A5A51;  /* 6,7:1 sur le fond, 7,0:1 sur la surface */
+  --c-bord:        #CAD4CA;  /* décor seulement, jamais seul pour porter un sens */
+  --c-bord-champ:  #6B7A71;  /* 4,4:1 sur la surface : bordure des champs (3:1 requis) */
+
+  /* Une seule famille chromatique (vert profond). Le vert lisible (texte, liens)
+     et le vert d'aplat (fond de bouton) sont deux tokens distincts. */
+  --c-primaire:       #0B5D44;  /* 7,2:1 sur le fond : texte, liens */
+  --c-primaire-cta:   #0B5D44;  /* fond de bouton */
+  --c-sur-primaire:   #FAFBF9;  /* 7,6:1 sur le fond de bouton */
+
+  /* États sémantiques : seules couleurs hors famille, et toujours doublées
+     d'un libellé ou d'une icône (jamais la couleur seule, WCAG 1.4.1). */
+  --c-prouve-fond:    #DCEFE5;
+  --c-prouve-texte:   #0B5D44;  /* 6,6:1 sur son fond */
+  --c-declare-fond:   #FBEBC8;
+  --c-declare-texte:  #7A4B00;  /* 6,3:1 sur son fond */
+  --c-erreur-fond:    #FBE3E0;
+  --c-erreur-texte:   #A3231B;  /* 6,1:1 sur son fond, 6,8:1 sur le fond */
+
+  /* Lueur d'accent : sert d'élévation (une ombre noire ne se voit pas en sombre). */
+  --lueur-focus: 0 0 0 3px color-mix(in srgb, var(--c-primaire) 45%, transparent);
+
+  /* ---- Typographie ---- */
+  --f-texte: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-chiffres: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --t-xs: 0.8125rem;
+  --t-sm: 0.9375rem;
+  --t-base: 1.0625rem;   /* 17 px : lisible sur un petit écran */
+  --t-lg: 1.25rem;
+  --t-xl: 1.75rem;
+  --t-montant: 3rem;     /* le montant de la caisse : le plus grand élément */
+  --interligne: 1.5;
+
+  /* ---- Espacements, rayons, tailles ---- */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --rayon: 0.875rem;       /* une seule échelle : tout est en 14 px */
+  --rayon-rond: 999px;
+  --cible-min: 3rem;       /* 48 px : cible tactile minimale */
+  --largeur-app: 30rem;
+
+  /* ---- Mouvement ---- */
+  --d-rapide: 120ms;
+  --d-normale: 220ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Thème sombre : suit le système, sauf si l'utilisateur impose l'un des deux. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="clair"]) { color-scheme: dark; --_sombre: 1; }
+}
+:root[data-theme="sombre"] { color-scheme: dark; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="clair"]) {
+    --c-fond: #0C1511;
+    --c-surface: #121E18;
+    --c-surface-h: #1B2A22;
+    --c-texte: #E8EFE9;        /* 15,9:1 sur le fond */
+    --c-texte-doux: #A5B5AB;   /* 8,7:1 sur le fond, 8,0:1 sur la surface */
+    --c-bord: #2C3F34;
+    --c-bord-champ: #7E9187;
+    --c-primaire: #5FD3A4;     /* 10,0:1 sur le fond */
+    --c-primaire-cta: #5FD3A4;
+    --c-sur-primaire: #08140F; /* 10,1:1 sur le fond de bouton */
+    --c-prouve-fond: #16352A;
+    --c-prouve-texte: #8FE3C0; /* 8,8:1 sur son fond */
+    --c-declare-fond: #3A2A07;
+    --c-declare-texte: #F5C86B; /* 8,8:1 sur son fond */
+    --c-erreur-fond: #3F1512;
+    --c-erreur-texte: #FF9E96;  /* 8,0:1 sur son fond */
+  }
+}
+:root[data-theme="sombre"] {
+  --c-fond: #0C1511;
+  --c-surface: #121E18;
+  --c-surface-h: #1B2A22;
+  --c-texte: #E8EFE9;
+  --c-texte-doux: #A5B5AB;
+  --c-bord: #2C3F34;
+  --c-bord-champ: #7E9187;
+  --c-primaire: #5FD3A4;
+  --c-primaire-cta: #5FD3A4;
+  --c-sur-primaire: #08140F;
+  --c-prouve-fond: #16352A;
+  --c-prouve-texte: #8FE3C0;
+  --c-declare-fond: #3A2A07;
+  --c-declare-texte: #F5C86B;
+  --c-erreur-fond: #3F1512;
+  --c-erreur-texte: #FF9E96;
+}
+
+/* Mouvement réduit : toutes les durées tombent à zéro. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-rapide: 0ms; --d-normale: 0ms; }
+}

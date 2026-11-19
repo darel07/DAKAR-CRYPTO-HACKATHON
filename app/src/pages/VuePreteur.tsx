@@ -4,6 +4,8 @@ import { CircleCheck, Printer, TriangleAlert } from "lucide-react";
 import { Alert, AmountDisplay, Button, Skeleton, StatCard } from "../components/ui";
 import { appelerApi, ErreurApi } from "../lib/api";
 import { formatNombreSimple } from "../lib/domain/format";
+import { chargerReference } from "../lib/fx/reference";
+import { libelleControle } from "../lib/nostr/controleMontants";
 import { decoder, PART_PLAFOND, verifier } from "../lib/nostr/verification";
 import type { Verification } from "../lib/nostr/verification";
 import { appliquerTheme, lirePreferences } from "../lib/preferences";
@@ -59,6 +61,8 @@ export function VuePreteur({ charge = null, id }: VuePreteurProps) {
   useEffect(() => {
     const ctrl = new AbortController();
     setEtat({ nom: "chargement" });
+    // Le cours de référence se charge en même temps que le passeport : aucune attente de plus.
+    const reference = chargerReference(ctrl.signal);
     const lire = async (): Promise<Etat> => {
       if (id !== undefined) {
         if (!ID_VALIDE.test(id)) return { nom: "illisible" };
@@ -68,11 +72,11 @@ export function VuePreteur({ charge = null, id }: VuePreteurProps) {
         } catch (e) {
           return e instanceof ErreurApi && e.statut === 404 ? { nom: "expire" } : { nom: "injoignable" };
         }
-        try { return { nom: "pret", v: verifier(await decoder(reponse.charge)), expireLe: reponse.expireLe }; }
+        try { return { nom: "pret", v: verifier(await decoder(reponse.charge), await reference), expireLe: reponse.expireLe }; }
         catch { return { nom: "illisible" }; }
       }
       if (!charge) return { nom: "illisible" };
-      try { return { nom: "pret", v: verifier(await decoder(charge)), expireLe: null }; }
+      try { return { nom: "pret", v: verifier(await decoder(charge), await reference), expireLe: null }; }
       catch { return { nom: "illisible" }; }
     };
     lire().then((e) => { if (!ctrl.signal.aborted) setEtat(e); }, () => undefined);
@@ -141,6 +145,14 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
         </Alert>
       )}
 
+      {v.montantsRejetes > 0 && (
+        <Alert niveau="erreur" titre="Montant incohérent">
+          {v.montantsRejetes > 1
+            ? `${v.montantsRejetes} paiements ont bien été reçus, mais pour un montant en FCFA qui ne correspond pas à la somme payée. Ils ne comptent pas dans le total prouvé.`
+            : "1 paiement a bien été reçu, mais pour un montant en FCFA qui ne correspond pas à la somme payée. Il ne compte pas dans le total prouvé."}
+        </Alert>
+      )}
+
       {/* Pas de montant de prêt suggéré à partir d'un relevé dont la signature ne tient pas. */}
       {v.signatureValide && (
         <section className="rubrique">
@@ -169,6 +181,9 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
                   ? `${v.preuvesRejetees} preuves ne correspondent pas à leur demande de paiement.`
                   : "1 preuve ne correspond pas à sa demande de paiement."}
               </Point>}
+          {v.nbProuvees + v.montantsRejetes > 0 && (
+            <Point ok={v.controle === "jour" && v.montantsRejetes === 0}>{libelleControle(v.controle)}</Point>
+          )}
           <Point ok={false}>
             Non vérifié : les ventes déclarées reposent sur la parole du commerçant. Un commerçant peut aussi se
             payer lui-même : comparez avec ce que vous voyez sur place.

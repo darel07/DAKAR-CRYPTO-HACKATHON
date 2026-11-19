@@ -4,6 +4,7 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { decode } from "light-bolt11-decoder";
 import type { ContenuPasseport, LignePasseport } from "../domain/types";
+import { montantCoherent, type NiveauControle, type ReferenceCours } from "./controleMontants";
 import { fluxVersOctets, KIND } from "./passeport";
 
 // Côté prêteur (E12) seulement : ce module et le décodeur de factures ne sont chargés qu'avec la
@@ -28,8 +29,12 @@ export interface Verification {
   totalDeclare: number;
   nbProuvees: number;
   nbDeclarees: number;
-  /** Lignes Lightning dont la preuve ne tient pas (préimage ou montant incohérent). */
+  /** Lignes Lightning dont la préimage ne correspond pas à la facture. */
   preuvesRejetees: number;
+  /** Lignes Lightning payées, mais dont le montant FCFA ne correspond pas aux sats payés (#37). */
+  montantsRejetes: number;
+  /** Précision du contrôle des montants, selon le cours de référence disponible. */
+  controle: NiveauControle;
   jours: number;
   /** Plafond indicatif sur le flux total, ramené à 30 jours. */
   plafondTotal: number;
@@ -37,22 +42,25 @@ export interface Verification {
   plafondProuve: number;
 }
 
-/** Une ligne Lightning est acceptée si la préimage correspond au hash de la facture
- *  et si le montant de la facture (sats) est cohérent avec une vente non nulle. */
-function preuveValide(ligne: Extract<LignePasseport, [number, number, "L", string, string]>): boolean {
+type LigneLightning = Extract<LignePasseport, [number, number, "L", string, string]>;
+
+/** Sats réellement payés si la préimage correspond au hash de la facture, sinon null.
+ *  La section `amount` du décodeur est en millisatoshis. */
+function satsPayes(ligne: LigneLightning): number | null {
   try {
     const [, , , facture, preimage] = ligne;
     const decodee = decode(facture);
     const hash = decodee.sections.find((s) => s.name === "payment_hash")?.value as string | undefined;
-    const montant = decodee.sections.find((s) => s.name === "amount")?.value as string | undefined;
-    if (!hash || !montant || Number(montant) <= 0) return false;
-    return bytesToHex(sha256(hexToBytes(preimage))) === hash.toLowerCase();
+    const msat = Number(decodee.sections.find((s) => s.name === "amount")?.value);
+    if (!hash || !(msat > 0)) return null;
+    return bytesToHex(sha256(hexToBytes(preimage))) === hash.toLowerCase() ? msat / 1000 : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function verifier(evenement: Event): Verification {
+/** `reference` : cours obtenu par le prêteur lui-même, jamais lu dans le passeport. */
+export function verifier(evenement: Event, reference: ReferenceCours = { niveau: "plage" }): Verification {
   const signatureValide = evenement.kind === KIND && verifyEvent(evenement);
   let contenu: ContenuPasseport | null = null;
   try {
@@ -60,18 +68,20 @@ export function verifier(evenement: Event): Verification {
     contenu = c.v === 1 && Array.isArray(c.lignes) ? c : null;
   } catch { contenu = null; }
 
-  let totalProuve = 0, totalDeclare = 0, nbProuvees = 0, nbDeclarees = 0, preuvesRejetees = 0;
+  let totalProuve = 0, totalDeclare = 0, nbProuvees = 0, nbDeclarees = 0, preuvesRejetees = 0, montantsRejetes = 0;
   for (const ligne of contenu?.lignes ?? []) {
     if (ligne[1] <= 0 || !Number.isFinite(ligne[1])) continue;
-    if (ligne[2] === "L" && preuveValide(ligne)) { totalProuve += ligne[1]; nbProuvees++; }
-    else if (ligne[2] === "L") { preuvesRejetees++; }
-    else { totalDeclare += ligne[1]; nbDeclarees++; }
+    if (ligne[2] !== "L") { totalDeclare += ligne[1]; nbDeclarees++; continue; }
+    const sats = satsPayes(ligne);
+    if (sats === null) preuvesRejetees++;
+    else if (!montantCoherent(ligne[1], sats, ligne[0], reference)) montantsRejetes++;
+    else { totalProuve += ligne[1]; nbProuvees++; }
   }
   const jours = contenu ? Math.max(1, Math.round((contenu.fin - contenu.debut) / 86400)) : 1;
   const parMois = (x: number) => (x / jours) * 30;
   return {
     signatureValide, auteur: evenement.pubkey, contenu,
-    totalProuve, totalDeclare, nbProuvees, nbDeclarees, preuvesRejetees, jours,
+    totalProuve, totalDeclare, nbProuvees, nbDeclarees, preuvesRejetees, montantsRejetes, controle: reference.niveau, jours,
     plafondTotal: Math.round(parMois(totalProuve + totalDeclare) * PART_PLAFOND),
     plafondProuve: Math.round(parMois(totalProuve) * PART_PLAFOND),
   };

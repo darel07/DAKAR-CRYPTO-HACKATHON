@@ -8,6 +8,12 @@ import { creerDepotRecus } from "./recus/depot.js";
 import { creerServiceRecus, type ServiceRecus } from "./recus/service.js";
 import { creerDepotTaux } from "./taux/depot.js";
 import { FOURNISSEURS_PAR_DEFAUT, type Fournisseur } from "./taux/fournisseurs.js";
+import {
+  coingeckoHistorique,
+  creerServiceHistorique,
+  type ServiceHistorique,
+  type SourceHistorique,
+} from "./taux/historique.js";
 import { creerServiceTaux, type ServiceTaux } from "./taux/service.js";
 
 /** Dépendances partagées, construites une fois au démarrage. */
@@ -16,6 +22,7 @@ export interface Etat {
   db: Base;
   ia: ServiceIA;
   taux: ServiceTaux;
+  historique: ServiceHistorique;
   passeports: ServicePasseports;
   recus: ServiceRecus;
   depotPasseports: DepotPasseports;
@@ -25,6 +32,7 @@ export interface Etat {
 export interface Substitutions {
   clientIA?: ClientIA | null;
   fournisseurs?: Fournisseur[];
+  sourceHistorique?: SourceHistorique;
   delaiIaMs?: number;
 }
 
@@ -41,6 +49,7 @@ export function creerEtat(config: Config, db: Base, sub: Substitutions = {}): Et
     db,
     ia: creerServiceIA(clientIA, sub.delaiIaMs),
     taux: creerServiceTaux(creerDepotTaux(db), sub.fournisseurs ?? FOURNISSEURS_PAR_DEFAUT),
+    historique: creerServiceHistorique(sub.sourceHistorique ?? coingeckoHistorique),
     passeports: creerServicePasseports(depotPasseports, config.publicUrl),
     recus: creerServiceRecus(creerDepotRecus(db), config.publicUrl),
     depotPasseports,

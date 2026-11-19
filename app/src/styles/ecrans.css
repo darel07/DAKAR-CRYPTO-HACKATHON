@@ -214,6 +214,11 @@
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
 
 .rubrique { display: grid; gap: var(--e-3); }
+/* E9 : 4 StatCard en 2 × 2, carte « Résumé du jour », mentions de la feuille « Passeport signé ». */
+.passeport__stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.carte { display: grid; gap: var(--e-2); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.carte__titre { font-size: var(--t-sous-titre); font-weight: 600; color: var(--c-primaire); }
+.passeport__validite { text-align: center; }
 /* ---- Aperçu du design system (#/apercu-design-system) ---- */
 .apercu {
   max-width: var(--largeur-app); margin-inline: auto;

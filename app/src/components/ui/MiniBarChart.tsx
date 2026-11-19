@@ -43,6 +43,8 @@ export function MiniBarChart({ jours, indexJour = jours.length - 1 }: MiniBarCha
     <div
       ref={zone}
       className="graphe"
+      // Glisser sur le graphe montre la valeur d'un jour : ce n'est pas un balayage d'onglet.
+      data-sans-balayage=""
       role="img"
       aria-label={resumer(jours)}
       onPointerDown={toucher}

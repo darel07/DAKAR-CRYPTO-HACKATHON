@@ -1,9 +1,39 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { brotliCompressSync, constants, gzipSync } from "node:zlib";
+import type { Plugin } from "vite";
 
 const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
+
+/** Pré-compresse le build (Brotli et gzip) : le serveur sert ces fichiers tels quels
+ *  (@fastify/static preCompressed). Sans ça, 466 ko de JS partaient en clair : 4,6 s de
+ *  premier affichage en 4G lente (Lighthouse). Compresser à chaque requête coûterait du CPU. */
+function preCompression(): Plugin {
+  const TEXTE = /\.(js|css|html|svg|webmanifest|json)$/;
+  const parcourir = (dossier: string): string[] =>
+    readdirSync(dossier).flatMap((f) => {
+      const chemin = join(dossier, f);
+      return statSync(chemin).isDirectory() ? parcourir(chemin) : [chemin];
+    });
+  return {
+    name: "pre-compression",
+    apply: "build",
+    closeBundle: {
+      order: "post",
+      handler() {
+        for (const f of parcourir("dist").filter((x) => TEXTE.test(x))) {
+          const brut = readFileSync(f);
+          if (brut.length < 1024) continue;
+          writeFileSync(`${f}.br`, brotliCompressSync(brut, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }));
+          writeFileSync(`${f}.gz`, gzipSync(brut, { level: 9 }));
+        }
+      },
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
@@ -47,6 +77,7 @@ export default defineConfig({
         ],
       },
     }),
+    preCompression(),
   ],
   // Version affichée dans Réglages > À propos.
   define: { __VERSION_APP__: JSON.stringify(version) },

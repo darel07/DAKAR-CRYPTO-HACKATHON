@@ -21,7 +21,14 @@ export async function installerStatique(app: FastifyInstance, dossier: string): 
   const racine = resolve(dossier);
   const present = existsSync(join(racine, "index.html"));
   if (present) {
-    await app.register(fastifyStatic, { root: racine, wildcard: true, index: false, setHeaders: entetes });
+    // preCompressed : sert les .br/.gz produits au build du front (Accept-Encoding), sans compresser à la volée.
+    await app.register(fastifyStatic, {
+      root: racine,
+      wildcard: true,
+      index: false,
+      preCompressed: true,
+      setHeaders: entetes,
+    });
     app.get("/", { schema: { hide: true } }, (_req, reply) => reply.sendFile("index.html"));
   }
   app.setNotFoundHandler((req, reply) => {

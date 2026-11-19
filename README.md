@@ -173,6 +173,17 @@ Toutes facultatives ; voir `backend/.env.example`. Les principales : `ANTHROPIC_
 - SQLite dans un volume : suffisant pour la démo et un pilote, pas pour plusieurs serveurs.
 - L'appel réel à Claude n'a pas encore été testé avec une clé (`npm run essai-ia`) ; les replis le sont.
 
+## 4 quater. Tests et qualité
+
+| Niveau | Commande | Ce qui est couvert |
+|---|---|---|
+| Back, unitaires, abus et contrat | `cd backend && npm test` | 100 tests : règle d'analyse, cours et historique, passeports, reçus et confirmations, limites de débit, journaux sans données, inventaire OpenAPI, fichiers pré-compressés |
+| Front, unitaires | `cd app && npm test` | Contrôle des montants (#37), vérification complète d'un passeport, contresignatures |
+| Parcours navigateur | `docker compose up -d` puis `cd app && npm run e2e` | 9 parcours × 2 (Pixel 7 et ordinateur) : encaissement démo, vente déclarée, passeport et lien court, passeport falsifié, navigation, hors connexion, reçu confirmé par un client, sauvegarde de la clé, audit d'accessibilité axe (aucune violation grave) sur 8 écrans, aucun débordement horizontal |
+| Lighthouse mobile | — | Bienvenue : performance 91, accessibilité 100, bonnes pratiques 96. Vue prêteur : 94 / 100 / 100 |
+
+Tout tourne en CI à chaque push, dans cet ordre : format, lint, types, tests du back, tests du front, build, `docker compose up --wait`, Playwright, gitleaks.
+
 ## 5. Architecture
 
 ```mermaid

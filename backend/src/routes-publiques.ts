@@ -4,6 +4,7 @@
 export const ROUTES_PUBLIQUES = [
   "GET /api/sante",
   "GET /api/taux",
+  "GET /api/taux/historique",
   "POST /api/ia/analyser",
   "POST /api/ia/resume",
   "POST /api/passeports",

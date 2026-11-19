@@ -57,7 +57,7 @@ export async function construireApp(etat: Etat, options: OptionsApp = {}): Promi
   await installerSecurite(app, etat.config);
   await installerDocumentation(app);
   await app.register(routesSante(etat.ia.active, etat.taux));
-  await app.register(routesTaux(etat.taux));
+  await app.register(routesTaux(etat.taux, etat.historique));
   await app.register(routesIA(etat.ia));
   await app.register(routesPasseports(etat.passeports));
   await app.register(routesRecus(etat.recus));

@@ -31,6 +31,7 @@ export async function appDeTest(sub: Substitutions = {}, avantRoutes?: (app: Fas
   const etat = creerEtat(config, db, {
     clientIA: null,
     fournisseurs: [fournisseurFixe("coingecko", 60_000)],
+    sourceHistorique: historiqueFixe,
     ...sub,
   });
   const app = await construireApp(etat, { fluxJournal: flux, ...(avantRoutes ? { avantRoutes } : {}) });
@@ -64,3 +65,9 @@ export function chargeSignee(
   if (options.alterer) evenement.content = evenement.content.replace("15000", "150000");
   return deflateSync(Buffer.from(JSON.stringify(evenement))).toString("base64url");
 }
+
+/** Historique simulé : 90 jours à 60 000 €/BTC jusqu'à aujourd'hui. */
+export const historiqueFixe = async (): Promise<[number, number][]> => {
+  const aujourdhui = Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate());
+  return Array.from({ length: 91 }, (_, i): [number, number] => [aujourdhui - (90 - i) * 86_400_000, 60_000]);
+};

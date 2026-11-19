@@ -7,6 +7,7 @@ import {
   StatCard, Switch, TransactionCard, TransactionList, WalletStatus, afficherToast,
 } from "../components/ui";
 import { CoinFcfa } from "../components/signature/CoinFcfa";
+import { RibbonBackground } from "../components/signature/RibbonBackground";
 import { appliquerTheme, lirePreferences, PLAFOND_DEFAUT } from "../lib/preferences";
 import type { Theme } from "../lib/preferences";
 import { COULEURS, FACTURE_EXEMPLE, SEMAINE_EXEMPLE, ventesExemple } from "./apercu/donnees";
@@ -39,6 +40,7 @@ export default function ApercuDesignSystem() {
   const [confirmation, setConfirmation] = useState(false);
   const [pieceEnPause, setPieceEnPause] = useState(false);
   const [entree, setEntree] = useState(0);
+  const [rubansEnPause, setRubansEnPause] = useState(false);
 
   useEffect(() => { appliquerTheme(theme); }, [theme]);
   useEffect(() => () => appliquerTheme(lirePreferences().theme), []);
@@ -199,6 +201,26 @@ export default function ApercuDesignSystem() {
           </Button>
           <Button variante="secondaire" icone={<RotateCcw aria-hidden="true" />} onClick={() => setEntree((n) => n + 1)}>Rejouer l'entrée</Button>
         </div>
+      </Bloc>
+
+      <Bloc titre="Rubans (animation signature)">
+        <div className="apercu-rubans">
+          <figure>
+            <RibbonBackground variante="plein" enPause={rubansEnPause} className="apercu-rubans__plein" />
+            <figcaption>Plein écran (Bienvenue)</figcaption>
+          </figure>
+          <figure>
+            <div className="apercu-rubans__entete">
+              <RibbonBackground variante="coin" enPause={rubansEnPause} className="apercu-rubans__coin" />
+              <p className="apercu-typo apercu-typo--ecran">Bonjour !</p>
+              <p className="texte-doux">Prêt à encaisser votre prochaine vente ?</p>
+            </div>
+            <figcaption>Coin de l'en-tête (Accueil)</figcaption>
+          </figure>
+        </div>
+        <Button variante="secondaire" icone={rubansEnPause ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />} onClick={() => setRubansEnPause((p) => !p)}>
+          {rubansEnPause ? "Relancer les rubans" : "Mettre les rubans en pause"}
+        </Button>
       </Bloc>
 
       <Bloc titre="Vide et chargement">

@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef } from "react";
+import { useId, useRef } from "react";
 import type { CSSProperties } from "react";
 import { Zap } from "lucide-react";
 import { useAppareilModeste } from "../../lib/useAppareilModeste";
+import { usePauseHorsEcran } from "./usePauseHorsEcran";
 
 export type ModePiece = "boucle" | "entree" | "fixe";
 
@@ -61,25 +62,7 @@ export function CoinFcfa({ mode = "boucle", taille, enPause = false, className }
   const simple = useAppareilModeste();
   const id = `piece-${useId().replace(/[^\w-]/g, "")}`;
 
-  // État de pause écrit dans le DOM (animation-play-state en CSS) : aucun rendu React.
-  useEffect(() => {
-    const el = racine.current;
-    if (!el || mode === "fixe" || simple) return;
-    let horsEcran = false;
-    const appliquer = () => { el.toggleAttribute("data-pause", enPause || document.hidden || horsEcran); };
-    const observateur = new IntersectionObserver(([entree]) => {
-      horsEcran = !entree.isIntersecting;
-      appliquer();
-    });
-    observateur.observe(el);
-    document.addEventListener("visibilitychange", appliquer);
-    appliquer();
-    return () => {
-      observateur.disconnect();
-      document.removeEventListener("visibilitychange", appliquer);
-      el.removeAttribute("data-pause");
-    };
-  }, [mode, simple, enPause]);
+  usePauseHorsEcran(racine, mode !== "fixe" && !simple, enPause);
 
   const style = taille ? ({ "--piece-taille": `${taille}px` } as CSSProperties) : undefined;
 

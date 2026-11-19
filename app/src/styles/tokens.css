@@ -98,7 +98,6 @@
   --interrupteur-h: 32px;
   --graphe-h: 88px;      /* MiniBarChart bars area */
   --poignee-l: 40px;     /* sheet drag handle */
-  --bandeau-rubans: 180px; /* ribbon band at the top of Home */
   --indicateur-l: 78px;  /* dock pill. FIXED (prompt 68 px): "Passeport" is 67 px wide at the active 1.12 scale */
   --indicateur-h: 56px;
   --dock-marge-interne: 4px;

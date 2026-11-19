@@ -261,3 +261,92 @@
   32.143%        { opacity: 0.7; scale: 1.05; }         /* 1.35 s */
   52.381%, 100%  { opacity: var(--piece-halo-repos); scale: 1; }
 }
+
+/* ======================================================================
+   RibbonBackground (§6.3): glossy ribbons, recoloured to the palette
+   ====================================================================== */
+.rubans {
+  /* Light: navy to blue from back to front (--ruban-6 = tip of the front ribbon) */
+  --ruban-1: #18324A;
+  --ruban-2: #24496B;
+  --ruban-3: #2F5E8C;
+  --ruban-4: #3C72A9;
+  --ruban-5: #4A86C5;
+  --ruban-6: #7DB0E3;
+  --ruban-lisere: rgb(242 179 92 / 0.6);    /* amber */
+  --ruban-lisere-vif: rgb(247 147 26 / 0.5); /* one Bitcoin-orange edge */
+  --rubans-fond-haut: #EAF0F6;
+  --rubans-fond-bas: #F5F7F9;
+
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+:root[data-theme="sombre"] .rubans {
+  --ruban-1: #1D2E40;
+  --ruban-2: #24496B;
+  --ruban-3: #2B5C8F;
+  --ruban-4: #346CA8;
+  --ruban-5: #3D7BC0;
+  --ruban-6: #6A9FD8;
+  --ruban-lisere: rgb(247 147 26 / 0.7);    /* the orange glints of the video */
+  --ruban-lisere-vif: rgb(242 179 92 / 0.5);
+  --rubans-fond-haut: #101820;
+  --rubans-fond-bas: #101820;
+}
+
+.rubans__masque { position: relative; inline-size: 100%; block-size: 100%; }
+/* One <svg> per ribbon, stacked: animating these HTML-level boxes stays on the compositor. */
+.rubans__ruban { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; overflow: visible; }
+
+.rubans__forme {
+  stroke: var(--ruban-lisere);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.rubans__ruban:nth-of-type(1) .rubans__forme { fill-opacity: 0.85; }
+.rubans__ruban:nth-of-type(2) .rubans__forme { fill-opacity: 0.9; }
+.rubans__ruban:nth-of-type(3) .rubans__forme { fill-opacity: 0.94; stroke: var(--ruban-lisere-vif); }
+.rubans__ruban:nth-of-type(4) .rubans__forme { fill-opacity: 0.97; }
+:root[data-theme="sombre"] .rubans__ruban:nth-of-type(2n) .rubans__forme { stroke: var(--ruban-lisere-vif); }
+:root[data-theme="sombre"] .rubans__ruban:nth-of-type(3) .rubans__forme { stroke: var(--ruban-lisere); }
+
+/* Full screen (Welcome): background gradient, bloom anchored bottom right. */
+.rubans--plein { background: linear-gradient(var(--rubans-fond-haut), var(--rubans-fond-bas)); }
+/* Ribbons pivot around the anchor: the bottom-right corner (xMaxYMax). */
+.rubans--plein .rubans__ruban { transform-origin: 100% 100%; }
+
+/* Corner of the Home header (validated deviation from the 180 px band): the curled crests of the
+   same bloom, fading out leftwards and downwards before any text. */
+.rubans--coin { mask-image: linear-gradient(to bottom, #000 35%, transparent); }
+.rubans--coin .rubans__masque { mask-image: linear-gradient(to left, #000 20%, transparent 62%); }
+/* The anchor is about three band heights below the top (viewBox y 0 under a 172-unit crop). */
+.rubans--coin .rubans__ruban { transform-origin: 100% 300%; }
+
+/* Per ribbon: its own keyframes, duration and offset (desynchronised), for each variant. */
+.rubans__ruban:nth-of-type(1) { --r-boucle: ruban-1 16s -3s;  --r-arrivee: ruban-1-arrivee 3.6s; }
+.rubans__ruban:nth-of-type(2) { --r-boucle: ruban-2 19s -11s; --r-arrivee: ruban-2-arrivee 4.1s; }
+.rubans__ruban:nth-of-type(3) { --r-boucle: ruban-3 22s -6s;  --r-arrivee: ruban-3-arrivee 4.5s; }
+.rubans__ruban:nth-of-type(4) { --r-boucle: ruban-4 18s -14s; --r-arrivee: ruban-4-arrivee 3.9s; }
+.rubans__ruban:nth-of-type(5) { --r-boucle: ruban-5 24s -9s;  --r-arrivee: ruban-5-arrivee 4.3s; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Welcome: slow loop, ±4deg, ±14 px, scale 1 → 1.03, 16 to 24 s, alternate. */
+  .rubans--plein:not([data-simple]) .rubans__ruban { animation: var(--r-boucle) ease-in-out infinite alternate both; }
+  /* Home corner: one wave on arrival, each ribbon settling at its own pace, still by 4.5 s. */
+  .rubans--coin:not([data-simple]) .rubans__ruban { animation: var(--r-arrivee) ease-in-out both; }
+}
+/* More specific than the animation rules above, whose shorthand resets the play state. */
+.rubans[data-pause]:not([data-simple]) .rubans__ruban { animation-play-state: paused; }
+
+@keyframes ruban-1 { from { transform: rotate(-3deg) translate(-10px, 6px); } to { transform: rotate(2deg) translate(14px, -8px) scale(1.03); } }
+@keyframes ruban-2 { from { transform: rotate(3deg) translate(8px, -4px) scale(1.01); } to { transform: rotate(-4deg) translate(-14px, 10px) scale(1.03); } }
+@keyframes ruban-3 { from { transform: rotate(-2deg) translate(12px, 8px); } to { transform: rotate(4deg) translate(-8px, -14px) scale(1.03); } }
+@keyframes ruban-4 { from { transform: rotate(4deg) translate(-12px, -6px) scale(1.02); } to { transform: rotate(-3deg) translate(10px, 12px); } }
+@keyframes ruban-5 { from { transform: rotate(-4deg) translate(6px, 14px) scale(1.03); } to { transform: rotate(3deg) translate(-14px, -6px); } }
+
+/* Arrival wave: displaced, swings past the rest pose, settles on it (the final state is the rest). */
+@keyframes ruban-1-arrivee { 0% { transform: rotate(-3deg) translate(-10px, 6px); } 55% { transform: rotate(1.5deg) translate(6px, -4px) scale(1.02); } 100% { transform: none; } }
+@keyframes ruban-2-arrivee { 0% { transform: rotate(3deg) translate(8px, -4px) scale(1.02); } 55% { transform: rotate(-2deg) translate(-7px, 5px); } 100% { transform: none; } }
+@keyframes ruban-3-arrivee { 0% { transform: rotate(-2deg) translate(12px, 8px); } 55% { transform: rotate(2deg) translate(-5px, -7px) scale(1.02); } 100% { transform: none; } }
+@keyframes ruban-4-arrivee { 0% { transform: rotate(4deg) translate(-12px, -6px) scale(1.02); } 55% { transform: rotate(-1.5deg) translate(5px, 6px); } 100% { transform: none; } }
+@keyframes ruban-5-arrivee { 0% { transform: rotate(-4deg) translate(6px, 14px) scale(1.03); } 55% { transform: rotate(1.5deg) translate(-7px, -3px); } 100% { transform: none; } }

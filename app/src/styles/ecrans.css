@@ -128,14 +128,23 @@
 /* ---- E3 Accueil / caisse ---- */
 .accueil { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); isolation: isolate; }
 .accueil__entete { position: relative; display: grid; gap: var(--e-1); }
+/* Rubans du coin : du haut de l'écran jusqu'au bas de l'en-tête, jamais plus bas (montant, alerte). */
 .accueil__rubans {
-  position: absolute; z-index: -1; pointer-events: none;
+  position: absolute; z-index: -1;
   inset-block-start: calc(var(--e-4) * -1); inset-inline: calc(var(--gouttiere) * -1);
-  height: var(--bandeau-rubans);
+  block-size: calc(100% + var(--e-4));
 }
 .accueil__salut { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2) var(--e-3); }
 .accueil__question { color: var(--c-texte-doux); }
 .accueil__jour { font-size: var(--t-secondaire); font-weight: 600; }
+/* Voile couleur fond ajusté au texte, fondu au bout : quelle que soit la longueur de la ligne
+   (montant du jour, largeur d'écran) et la position des rubans, le texte garde son contraste
+   sur fond (texte doux 5,10:1 en clair). Les rubans semblent passer derrière la ligne. */
+.accueil__question, .accueil__jour {
+  justify-self: start;
+  padding-inline-end: var(--e-5);
+  background: linear-gradient(to right, var(--c-fond) calc(100% - var(--e-5)), transparent);
+}
 /* Le pavé et l'action restent en bas, sous le pouce ; le montant se centre dans l'espace libre. */
 .accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
 .accueil__caisse > .montant { margin-block: auto; }
@@ -233,3 +242,9 @@
 .apercu-pieces { display: flex; flex-wrap: wrap; gap: var(--e-4); }
 .apercu-pieces figure { display: grid; justify-items: center; gap: var(--e-2); margin: 0; }
 .apercu-pieces figcaption { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.apercu-rubans { display: grid; gap: var(--e-4); }
+.apercu-rubans figure { display: grid; gap: var(--e-2); margin: 0; }
+.apercu-rubans figcaption { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.apercu-rubans__plein { aspect-ratio: 390 / 844; border-radius: var(--rayon); }
+.apercu-rubans__entete { position: relative; isolation: isolate; display: grid; gap: var(--e-1); padding: var(--e-4); border: 1px solid var(--c-bord); border-radius: var(--rayon); overflow: hidden; }
+.apercu-rubans__coin { position: absolute; inset: 0; z-index: -1; }

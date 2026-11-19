@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { RibbonBackground } from "../components/signature/RibbonBackground";
 import { Alert, AmountDisplay, Button, LienBouton, NumericKeypad, WalletStatus, afficherToast } from "../components/ui";
 import type { EtatPortefeuille } from "../components/ui";
 import { creerDemande, modifierSaisie, useEncaissement } from "../lib/domain/encaissement";
@@ -75,8 +76,8 @@ export function Accueil() {
   return (
     <div className={`accueil${!portefeuille || demande ? " accueil--alerte" : ""}`}>
       <header className="accueil__entete">
-        {/* Emplacement du bandeau à rubans (RibbonBackground, issue #5). */}
-        <div className="accueil__rubans" aria-hidden="true" />
+        {/* Rubans dans le coin haut droit seulement : effacés avant les textes, jamais sous le montant. */}
+        <RibbonBackground variante="coin" className="accueil__rubans" />
         <div className="accueil__salut">
           <h1>Bonjour !</h1>
           <WalletStatus etat={etatWallet} />

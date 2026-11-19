@@ -61,8 +61,21 @@ export function historiqueCsv(ventes: Vente[]): string {
       v.paymentHash ?? "",
     ].join(";")),
   ];
-  return `﻿${lignes.join("\r\n")}\r\n`;
+  return `\uFEFF${lignes.join("\r\n")}\r\n`;
 }
 
 /** « ventes-2026-11-19.csv » : date du jour de l'export. */
 export const nomExport = (maintenant = new Date()) => `ventes-${cleJour(maintenant.getTime() / 1000)}.csv`;
+
+/** Télécharge le CSV (Historique, Réglages) et rend le nom du fichier. */
+export function telechargerHistorique(ventes: Vente[]): string {
+  const nom = nomExport();
+  const url = URL.createObjectURL(new Blob([historiqueCsv(ventes)], { type: "text/csv;charset=utf-8" }));
+  const lien = document.createElement("a");
+  lien.href = url;
+  lien.download = nom;
+  lien.click();
+  // Révoquée plus tard : certains navigateurs lisent l'adresse après le clic.
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return nom;
+}

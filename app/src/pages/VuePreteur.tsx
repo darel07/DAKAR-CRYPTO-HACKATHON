@@ -4,8 +4,8 @@ import { CircleCheck, Printer, TriangleAlert } from "lucide-react";
 import { Alert, AmountDisplay, Button, Skeleton, StatCard } from "../components/ui";
 import { appelerApi, ErreurApi } from "../lib/api";
 import { formatFcfa } from "../lib/domain/format";
-import { decoder, PART_PLAFOND, verifier } from "../lib/nostr/passeport";
-import type { Verification } from "../lib/nostr/passeport";
+import { decoder, PART_PLAFOND, verifier } from "../lib/nostr/verification";
+import type { Verification } from "../lib/nostr/verification";
 import { appliquerTheme, lirePreferences } from "../lib/preferences";
 
 type Etat =

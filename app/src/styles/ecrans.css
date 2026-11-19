@@ -271,3 +271,88 @@
 .apercu-rubans__plein { aspect-ratio: 390 / 844; border-radius: var(--rayon); }
 .apercu-rubans__entete { position: relative; isolation: isolate; display: grid; gap: var(--e-1); padding: var(--e-4); border: 1px solid var(--c-bord); border-radius: var(--rayon); overflow: hidden; }
 .apercu-rubans__coin { position: absolute; inset: 0; z-index: -1; }
+
+/* ---- E11 Réglages : liste groupée, lignes de 56 px ---- */
+.reglages__groupe { display: grid; gap: var(--e-2); }
+.reglages__carte {
+  display: grid; padding-inline: var(--e-4);
+  background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon);
+}
+.reglages__carte > * + * { border-block-start: 1px solid var(--c-bord); }
+.reglages__carte > .reglages__aide { border-block-start: 0; padding-block: 0 var(--e-3); }
+.reglages__aide { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.reglages__bouton, .reglages__champ { padding-block: var(--e-3); }
+.reglage {
+  display: flex; align-items: center; gap: var(--e-3); inline-size: 100%; min-block-size: var(--bouton-lg);
+  padding: 0; border: 0; background: none; color: var(--c-texte); font: inherit; text-align: start; text-decoration: none;
+}
+button.reglage { cursor: pointer; }
+.reglage__icone { display: grid; color: var(--c-texte-doux); }
+.reglage__icone svg { inline-size: var(--icone); block-size: var(--icone); }
+.reglage__libelle { flex: 1; font-weight: 500; }
+.reglage__valeur { display: flex; align-items: center; color: var(--c-texte-doux); }
+.reglage__chevron { flex: none; inline-size: var(--icone-s); block-size: var(--icone-s); color: var(--c-texte-doux); }
+@media (hover: hover) { .reglage--action:not(:disabled):hover .reglage__libelle { text-decoration: underline; text-underline-offset: 0.2em; } }
+.reglage--desactivee, .reglage:disabled { cursor: not-allowed; }
+.reglage--desactivee .reglage__libelle, .reglage:disabled .reglage__libelle { color: var(--c-texte-doux); }
+.reglages__formulaire { display: grid; gap: var(--e-4); }
+
+/* Restauration : 12 champs numérotés, 2 colonnes */
+.mots { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-2) var(--e-3); margin: 0; padding: 0; list-style: none; }
+.mots label { display: flex; align-items: center; gap: var(--e-2); }
+.mots__numero { inline-size: 2ch; text-align: end; font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.mots__entree {
+  flex: 1; min-inline-size: 0; block-size: var(--cible-min); padding-inline: var(--e-3);
+  border: 1px solid var(--c-bord-champ); border-radius: var(--rayon-s);
+  background: var(--c-surface); color: var(--c-texte); font: inherit; font-size: var(--t-sous-titre);
+}
+.mots__entree[aria-invalid="true"] { border-color: var(--c-erreur-texte); }
+
+/* Changement de thème : fondu de toute la page (View Transition), 240 ms ; 0 en mouvement réduit. */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--d-normale); }
+
+/* ---- E0 Bienvenue : rubans plein écran, pièce en boucle, texte sur un voile ---- */
+.bienvenue { position: relative; isolation: isolate; display: flex; flex-direction: column; min-block-size: 100dvh; }
+.bienvenue__fond { position: fixed; inset: 0; z-index: -1; }
+.bienvenue__pause {
+  position: absolute; z-index: 1;
+  inset-block-start: calc(env(safe-area-inset-top) + var(--e-3)); inset-inline-end: var(--gouttiere);
+  display: grid; place-items: center; inline-size: var(--cible-min); block-size: var(--cible-min);
+  border: 1px solid var(--c-bord); border-radius: var(--rayon-rond); background: var(--c-surface); color: var(--c-texte); cursor: pointer;
+}
+.bienvenue__pause svg { inline-size: var(--icone-s); block-size: var(--icone-s); }
+.bienvenue__contenu {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--e-4);
+  inline-size: 100%; max-inline-size: var(--largeur-app); margin-inline: auto;
+  padding: calc(env(safe-area-inset-top) + var(--e-6)) var(--gouttiere) calc(env(safe-area-inset-bottom) + var(--e-4));
+}
+.bienvenue__piece { --piece-taille: 140px; }
+/* Voile couleur fond sous le texte (§8 E0) : le contraste est mesuré sur le pire pixel des rubans. */
+.bienvenue__voile {
+  display: grid; gap: var(--e-4); inline-size: 100%; margin-block-start: auto;
+  padding: var(--e-5) var(--e-4) var(--e-4); border-radius: var(--rayon);
+  background: color-mix(in srgb, var(--c-fond) var(--voile-bienvenue, 70%), transparent);
+}
+/* Texte principal, pas texte doux : sur des rubans marine voilés à 70 %, le texte doux tombe à 3,1:1. */
+.bienvenue__voile p { color: var(--c-texte); }
+.bienvenue__arguments { display: grid; gap: var(--e-2); margin: 0; padding: 0; list-style: none; font-weight: 600; }
+.bienvenue__arguments li { display: flex; align-items: center; gap: var(--e-2); }
+.bienvenue__arguments svg { flex: none; inline-size: var(--icone-s); block-size: var(--icone-s); color: var(--c-primaire); }
+.bienvenue__actions { display: grid; gap: var(--e-1); }
+@media (max-height: 740px) {
+  .bienvenue__piece { --piece-taille: 104px; }
+  .bienvenue__contenu { gap: var(--e-3); padding-block-start: calc(env(safe-area-inset-top) + var(--e-4)); }
+  .bienvenue__voile { gap: var(--e-3); padding-block-start: var(--e-4); }
+}
+
+/* ---- E1 Connexion du portefeuille ---- */
+.connexion { align-items: stretch; text-align: start; }
+.connexion h1:focus { outline: none; }
+.connexion__etape { gap: var(--e-3); }
+.connexion__numero {
+  display: inline-grid; place-items: center; inline-size: var(--e-5); block-size: var(--e-5); margin-inline-end: var(--e-2);
+  border-radius: var(--rayon-rond); background: var(--c-primaire); color: var(--c-sur-primaire); font-size: var(--t-secondaire);
+}
+/* « Créer la connexion automatiquement » ne tient pas sur une ligne à 390 px : il passe à la ligne. */
+.connexion__etape > * { min-inline-size: 0; }
+.connexion__etape .btn { white-space: normal; text-align: center; block-size: auto; min-block-size: var(--bouton-md); padding-block: var(--e-2); }

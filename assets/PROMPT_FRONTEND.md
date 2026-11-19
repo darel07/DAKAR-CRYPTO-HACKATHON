@@ -2,6 +2,8 @@
 
 > **À qui s'adresse ce fichier** : à un agent de code (Claude) qui doit construire le frontend sans autre contexte. Tout ce qu'il faut est ici ou dans les fichiers cités. Lis ce document en entier avant d'écrire du code, puis suis l'ordre de travail de la section 2.
 
+> **Phase en cours (19 nov., après-midi)** : une bonne partie des écrans existe déjà. Ne repars pas de zéro : commence par la **section 2 bis** (revue du front existant avec les skills, puis écrans restants).
+
 ---
 
 ## 0. Mission en une phrase
@@ -50,6 +52,66 @@ Construire une **PWA mobile-first** en français qui transforme le téléphone d
 5. **Écrans** : section 8. Ils assemblent, ils n'inventent ni couleur, ni marge, ni appel réseau.
 6. **PWA** : section 9.
 7. **Vérifications** : section 11.
+
+## 2 bis. Phase actuelle : revue avec les skills, puis écrans restants
+
+Les écrans E0, E1, E3, E4, E5, E7, E8, E9, E11 et E12 existent et marchent, mais ils ont été construits **sans les skills front**. Le rendu n'est pas au niveau attendu pour gagner. Cette phase le corrige avant d'ajouter quoi que ce soit.
+
+### 2 bis.1 Skills à utiliser (installées dans `~/.claude/skills/`)
+
+| Skill | Usage dans ce projet |
+|---|---|
+| `frontend-solide` | Avant toute modification d'écran, de composant, de hook ou d'appel réseau |
+| `ui-ux-pro-max` | Pour chaque question d'interface (script `search.py`), et **sa liste de vérification avant livraison, sur chaque écran** |
+| `design-taste-frontend` | Passe visuelle « anti-template » sur les écrans de la vidéo : E0, E3, E5, E9, E12 |
+| `apple-design` | Tout ce qui bouge : barre de navigation, balayage, feuilles du bas, ressorts, mouvement réduit |
+| `polices-affiches` | Seulement si on touche aux polices (normalement non) |
+
+**Priorité** : ce fichier gagne sur les skills. CSS natif avec tokens (pas de Tailwind), Lucide, Plus Jakarta Sans + Manrope auto-hébergées, aucune bibliothèque d'animation, aucun script en ligne ni CDN (CSP du serveur), palette et textes de ce fichier. Si une skill propose mieux, demande à Yanis en une phrase avant d'appliquer.
+
+### 2 bis.2 Étape A : revue du front existant (3 h au plus, montre en main)
+
+Pour chaque écran existant, dans cet ordre (ceux de la vidéo d'abord) : **E0 Bienvenue, E3 Accueil-caisse, E4 Paiement, E5 Paiement reçu, E9 Passeport, E12 Vue prêteur**, puis E1, E7/E8, E11 et la barre de navigation.
+
+1. Relire la section de l'écran (§8) et charger les skills du tableau ci-dessus.
+2. Passer la liste de vérification de `ui-ux-pro-max` et la vérification finale de `design-taste-frontend` ; vérifier à 390 × 844 **et** 360 × 640, en clair et en sombre, avec mouvement réduit.
+3. Noter les écarts dans un tableau (écran, problème, gravité : bloquant / visible dans la vidéo / détail).
+4. Corriger **bloquant** et **visible dans la vidéo** ; laisser les détails pour la fin. Ne pas réécrire ce qui marche.
+5. Une PR « Revue avec les skills » vers `main`, avec le tableau en description et des captures avant/après des 6 écrans de la vidéo.
+
+**Défauts déjà connus, à corriger pendant la revue**
+
+| Défaut | Où | Correction |
+|---|---|---|
+| Icônes de la barre **penchées au repos** | `src/styles/ecrans.css` : `rotate: calc(var(--d) * var(--arc-inclinaison))` | Au repos : `rotate: 0`. Rotation seulement pendant le mouvement, proportionnelle à la vitesse de `--progression` (§6.2, corrigé). Valider avec Yanis sur téléphone |
+| Vente **démo affichée « Prouvé »** alors que la vue prêteur la rejette (facture factice) | Paiement reçu, historique, détail | Enregistrer `demo: true` sur la vente ; afficher une pastille « Démo » (ton neutre), jamais « Prouvé » ; l'exclure du total prouvé de l'écran Activité |
+| **E6 n'appelle pas Claude** : `Declarer.tsx` utilise seulement `analyserVenteLocale` | `src/pages/Declarer.tsx` | Voir E6 ci-dessous (`POST /api/ia/analyser`) |
+| Montant FCFA d'une ligne prouvée **non contrôlé** par la vue prêteur (faille, issue #37) | `lib/nostr/passeport.ts` | Voir E12 ci-dessous (passeport v2) |
+
+### 2 bis.3 Étape B : écrans et tâches restants, dans cet ordre
+
+| Ordre | Tâche | Issue |
+|---|---|---|
+| 1 | E6 Vente en espèces ou Wave branchée sur Claude | #11 |
+| 2 | Passeport v2 : cours du jour par ligne et contrôle du montant dans la vue prêteur | #37 |
+| 3 | **Vrai paiement** avec Alby Hub ou LNbits (avec Yanis) | #10 |
+| 4 | E2 Sauvegarde et restauration de la clé | #7 |
+| 5 | E13 Reçu client contresigné et comptage dans la vue prêteur | #18 |
+| 6 | PWA : service worker, installation, hors ligne | #16 |
+| 7 | Accessibilité, tests e2e, Lighthouse | #17 |
+| 8 | E14 Mon équipe (seulement s'il reste du temps) | #19 |
+
+**Gel du code : 20 novembre, 15h.** Après, uniquement des corrections pour la vidéo et la soumission.
+
+### 2 bis.4 Lancer le projet
+
+```bash
+git checkout front && git pull
+docker compose up --build        # API + front compilé sur http://localhost:8080
+cd app && npm run dev            # autre terminal : front avec rechargement, /api redirigé vers :8080
+```
+
+Documentation exacte de l'API (formats, codes d'erreur) : http://localhost:8080/api/docs. Erreurs : `{ "error": { "code", "message" } }` ; codes `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`, `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`. **Tout appel au backend a un repli** si le serveur ne répond pas.
 
 ## 3. Stack et contraintes techniques
 
@@ -281,7 +343,9 @@ Chaque composant : un fichier < 300 lignes, rendu < 30 lignes par fonction, vari
 - Variable continue `--progression` = index de l'onglet actif (0 à 3), fractionnaire pendant un glissement.
 - Pour chaque onglet `i`, avec `d = i - progression` :
   - `translateY = d² × 5 px` (les onglets éloignés descendent : effet d'arc) ;
-  - `rotate = d × 5 deg` (tangente à l'arc, comme les icônes inclinées de la vidéo) ;
+  - **Pas d'inclinaison au repos** (correction du 19 nov., retour de Yanis) : quand `--progression` est entier, toutes les icônes sont droites (`rotate: 0`). L'effet de la vidéo est une **rotation de roue pendant le mouvement**, pas une icône penchée en permanence.
+  - Pendant un changement d'onglet (tap ou balayage), chaque icône tourne sur elle-même en suivant le mouvement de la roue : `rotate = vitesse de --progression × k`, de même signe que le déplacement, plafonné à ±18°, avec `k` réglé pour atteindre environ 12° sur un tap. La rotation revient à 0 avec le ressort (`--ease-ressort`, 320 ms) à l'arrêt. Calculer la vitesse dans la boucle `requestAnimationFrame` qui écrit déjà `--progression` (variable `--rotation-roue`), jamais avec `useState`.
+  - À valider image par image contre `assets/nagivationbar scrolling animation.webm` (0,75 s à 1,25 s) et `assets/references/navigation_arc_planche.jpg`, puis par Yanis sur téléphone ;
   - `scale = 1.12` à `d = 0`, décroissant de 0,07 par unité de distance (minimum 0,92) ;
   - `opacity = 1` à `d = 0`, puis `max(0.72, 1 - |d| × 0.14)` : les icônes latérales restent identifiables (contraste ≥ 3:1 vérifié avec l'opacité).
 - **Balayage horizontal** sur le contenu de la page (pas sur la barre) : gestes pointeur avec verrouillage d'axe (si l'angle initial dépasse 30° de l'horizontale, c'est un défilement vertical et on n'intervient pas). Pendant le glissement, `--progression` suit le doigt et la page glisse latéralement (`translateX`), la page voisine entrant par le côté. Au relâchement : changement d'onglet si le déplacement dépasse 25 % de la largeur ou la vitesse 0,5 px/ms, sinon retour. Animation finale : 320 ms `--ease-ressort`.
@@ -488,6 +552,13 @@ Format de chaque fiche : objectif, maquette (390 × 844), textes exacts, composa
 - Bouton primaire : « Enregistrer 15 000 FCFA ». Puis toast « Vente enregistrée » et retour à E3.
 - Erreurs : pas de montant trouvé → « Je n'ai pas trouvé de montant. Exemple : 2 sacs de riz, 15 000 » ; montant invalide → « Veuillez saisir un montant valide. ».
 
+**Contrat API (ajout du 19 nov.)** : `POST /api/ia/analyser`, corps `{ "texte": "<1 à 120 caractères>" }`, délai côté front 9 s (`appelerApi`).
+- Réponse 200 : `{ libelle, quantite: number|null, montantFcfa: number|null, moyen: "especes"|"wave"|"orange_money"|"autre"|null, confiance: "haute"|"moyenne"|"basse", source: "ia"|"regle" }`.
+- Pré-remplir Article, Montant et le `Segmented` (moyen) avec la proposition. `montantFcfa: null` → message « Je n'ai pas trouvé de montant… ».
+- `source !== "ia"`, erreur réseau, 422 ou 429 → repli `analyserVenteLocale` et mention « Analyse hors ligne ». Le backend ne renvoie jamais de 5xx pour une panne d'IA.
+- `confiance: "basse"` → texte doux « Vérifiez le montant avant d'enregistrer. »
+- Le texte saisi n'est jamais stocké ailleurs que dans la vente confirmée.
+
 ### E7. Historique des ventes (`#/ventes`)
 
 - Titre : « Historique des ventes » ; texte : « Retrouvez toutes vos transactions au même endroit. »
@@ -560,10 +631,35 @@ Liste groupée (titres de section 20 px), lignes de 56 px avec icône, libellé,
 - États : chargement (squelettes), lien illisible (« Le lien est incomplet ou abîmé. Demandez au commerçant de le renvoyer. »).
 - Bouton « Imprimer » (`window.print()`, feuille de style d'impression sans fond animé).
 
+**Passeport v2 : contrôles supplémentaires (ajout du 19 nov., issues #37 et #18)**
+
+Le serveur accepte déjà ce format ; il ne recalcule rien. Tout se vérifie ici, dans le navigateur de l'agent.
+
+- Contenu `v: 2`. Ligne Lightning : `[ts, fcfa, "L", facture, preimage, fcfaParBtc, confirmation | null]`. Ligne déclarée inchangée `[ts, fcfa, "D"]`. Continuer à lire `v: 1` (5 éléments) comme avant.
+- À l'encaissement (E4/E5), enregistrer sur la vente le cours utilisé (`fcfaParBtc`) ; `construireContenu` le recopie dans la ligne.
+- **Contrôle du montant (#37)** : `sats = montant de la facture en msat / 1000` (section `amount` de `light-bolt11-decoder`) ; `attendu = sats × fcfaParBtc / 100 000 000`. Rejeter la ligne (« preuve rejetée ») si `|fcfa − attendu| / attendu > 0,05`, ou si `fcfaParBtc` est hors de 10 000 000 à 200 000 000. Ligne v1 : afficher « ancien format, montant non contrôlé » dans « Ce qui a été vérifié ».
+- **Contresignature (#18)** : une ligne est « contresignée » si `confirmation` est un événement Nostr tel que `verifyEvent(confirmation)` est vrai, `kind === 30078`, balise `d === "confirmation:" + payment_hash` (le hash de **la facture de la ligne**), balise `p === auteur du passeport`, et `confirmation.pubkey !== auteur du passeport`.
+- Affichage : sous la carte « Prouvé », « K paiements contresignés par N clients différents » (N = clés distinctes). Dans « Ce qui n'est pas vérifié », garder : « une contresignature prouve une clé, pas une personne ».
+- Tests unitaires : ligne cohérente acceptée ; montant gonflé ×10 rejeté ; cours aberrant rejeté ; contresignature valide comptée ; contresignature du commerçant lui-même, d'un autre paiement ou altérée non comptée ; passeport v1 toujours lisible.
+
 ### E13. Reçu client (bonus, `#/recu-client/<charge>`)
 
 - Page autonome : montant, commerçant (identité courte), date, « Paiement prouvé ».
 - Bouton « Confirmer cet achat » : signature Nostr du client (extension NIP-07 si présente, sinon clé éphémère), renvoyée au commerçant. Après : « Merci, votre confirmation a été enregistrée. »
+
+**Contrat API et formats (ajout du 19 nov., backend prêt)**
+
+1. **Côté commerçant, sur E5 Paiement reçu** : bouton secondaire « Envoyer le reçu au client ».
+   - Reçu = événement signé par la clé du commerçant (`lireOuCreerCle`) : `kind: 30078`, `tags: [["d", "recu:" + paymentHash]]`, `content: JSON.stringify({ v: 1, montantFcfa, ts, paymentHash, libelle })` (libellé ≤ 80 caractères, facultatif).
+   - Charge = `encoder(evenement)` (même encodage que le passeport, ≤ 8 Kio). `POST /api/recus { charge }` → 201 `{ id, url, expireLe }` (90 jours).
+   - Afficher un QR de `${origin}${pathname}#/recu-client/r/<id>` (construire l'adresse comme pour le lien court du passeport, ne pas reprendre `url`) que le client scanne. Enregistrer `recuId` sur la vente.
+   - Sans backend : le bouton affiche « Reçu indisponible hors connexion » (pas de lien long : un reçu n'a de valeur que confirmé).
+2. **Côté client, E13** (`#/recu-client/r/<id>`, page autonome comme E12) :
+   - `GET /api/recus/:id` → `{ charge, expireLe, confirmation | null }`. Décoder, vérifier la signature (`verifyEvent`) et la balise `d` ; sinon « Ce reçu n'est pas valide. ». 404 → « Ce reçu n'existe pas ou a expiré. ».
+   - Si `confirmation` existe déjà : « Cet achat a déjà été confirmé. »
+   - « Confirmer cet achat » : signer avec `window.nostr` (NIP-07) s'il existe, sinon avec une clé client conservée dans `localStorage` (`caisse.client.cle.v1`), créée au premier usage. Événement : `kind: 30078`, `created_at` maintenant, `tags: [["d", "confirmation:" + paymentHash], ["p", <clé publique du commerçant>]]`, `content: ""`.
+   - `POST /api/recus/:id/confirmation { evenement }` → 201 `{ confirmeLe }` : « Merci, votre confirmation a été enregistrée. » ; 409 → « Cet achat a déjà été confirmé. » ; 422 → « La confirmation n'a pas pu être vérifiée. ».
+3. **Côté commerçant, avant de générer le passeport (E9)** : pour chaque vente Lightning avec `recuId` sans confirmation, `GET /api/recus/:id` (4 requêtes en parallèle au plus, erreurs ignorées) et enregistrer `confirmation` sur la vente. Elle part ensuite dans la ligne v2 du passeport (voir E12). Afficher sur E9 « K ventes confirmées par vos clients ».
 
 ### E14. Mon équipe (bonus, `#/equipe`, accessible depuis Réglages)
 

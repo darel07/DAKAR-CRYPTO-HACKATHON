@@ -29,7 +29,7 @@ export function SauvegardeCle() {
     setEnCours(false);
     if (!ok) { setEtat({ nom: "erreur" }); return; }
     modifierPreferences({ cleSauvegardee: true });
-    afficherToast("Clé sauvegardée : votre passeport est protégé.");
+    afficherToast("Clé sauvegardée : votre passeport est protégé.");
     remplacer("/");
   };
 

@@ -108,7 +108,7 @@ function EtatConfirmation({ issue }: { issue: IssueConfirmation | null }) {
   if (issue === null) return null;
   if (issue === "confirme") {
     return (
-      <Alert niveau="succes" titre="Merci !">
+      <Alert niveau="succes" titre="Merci !">
         Votre confirmation a été enregistrée.
       </Alert>
     );

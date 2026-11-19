@@ -57,7 +57,7 @@ const dansPlage = (implicite: number) =>
 
 /** Phrase pour « Ce qui a été vérifié ». */
 export function libelleControle(niveau: NiveauControle): string {
-  if (niveau === "jour") return "Montant de chaque paiement comparé au cours du bitcoin le jour de la vente (écart toléré : 10 %).";
-  if (niveau === "courant") return "Montant de chaque paiement comparé au cours actuel du bitcoin (contrôle approximatif, écart toléré : 35 %).";
-  return "Montant de chaque paiement contrôlé seulement de façon grossière : cours du bitcoin indisponible.";
+  if (niveau === "jour") return "Montant de chaque paiement comparé au cours du bitcoin le jour de la vente (écart toléré : 10 %).";
+  if (niveau === "courant") return "Montant de chaque paiement comparé au cours actuel du bitcoin (contrôle approximatif, écart toléré : 35 %).";
+  return "Montant de chaque paiement contrôlé seulement de façon grossière : cours du bitcoin indisponible.";
 }

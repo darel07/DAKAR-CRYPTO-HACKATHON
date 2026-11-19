@@ -152,12 +152,18 @@
 }
 /* Le pavé et l'action restent en bas, sous le pouce ; le montant se centre dans l'espace libre. */
 .accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
-/* Le montant est l'écran de la caisse : le seul panneau surélevé, qui prend la hauteur libre
-   (plus de vide entre l'en-tête et le pavé), montant centré dedans. */
+/* Surface forte : les deux objets clés du produit, l'afficheur de la caisse et la couverture du
+   passeport. Elle redéfinit localement les couleurs de texte : AmountDisplay et les autres
+   composants posés dessus lisent les mêmes tokens, sans variante à maintenir. */
+.accueil__caisse > .montant, .chiffre-cle.chiffre-cle--passeport, .preteur__periode {
+  background: var(--c-forte); box-shadow: var(--ombre-forte); border-color: transparent; color: var(--c-forte-texte);
+  --c-texte: var(--c-forte-texte); --c-texte-doux: var(--c-forte-doux); --c-erreur-texte: var(--c-forte-erreur);
+}
+/* Le montant est l'écran de la caisse, comme celui d'un terminal de paiement : il prend la hauteur
+   libre entre l'en-tête et le pavé, montant centré dedans. */
 .accueil__caisse > .montant {
   flex: 1; align-content: center; min-block-size: 0;
-  padding: var(--e-4) var(--e-3);
-  background: var(--c-ecran-caisse); border-radius: var(--rayon); box-shadow: var(--ombre-ecran);
+  padding: var(--e-4) var(--e-3); border-radius: var(--rayon);
 }
 .accueil__actions { display: grid; gap: var(--e-1); }
 /* Écrans courts (360 × 740) : tout doit tenir même avec le bandeau hors ligne et une alerte
@@ -221,6 +227,47 @@
 @keyframes fond-prouve { from { background-color: var(--c-fond); } }
 .flux--recu h1 { color: var(--c-prouve-texte); }
 .flux--recu h1:focus { outline: none; }
+/* ---- Transitions du parcours d'encaissement (View Transitions, lib/transitions.ts) ----
+   L'écran de caisse de l'Accueil devient le ticket du QR (E3 ↔ E4), puis le montant rejoint le
+   reçu pendant que le vert jaillit du QR payé (E4 → E5). Les noms partagés n'existent
+   que pendant une transition (data-vt sur <html>) : un seul élément par nom, aucune capture le
+   reste du temps. Mouvement réduit : ni nom ni cercle, le navigateur fait un simple fondu. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-vt="caisse"] :is(.accueil__caisse > .montant, .paiement__ticket) { view-transition-name: ticket; }
+  :root:is([data-vt="caisse"], [data-vt="succes"]) :is(
+    .accueil__caisse .montant__valeur, .paiement__ticket .montant__valeur, .flux--recu > .montant .montant__valeur
+  ) { view-transition-name: montant; }
+
+  /* Le ticket est UNE surface qui change de taille, son contenu (montant, QR, détails du reçu)
+     se fond dedans : le fond est porté par le groupe, pas par les captures. */
+  ::view-transition-group(ticket) {
+    background: var(--c-surface); border-radius: var(--rayon); overflow: clip;
+    animation-duration: var(--d-lente); animation-timing-function: var(--ease-sortie);
+  }
+  ::view-transition-group(montant) { animation-duration: var(--d-lente); animation-timing-function: var(--ease-sortie); }
+  /* L'ancien contenu s'efface vite ; le nouveau (le QR) est lisible dès le premier tiers. */
+  ::view-transition-old(ticket) { animation: vt-efface calc(var(--d-lente) / 2) var(--ease-sortie) both; }
+  ::view-transition-new(ticket) { animation: vt-apparait var(--d-lente) var(--ease-sortie) both; }
+  /* Le reste de l'écran : l'ancien s'efface AVANT que le nouveau n'apparaisse (deux titres en
+     fondu enchaîné se lisent l'un sur l'autre). */
+  :root[data-vt="caisse"]::view-transition-old(root) { animation: vt-efface var(--d-rapide) var(--ease-sortie) both; }
+  :root[data-vt="caisse"]::view-transition-new(root) { animation: vt-apparait var(--d-normale) var(--ease-sortie) var(--d-instant) both; }
+
+  /* Succès : le nouvel écran est révélé par un cercle parti du QR ; l'ancien reste dessous.
+     Seul le montant voyage du ticket au reçu : un QR écrasé dans le petit ticket du reçu brouillait
+     l'image. */
+  :root[data-vt="succes"]::view-transition-old(root) { animation: none; }
+  :root[data-vt="succes"]::view-transition-new(root) { animation: vt-revele var(--d-revele) var(--ease-revele) both; }
+  /* Le cercle apporte déjà le vert : le fondu de fond du reçu ferait arriver un vert délavé. */
+  @supports (view-transition-name: none) { .flux--recu { animation: none; } }
+}
+@keyframes vt-efface { to { opacity: 0; } }
+@keyframes vt-apparait { from { opacity: 0; } }
+@keyframes vt-revele {
+  from { clip-path: circle(0 at var(--vt-x) var(--vt-y)); }
+  to { clip-path: circle(var(--vt-rayon) at var(--vt-x) var(--vt-y)); }
+}
+
 /* Détails du reçu : un ticket (statut, date, référence) posé sur le vert du succès. */
 .recu__details {
   display: grid; justify-items: center; gap: var(--e-2); inline-size: 100%; padding: var(--e-3) var(--e-4);
@@ -255,6 +302,9 @@
 .chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
 .chiffre-cle__valeur { font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 700; }
 .chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
+/* Couverture du passeport : un filet doré en retrait, comme la dorure d'un vrai passeport. La même
+   couverture chez le commerçant (E9) et chez l'agent de microfinance (E12) : le même objet. */
+.chiffre-cle--passeport, .preteur__periode { outline: 1px solid var(--c-dorure); outline-offset: calc(-1 * var(--e-2)); }
 .lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
 .liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
@@ -268,7 +318,7 @@
 .preteur__marque img { border-radius: var(--rayon-s); }
 .preteur__squelettes { display: grid; gap: var(--e-3); }
 /* Un relevé se lit en colonne, aligné à gauche comme le reste du document. */
-.preteur__periode { display: grid; gap: var(--e-1); }
+.preteur__periode { display: grid; gap: var(--e-1); padding: var(--e-5); border-radius: var(--rayon); }
 .preteur__periode > .montant { justify-items: start; text-align: start; }
 .preteur__totaux, .preteur__plafonds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 .preteur__cle { font-weight: 600; }
@@ -278,6 +328,11 @@
   .preteur__imprimer, .toasts, .bandeau-reseau { display: none !important; }
   .coque--libre { max-width: none; padding: 0; gap: var(--e-4); }
   .preteur :is(.stat, .alerte, .rubrique, .preteur__periode) { break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  /* La couverture redevient un cadre sur papier : un aplat bleu nuit boit l'encre et grise mal. */
+  .preteur__periode {
+    background: none; box-shadow: none; outline-color: var(--c-bord); color: inherit;
+    --c-texte: inherit; --c-texte-doux: inherit; --c-erreur-texte: inherit;
+  }
 }
 
 .rubrique { display: grid; gap: var(--e-3); }

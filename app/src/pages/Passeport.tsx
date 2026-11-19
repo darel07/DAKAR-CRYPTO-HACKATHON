@@ -197,7 +197,7 @@ export function Passeport() {
       <section className="rubrique" aria-labelledby={idPasseport}>
         <h2 id={idPasseport}>Mon passeport de revenus</h2>
         <Segmented label="Période du passeport" options={PERIODES} valeur={periode} onChange={setPeriode} bloc />
-        <div className="chiffre-cle">
+        <div className="chiffre-cle chiffre-cle--passeport">
           <span className="chiffre-cle__valeur chiffres">{formatFcfa(total)}</span>
           <span className="chiffre-cle__libelle">
             {total === 0

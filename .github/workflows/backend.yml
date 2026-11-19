@@ -37,7 +37,7 @@ jobs:
         working-directory: .
         run: |
           if [ -f app/package.json ]; then
-            (cd app && npm ci && npm run build)
+            (cd app && npm ci && npm test && npm run build)
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "Pas de dossier app/ sur cette branche : étapes Docker ignorées."
@@ -57,6 +57,22 @@ jobs:
           curl -fsS http://localhost:8080/api/taux || echo "Cours indisponible (réseau de la CI) : toléré."
           curl -fsS http://localhost:8080/ | grep -q "<html"
           curl -fsS http://localhost:8080/api/passeports/demo000000 > /dev/null
+
+      # Parcours réels (Playwright) contre la stack Docker : Chrome est préinstallé sur le runner.
+      - name: Parcours navigateur (Playwright, mobile et ordinateur)
+        if: steps.front.outputs.present == 'true'
+        working-directory: app
+        run: npx playwright test
+
+      - name: Rapport Playwright (en cas d'échec)
+        if: failure() && steps.front.outputs.present == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-playwright
+          path: |
+            app/playwright-report
+            app/test-results
+          retention-days: 7
 
       - name: Scan de secrets sur tout l'historique (gitleaks)
         working-directory: .

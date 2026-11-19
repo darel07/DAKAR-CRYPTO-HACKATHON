@@ -328,7 +328,9 @@ Chaque composant : un fichier < 300 lignes, rendu < 30 lignes par fonction, vari
 | 3 | Passeport | `ShieldCheck` | `#/passeport` |
 | 4 | Réglages | `Settings` | `#/reglages` |
 
-**Indicateur liquid glass (reproduction de la vidéo, recoloré en ambre)**
+> **Remplacé le 19 nov. au soir (accord de l'utilisateur, PR #51) : la pièce qui roule.** L'indicateur n'est plus une pastille liquid glass mais une **pièce ambrée de 40 px** sous l'icône de l'onglet actif (tranche crantée, anneau gravé, icône foncée posée dessus, libellé en dessous). Sa position ET sa rotation suivent `--progression` avec la même transition (`--d-roule` 560 ms, `--ease-ressort`) : elle tourne de `--piece-tour` (240°, un pas d'onglet ÷ son rayon) par onglet, donc elle roule sans glisser ; pendant un balayage elle suit le doigt. Les icônes ne tournent plus et ne grossissent plus (la pièce marque l'onglet actif). Mouvement réduit : elle se pose sans rouler. Les spécifications de la pastille et de la rotation des icônes ci-dessous sont historiques.
+
+**Indicateur liquid glass (reproduction de la vidéo, recoloré en ambre) : historique, voir ci-dessus**
 - Pastille derrière l'onglet actif : 68 × 56 px, rayon 28 px.
 - Matière : `linear-gradient(180deg, rgb(242 194 122 / .55), rgb(217 154 69 / .38))`, reflet `radial-gradient(ellipse at 50% 18%, rgb(255 255 255 / .75), transparent 55%)`, lueur `0 0 18px rgb(217 154 69 / .45)`, liseré `inset 0 0 0 1px rgb(255 255 255 / .55)`, ombre intérieure basse `inset 0 -6px 12px rgb(217 154 69 / .25)`. Aucun `backdrop-filter` sur la pastille.
 - **Étirement liquide** (ce que montre la vidéo à 1,8 s et 4,6 s : la pastille devient une capsule qui couvre l'ancien et le nouvel onglet, puis se rétracte) : la pastille est positionnée par deux variables `--bord-gauche` et `--bord-droit`. Au changement d'onglet :

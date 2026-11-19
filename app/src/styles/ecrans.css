@@ -45,33 +45,35 @@
   .dock { background: var(--c-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
-/* Pastille : ses bords gauche et droit sont calés sur l'onglet --ind. Le bord avant (côté
-   destination) arrive en 220 ms, le bord arrière suit en ressort : la capsule s'étire puis se reforme. */
-.dock__indicateur {
+/* Pièce qui roule : sous l'icône de l'onglet actif, une pièce ambrée roule d'un onglet à l'autre.
+   Position ET rotation suivent --progression avec la même transition : elle tourne d'autant qu'elle
+   avance, sans glisser (≈ 85 px par onglet ÷ rayon de 20 px ≈ 240°). Pendant un balayage elle suit
+   le doigt ; au relâchement, elle finit sa course avec le ressort et se balance un peu. */
+.dock__piece {
   --pas: calc((100% - 2 * var(--dock-marge-interne)) / var(--onglets));
-  position: absolute; inset-block: 0; margin-block: auto; height: var(--indicateur-h);
-  left: calc(var(--dock-marge-interne) + (var(--ind, 0) + 0.5) * var(--pas) - var(--indicateur-l) / 2);
-  right: calc(var(--dock-marge-interne) + (var(--onglets) - var(--ind, 0) - 0.5) * var(--pas) - var(--indicateur-l) / 2);
-  border-radius: var(--rayon-rond);
-  background:
-    radial-gradient(ellipse at 50% 18%, var(--c-indicateur-reflet), transparent 55%),
-    linear-gradient(180deg, var(--c-indicateur-haut), var(--c-indicateur-bas));
-  box-shadow: 0 0 18px var(--c-indicateur-lueur), inset 0 0 0 1px var(--c-indicateur-lisere), inset 0 -6px 12px var(--c-indicateur-ombre);
-  pointer-events: none;
+  position: absolute; pointer-events: none;
+  inline-size: var(--piece-dock); block-size: var(--piece-dock); border-radius: 50%;
+  /* Centrée sur l'icône : le contenu de l'onglet (icône, écart, libellé) est centré dans la barre. */
+  inset-block-start: calc((100% - var(--icone) - var(--dock-ecart) - 1.2 * var(--t-nav)) / 2 + (var(--icone) - var(--piece-dock)) / 2);
+  left: calc(var(--dock-marge-interne) + (var(--progression, 0) + 0.5) * var(--pas) - var(--piece-dock) / 2);
+  rotate: calc(var(--progression, 0) * var(--piece-tour));
+  background: radial-gradient(circle at 34% 28%, var(--c-piece-reflet), var(--c-piece) 52%, var(--c-piece-ombre));
+  box-shadow: 0 2px 6px var(--c-piece-portee), inset 0 0 0 1px var(--c-piece-lisere);
 }
-.dock[data-pret] .dock__indicateur {
-  transition:
-    right var(--d-bord-avant) var(--ease-sortie),
-    left var(--d-bord-arriere) var(--ease-ressort) var(--d-bord-retard);
+/* Tranche crantée et anneau gravé : ce sont eux qui montrent que la pièce tourne. */
+.dock__piece::before, .dock__piece::after { content: ""; position: absolute; border-radius: 50%; }
+.dock__piece::before {
+  inset: 0;
+  background: repeating-conic-gradient(var(--c-piece-cran) 0 4deg, transparent 4deg 12deg);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 2.5px));
 }
-.dock[data-pret][data-sens="gauche"] .dock__indicateur {
-  transition:
-    left var(--d-bord-avant) var(--ease-sortie),
-    right var(--d-bord-arriere) var(--ease-ressort) var(--d-bord-retard);
+.dock__piece::after { inset: 6px; border: 1px dashed var(--c-piece-cran); }
+.dock[data-pret] .dock__piece {
+  transition: left var(--d-roule) var(--ease-ressort), rotate var(--d-roule) var(--ease-ressort);
 }
 
 /* Onglet : zone tactile fixe (toute la hauteur, un quart de largeur). Seul son contenu se
-   place sur l'arc, selon sa distance d à --progression (fractionnaire pendant un balayage). */
+   allège (taille, opacité) selon sa distance d à --progression (fractionnaire pendant un balayage). */
 .dock__onglet {
   --d: calc(var(--i) - var(--progression, 0));
   --d-abs: max(var(--d), -1 * var(--d));
@@ -80,18 +82,15 @@
 }
 .dock__onglet:focus-visible { outline-offset: calc(var(--anneau-focus) * -2); border-radius: var(--rayon-rond); }
 .dock__onglet[aria-current="page"] { color: var(--c-onglet-actif); }
-.dock__onglet[data-recouvert] { color: var(--c-onglet-recouvert); }
 @media (hover: hover) {
   .dock__onglet:not([aria-current="page"]):hover { color: var(--c-texte); }
 }
 .dock__contenu {
-  display: grid; justify-items: center; gap: 2px;
+  display: grid; justify-items: center; gap: var(--dock-ecart);
   translate: 0 calc(var(--d) * var(--d) * var(--arc-descente));
-  /* Droites au repos ; rotation de roue pendant le mouvement seulement (§6.2 corrigé le 19 nov.). */
-  rotate: var(--rotation-roue);
   scale: max(var(--arc-echelle-min), var(--arc-echelle-max) - var(--d-abs) * var(--arc-echelle-pas));
-  /* Grandit depuis sa base : tous les libellés restent sur la même ligne (depuis le centre, ils
-     glissaient de 1 px par onglet et la barre paraissait penchée). L'onglet actif dépasse vers le haut. */
+  /* Rétrécit vers sa base : tous les libellés restent sur la même ligne (depuis le centre, ils
+     glissaient de 1 px par onglet et la barre paraissait penchée). */
   transform-origin: 50% 100%;
 }
 .dock__icone {
@@ -100,8 +99,9 @@
   opacity: max(var(--arc-opacite-min), 1 - var(--d-abs) * var(--arc-opacite-pas));
 }
 .dock__libelle { font-size: var(--t-nav); font-weight: 600; line-height: 1.2; }
-/* Onglet actif : icône pleine à 15 %, trait 2,25, libellé 700, remplis quand la pastille arrive. */
-.dock__onglet[aria-current="page"] .dock__icone { fill-opacity: 0.15; stroke-width: 2.25; }
+/* Onglet actif : icône foncée sur la pièce, pleine à 15 %, trait 2,25, libellé 700 ; elle fonce
+   quand la pièce arrive dessous. */
+.dock__onglet[aria-current="page"] .dock__icone { color: var(--c-sur-piece); fill-opacity: 0.15; stroke-width: 2.25; }
 .dock__onglet[aria-current="page"] .dock__libelle { font-weight: 700; }
 /* Flou de mouvement des icônes inactives, pendant un balayage rapide seulement. */
 .dock__onglet:not([aria-current="page"]) .dock__icone { filter: blur(var(--flou, 0px)); }
@@ -110,22 +110,20 @@
 .dock[data-pret] .dock__contenu {
   transition: translate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
 }
-/* Rotation de roue : une seule variable pour toutes les icônes, écrite à chaque image pendant le
-   balayage (sans transition), puis ramenée à 0 avec le ressort quand la roue s'arrête. */
-@property --rotation-roue { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
-.dock[data-pret]:not([data-glisse]) { transition: --rotation-roue var(--d-glisse) var(--ease-ressort); }
 .dock[data-pret] .dock__icone {
   transition:
+    color var(--d-rapide) ease var(--d-remplissage-retard),
     fill-opacity var(--d-apparition) ease var(--d-remplissage-retard),
     stroke-width var(--d-apparition) ease var(--d-remplissage-retard),
     opacity var(--d-glisse) ease, filter var(--d-flou) ease;
 }
-/* Pendant le glissement, l'arc suit le doigt sans retard. */
-.dock[data-glisse] .dock__contenu, .dock[data-glisse] .dock__icone { transition: none; }
+/* Pendant le glissement, la pièce et les onglets suivent le doigt sans retard. */
+.dock[data-glisse] :is(.dock__contenu, .dock__icone, .dock__piece) { transition: none; }
 
-/* Mouvement réduit : ni arc, ni rotation, ni flou (et durées à 0 dans tokens.css). */
+/* Mouvement réduit : la pièce se pose sans rouler, ni taille ni flou (durées à 0 dans tokens.css). */
 @media (prefers-reduced-motion: reduce) {
-  .dock__contenu { translate: none; rotate: none; scale: none; }
+  .dock__contenu { translate: none; scale: none; }
+  .dock__piece { rotate: none; }
   .dock__icone { opacity: 1; }
   .dock__onglet .dock__icone { filter: none; }
 }

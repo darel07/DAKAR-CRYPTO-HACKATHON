@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { RefObject } from "react";
 import { dureeJeton, lireJeton } from "../../lib/animation";
 import { aller } from "../../lib/useRoute";
-import { deplacerIndicateur, ONGLETS, ROUE_GAIN, tournerRoue } from "./BottomNavigation";
+import { deplacerIndicateur, ONGLETS } from "./BottomNavigation";
 
 /** Page voisine affichée pendant un balayage, à côté de la page courante. */
 export interface Voisin {
@@ -74,9 +74,6 @@ export function useBalayage({ actif, flou, chemin, index, page, couche, dock, su
       if (d) {
         d.style.setProperty("--progression", String(index - g.dx / g.largeur));
         if (flou) d.style.setProperty("--flou", `${Math.min(Math.abs(g.vx) * 2, FLOU_MAX)}px`);
-        // Roue : vitesse de --progression en onglets/s (le doigt vers la gauche fait avancer).
-        const vitesse = (-g.vx / g.largeur) * 1000 * (g.voisin ? 1 : RESISTANCE);
-        tournerRoue(d, vitesse * ROUE_GAIN);
       }
     };
 
@@ -94,8 +91,7 @@ export function useBalayage({ actif, flou, chemin, index, page, couche, dock, su
         // L'arc et la pastille rejoignent leur place en même temps que la page (transitions CSS).
         d.removeAttribute("data-glisse");
         d.style.setProperty("--flou", "0px");
-        d.style.setProperty("--rotation-roue", "0deg"); // la roue s'arrête : retour à 0 avec le ressort
-        if (passe) deplacerIndicateur(d, index + geste.sens, { impulsion: false });
+        if (passe) deplacerIndicateur(d, index + geste.sens);
         else d.style.setProperty("--progression", String(index));
       }
       el.removeAttribute("data-glisse");

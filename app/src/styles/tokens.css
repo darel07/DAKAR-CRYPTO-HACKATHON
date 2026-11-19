@@ -41,16 +41,15 @@
   --c-scrim:         rgb(23 38 53 / 0.45);    /* behind sheets and modals */
   --verre-flou:      blur(16px) saturate(1.4);
 
-  /* Navigation dock (§6.2): amber "liquid glass" indicator. */
-  --c-indicateur-haut:   rgb(242 194 122 / 0.55);
-  --c-indicateur-bas:    rgb(217 154 69 / 0.38);
-  --c-indicateur-reflet: rgb(255 255 255 / 0.75);
-  --c-indicateur-lueur:  rgb(217 154 69 / 0.45);
-  --c-indicateur-lisere: rgb(255 255 255 / 0.55);
-  --c-indicateur-ombre:  rgb(217 154 69 / 0.25);
-  --c-onglet-actif:      var(--c-primaire);      /* navy on the light pill: >= 9:1 (scripts/contraste.mjs) */
-  --c-onglet-recouvert:  var(--c-declare-texte); /* amber tint while the pill stretches over a tab (<= 420 ms);
-                                                    dark amber in light, light amber in dark: readable on the glass */
+  /* Navigation dock (§6.2): an amber coin rolls under the active icon. */
+  --c-piece:         #D99A45;
+  --c-piece-reflet:  #F7D9A0;
+  --c-piece-ombre:   #A86E22;
+  --c-piece-cran:    rgb(92 58 12 / 0.38);  /* milled edge and engraved ring: show the roll */
+  --c-piece-lisere:  rgb(255 255 255 / 0.45);
+  --c-piece-portee:  rgb(23 38 53 / 0.25);
+  --c-sur-piece:     #18324A; /* active icon on the coin: 5.43:1 on the face, 3.09:1 on its darkest rim */
+  --c-onglet-actif:  var(--c-primaire); /* active label, on the glass: navy */
   --c-qr-fond:       #FFFFFF; /* QR: black on white in BOTH themes (scanners expect it) */
   --c-qr-module:     #000000;
 
@@ -113,16 +112,17 @@
   --interrupteur-h: 32px;
   --graphe-h: 88px;      /* MiniBarChart bars area */
   --poignee-l: 40px;     /* sheet drag handle */
-  --indicateur-l: 78px;  /* dock pill. FIXED (prompt 68 px): "Passeport" is 67 px wide at the active 1.12 scale */
-  --indicateur-h: 56px;
+  --piece-dock: 40px;    /* rolling coin under the active icon */
+  --piece-tour: 240deg;  /* coin turn per tab: one step (~85 px) / radius (20 px), so it rolls, not slides */
+  --dock-ecart: 8px;     /* icon to label: room for the coin above the label */
   --dock-marge-interne: 4px;
 
-  /* Dock arc (§6.2, softened so every tab stays inside the 72 px bar: 0, 1, 4, 9 px). No tilt at
-     rest: icons only spin while the wheel moves (--rotation-roue, BottomNavigation.tsx). */
+  /* Dock depth (§6.2): distant tabs get slightly smaller and lighter. Icons never tilt: the coin is
+     the wheel. */
   --arc-descente: 0px;      /* x d squared. Flat bar (19 Nov, evening): with the active tab at an end,
                                the one-sided arc read as a tilted bar, a defect */
-  --arc-echelle-max: 1.12;
-  --arc-echelle-pas: 0.07;
+  --arc-echelle-max: 1;    /* the coin marks the active tab: no magnification */
+  --arc-echelle-pas: 0.03;
   --arc-echelle-min: 0.92;
   --arc-opacite-pas: 0.14;
   --arc-opacite-min: 0.72;
@@ -135,10 +135,7 @@
   --d-lente: 420ms;
   --d-revele: 640ms;     /* E4 -> E5: the green circle grows from the paid QR */
   --d-reflet: 1400ms;    /* skeleton shimmer loop (off under reduced motion) */
-  --d-bord-avant: 220ms;   /* dock pill: leading edge */
-  --d-bord-arriere: 380ms; /* dock pill: trailing edge (spring) */
-  --d-bord-retard: 40ms;
-  --d-etirement: 420ms;    /* pill height bump while stretched */
+  --d-roule: 560ms;        /* dock coin roll (spring: it rocks a little as it settles) */
   --d-remplissage-retard: 120ms; /* active icon fills once the pill arrives */
   --d-glisse: 320ms;       /* page swipe release */
   --d-flou: 120ms;         /* motion blur fades out */
@@ -179,15 +176,10 @@
   --c-declare-fond: #3A2A0F; --c-declare-texte: #F5C97E; /* 8.92:1 */
   --c-erreur-fond: #3F1714;  --c-erreur-texte: #FF9E96;  /* 7.87:1 */
 
-  /* Dark: a translucent amber pill over dark glass is a mid tone where neither light nor amber
-     text reaches 3:1. The pill becomes a near-solid amber with dark content, like dark CTAs. */
-  --c-indicateur-haut:   rgb(242 179 92 / 0.94);
-  --c-indicateur-bas:    rgb(217 154 69 / 0.9);
-  --c-indicateur-reflet: rgb(255 255 255 / 0.4);
-  --c-indicateur-lueur:  rgb(242 179 92 / 0.35);
-  --c-indicateur-lisere: rgb(255 255 255 / 0.3);
-  --c-indicateur-ombre:  rgb(138 90 18 / 0.35);
-  --c-onglet-actif:      var(--c-sur-primaire);
+  --c-piece: #F2B35C;  --c-piece-reflet: #FBE1B2;  --c-piece-ombre: #B57A2C;
+  --c-piece-portee: rgb(0 0 0 / 0.45);
+  --c-sur-piece: #101820; /* 9.70:1 on the face, 4.93:1 on its darkest rim */
+  --c-onglet-actif: var(--c-primaire); /* active label on the dark glass: amber */
 
   --c-verre: rgb(23 36 51 / 0.72);
   --c-verre-bord: var(--c-bord);
@@ -214,7 +206,7 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --d-instant: 0ms; --d-rapide: 0ms; --d-apparition: 0ms; --d-normale: 0ms; --d-lente: 0ms; --d-revele: 0ms;
-    --d-bord-avant: 0ms; --d-bord-arriere: 0ms; --d-bord-retard: 0ms; --d-etirement: 0ms;
+    --d-roule: 0ms;
     --d-remplissage-retard: 0ms; --d-glisse: 0ms; --d-flou: 0ms;
     --echelle-appui: 1; --echelle-touche: 1;
   }

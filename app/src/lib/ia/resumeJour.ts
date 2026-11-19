@@ -1,5 +1,6 @@
 import { appelerApi } from "../api";
 import { cleJour, formatFcfa } from "../domain/format";
+import { estProuvee } from "../domain/statut";
 import type { Vente } from "../domain/types";
 
 /** Corps de POST /api/ia/resume : des chiffres agrégés, jamais un libellé de vente complet. */
@@ -50,7 +51,7 @@ export function entreeResume(ventes: Vente[], maintenant = new Date()): EntreeRe
     jour,
     totalFcfa: du.reduce((s, v) => s + v.montantFcfa, 0),
     nbVentes: du.length,
-    totalProuveFcfa: du.filter((v) => v.type === "lightning").reduce((s, v) => s + v.montantFcfa, 0),
+    totalProuveFcfa: du.filter(estProuvee).reduce((s, v) => s + v.montantFcfa, 0),
     meilleureHeure: du.length > 1 ? `${heure}h-${heure + 1}h` : null,
     articlesFrequents: [...frequences].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([a]) => a),
   };

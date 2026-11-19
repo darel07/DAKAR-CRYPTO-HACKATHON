@@ -1,4 +1,5 @@
 import { cleJour } from "./format";
+import { statutVente } from "./statut";
 import type { Vente } from "./types";
 
 export type Periode = "jour" | "semaine" | "mois" | "tout";
@@ -35,8 +36,9 @@ export interface Totaux { prouve: number; nbProuvees: number; declare: number; n
 export function totaux(ventes: Vente[]): Totaux {
   const t: Totaux = { prouve: 0, nbProuvees: 0, declare: 0, nbDeclarees: 0 };
   for (const v of ventes) {
-    if (v.type === "lightning") { t.prouve += v.montantFcfa; t.nbProuvees++; }
-    else { t.declare += v.montantFcfa; t.nbDeclarees++; }
+    const statut = statutVente(v);
+    if (statut === "prouve") { t.prouve += v.montantFcfa; t.nbProuvees++; }
+    else if (statut === "declare") { t.declare += v.montantFcfa; t.nbDeclarees++; }
   }
   return t;
 }
@@ -56,7 +58,7 @@ export function historiqueCsv(ventes: Vente[]): string {
     ...ventes.map((v) => [
       new Date(v.ts * 1000).toISOString(),
       String(v.montantFcfa),
-      v.type === "lightning" ? "prouvee" : "declaree",
+      ({ prouve: "prouvee", demo: "demo", declare: "declaree" } as const)[statutVente(v)],
       cellule(v.libelle),
       v.paymentHash ?? "",
     ].join(";")),

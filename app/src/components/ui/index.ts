@@ -14,6 +14,7 @@ export { MiniBarChart } from "./MiniBarChart";
 export type { JourGraphe } from "./MiniBarChart";
 export { NumericKeypad } from "./NumericKeypad";
 export { OfflineBanner } from "./OfflineBanner";
+export { PastilleVente } from "./PastilleVente";
 export { PaymentQRCode, QrCode } from "./PaymentQRCode";
 export { PaymentStatus } from "./PaymentStatus";
 export type { EtatPaiement } from "./PaymentStatus";

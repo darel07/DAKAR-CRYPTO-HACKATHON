@@ -11,6 +11,8 @@ export interface Vente {
   montantFcfa: number;
   type: TypeVente;
   libelle: string;
+  /** Encaissée en mode démonstration : facture factice, jamais présentée comme prouvée. */
+  demo?: boolean;
   /** Vente déclarée : espèces, Wave ou autre (choisi sur E6). */
   moyen?: MoyenVente;
   /** Présents seulement pour une vente Lightning : preuve de règlement. */

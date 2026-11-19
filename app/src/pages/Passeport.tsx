@@ -200,6 +200,11 @@ export function Passeport() {
               : <>dont {formatFcfa(apercu.prouve)} prouvés ({apercu.nbProuvees}) et {formatFcfa(apercu.declare)} déclarés ({apercu.nbDeclarees})</>}
           </span>
         </div>
+        {apercu.nbDemo > 0 && (
+          <p className="texte-secondaire">
+            {apercu.nbDemo > 1 ? `${apercu.nbDemo} paiements de démonstration ne comptent pas` : "1 paiement de démonstration ne compte pas"} : ils sont simulés.
+          </p>
+        )}
         <p className="texte-secondaire">Plus la part prouvée est grande, plus votre passeport est solide.</p>
         {erreur && <Alert niveau="erreur">{erreur}</Alert>}
         <Button taille="lg" bloc onClick={generer} disabled={total === 0} chargement={generation && "Génération du passeport…"}>

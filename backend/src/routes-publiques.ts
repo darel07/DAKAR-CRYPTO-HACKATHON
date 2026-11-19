@@ -8,6 +8,9 @@ export const ROUTES_PUBLIQUES = [
   "POST /api/ia/resume",
   "POST /api/passeports",
   "GET /api/passeports/:id",
+  "POST /api/recus",
+  "GET /api/recus/:id",
+  "POST /api/recus/:id/confirmation",
 ] as const;
 
 /** Routes techniques exclues de l'inventaire métier (documentation elle-même). */

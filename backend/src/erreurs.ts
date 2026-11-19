@@ -6,6 +6,7 @@ import { z } from "zod";
 export type CodeErreur =
   | "VALIDATION_ERROR"
   | "NOT_FOUND"
+  | "CONFLICT"
   | "PAYLOAD_TOO_LARGE"
   | "RATE_LIMITED"
   | "SERVICE_UNAVAILABLE"
@@ -25,6 +26,7 @@ export class ErreurApp extends Error {
 export const erreurs = {
   validation: (m = "La requête est invalide.") => new ErreurApp("VALIDATION_ERROR", 422, m),
   introuvable: (m = "Ressource introuvable.") => new ErreurApp("NOT_FOUND", 404, m),
+  conflit: (m: string) => new ErreurApp("CONFLICT", 409, m),
   tropGros: (m = "Le contenu envoyé est trop volumineux.") => new ErreurApp("PAYLOAD_TOO_LARGE", 413, m),
   debit: () => new ErreurApp("RATE_LIMITED", 429, "Trop de requêtes. Réessayez dans un instant."),
   indisponible: (m: string) => new ErreurApp("SERVICE_UNAVAILABLE", 503, m),

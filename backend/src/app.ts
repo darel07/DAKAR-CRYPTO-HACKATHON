@@ -13,6 +13,7 @@ import type { Etat } from "./etat.js";
 import { routesIA } from "./ia/routes.js";
 import { optionsJournal } from "./journal.js";
 import { routesPasseports } from "./passeports/routes.js";
+import { routesRecus } from "./recus/routes.js";
 import { routesSante, VERSION } from "./sante/routes.js";
 import { CORPS_MAX_OCTETS, installerSecurite } from "./securite.js";
 import { installerStatique } from "./statique/routes.js";
@@ -59,6 +60,7 @@ export async function construireApp(etat: Etat, options: OptionsApp = {}): Promi
   await app.register(routesTaux(etat.taux));
   await app.register(routesIA(etat.ia));
   await app.register(routesPasseports(etat.passeports));
+  await app.register(routesRecus(etat.recus));
   await installerStatique(app, etat.config.frontDist);
   return app;
 }

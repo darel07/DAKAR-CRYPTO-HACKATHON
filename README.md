@@ -126,6 +126,7 @@ npm install
 cp .env.example .env     # DATABASE_PATH=./caisse.sqlite pour travailler en local
 npm run dev              # http://localhost:8080, documentation sur /api/docs
 npm test                 # tests unitaires, d'abus et de contrat
+npm run essai-ia         # interroge le vrai Claude sur des phrases de marché (clé dans .env)
 ```
 
 ### Routes
@@ -138,8 +139,11 @@ npm test                 # tests unitaires, d'abus et de contrat
 | `POST /api/ia/resume` | Résumé du jour à partir de chiffres agrégés | idem |
 | `POST /api/passeports` | Lien court pour un passeport signé, vérifié avant stockage, 30 jours | 10/h |
 | `GET /api/passeports/:id` | Charge d'un passeport raccourci | 60/min |
+| `POST /api/recus` | Lien court pour un reçu signé par le commerçant (vérifié, 90 jours) | 120/h |
+| `GET /api/recus/:id` | Reçu et, s'il existe, la confirmation signée par le client | 60/min |
+| `POST /api/recus/:id/confirmation` | Le client confirme l'achat (événement Nostr signé par une autre clé que celle du commerçant, une seule fois) | 10/min |
 
-Documentation OpenAPI : `/api/docs` (interface) et `/api/openapi.json`. Erreurs : toujours `{ "error": { "code", "message" } }`, codes `VALIDATION_ERROR`, `NOT_FOUND`, `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`.
+Documentation OpenAPI : `/api/docs` (interface) et `/api/openapi.json`. Erreurs : toujours `{ "error": { "code", "message" } }`, codes `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`, `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`.
 
 ### Variables d'environnement
 
@@ -167,7 +171,7 @@ Toutes facultatives ; voir `backend/.env.example`. Les principales : `ANTHROPIC_
 
 - Un seul réplica : les compteurs de débit, le cache des cours et le nettoyage horaire des passeports expirés vivent dans le processus.
 - SQLite dans un volume : suffisant pour la démo et un pilote, pas pour plusieurs serveurs.
-- L'appel réel à Claude n'a pas encore été testé avec une clé ; les replis le sont.
+- L'appel réel à Claude n'a pas encore été testé avec une clé (`npm run essai-ia`) ; les replis le sont.
 
 ## 5. Architecture
 

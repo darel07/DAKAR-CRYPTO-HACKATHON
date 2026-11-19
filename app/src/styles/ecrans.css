@@ -221,6 +221,47 @@
 @keyframes fond-prouve { from { background-color: var(--c-fond); } }
 .flux--recu h1 { color: var(--c-prouve-texte); }
 .flux--recu h1:focus { outline: none; }
+/* ---- Transitions du parcours d'encaissement (View Transitions, lib/transitions.ts) ----
+   L'écran de caisse de l'Accueil devient le ticket du QR (E3 ↔ E4), puis le montant rejoint le
+   reçu pendant que le vert jaillit du QR payé (E4 → E5). Les noms partagés n'existent
+   que pendant une transition (data-vt sur <html>) : un seul élément par nom, aucune capture le
+   reste du temps. Mouvement réduit : ni nom ni cercle, le navigateur fait un simple fondu. */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-vt="caisse"] :is(.accueil__caisse > .montant, .paiement__ticket) { view-transition-name: ticket; }
+  :root:is([data-vt="caisse"], [data-vt="succes"]) :is(
+    .accueil__caisse .montant__valeur, .paiement__ticket .montant__valeur, .flux--recu > .montant .montant__valeur
+  ) { view-transition-name: montant; }
+
+  /* Le ticket est UNE surface qui change de taille, son contenu (montant, QR, détails du reçu)
+     se fond dedans : le fond est porté par le groupe, pas par les captures. */
+  ::view-transition-group(ticket) {
+    background: var(--c-surface); border-radius: var(--rayon); overflow: clip;
+    animation-duration: var(--d-lente); animation-timing-function: var(--ease-sortie);
+  }
+  ::view-transition-group(montant) { animation-duration: var(--d-lente); animation-timing-function: var(--ease-sortie); }
+  /* L'ancien contenu s'efface vite ; le nouveau (le QR) est lisible dès le premier tiers. */
+  ::view-transition-old(ticket) { animation: vt-efface calc(var(--d-lente) / 2) var(--ease-sortie) both; }
+  ::view-transition-new(ticket) { animation: vt-apparait var(--d-lente) var(--ease-sortie) both; }
+  /* Le reste de l'écran : l'ancien s'efface AVANT que le nouveau n'apparaisse (deux titres en
+     fondu enchaîné se lisent l'un sur l'autre). */
+  :root[data-vt="caisse"]::view-transition-old(root) { animation: vt-efface var(--d-rapide) var(--ease-sortie) both; }
+  :root[data-vt="caisse"]::view-transition-new(root) { animation: vt-apparait var(--d-normale) var(--ease-sortie) var(--d-instant) both; }
+
+  /* Succès : le nouvel écran est révélé par un cercle parti du QR ; l'ancien reste dessous.
+     Seul le montant voyage du ticket au reçu : un QR écrasé dans le petit ticket du reçu brouillait
+     l'image. */
+  :root[data-vt="succes"]::view-transition-old(root) { animation: none; }
+  :root[data-vt="succes"]::view-transition-new(root) { animation: vt-revele var(--d-revele) var(--ease-revele) both; }
+  /* Le cercle apporte déjà le vert : le fondu de fond du reçu ferait arriver un vert délavé. */
+  @supports (view-transition-name: none) { .flux--recu { animation: none; } }
+}
+@keyframes vt-efface { to { opacity: 0; } }
+@keyframes vt-apparait { from { opacity: 0; } }
+@keyframes vt-revele {
+  from { clip-path: circle(0 at var(--vt-x) var(--vt-y)); }
+  to { clip-path: circle(var(--vt-rayon) at var(--vt-x) var(--vt-y)); }
+}
+
 /* Détails du reçu : un ticket (statut, date, référence) posé sur le vert du succès. */
 .recu__details {
   display: grid; justify-items: center; gap: var(--e-2); inline-size: 100%; padding: var(--e-3) var(--e-4);

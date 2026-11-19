@@ -127,6 +127,7 @@
   --d-apparition: 160ms; /* QR code fade-in */
   --d-normale: 240ms;
   --d-lente: 420ms;
+  --d-revele: 640ms;     /* E4 -> E5: the green circle grows from the paid QR */
   --d-reflet: 1400ms;    /* skeleton shimmer loop (off under reduced motion) */
   --d-bord-avant: 220ms;   /* dock pill: leading edge */
   --d-bord-arriere: 380ms; /* dock pill: trailing edge (spring) */
@@ -136,6 +137,7 @@
   --d-glisse: 320ms;       /* page swipe release */
   --d-flou: 120ms;         /* motion blur fades out */
   --ease-sortie: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-revele: cubic-bezier(0.45, 0, 0.2, 1); /* even growth: the circle is seen leaving the QR */
   /* Light spring (~4 % overshoot), no library: */
   --ease-ressort: linear(0, 0.18 7%, 0.6 18%, 0.92 30%, 1.03 42%, 1.04 50%, 1.01 64%, 1);
   --echelle-appui: 0.98;
@@ -200,7 +202,7 @@
 /* ---------- Reduced motion: every duration drops to zero ---------- */
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --d-instant: 0ms; --d-rapide: 0ms; --d-apparition: 0ms; --d-normale: 0ms; --d-lente: 0ms;
+    --d-instant: 0ms; --d-rapide: 0ms; --d-apparition: 0ms; --d-normale: 0ms; --d-lente: 0ms; --d-revele: 0ms;
     --d-bord-avant: 0ms; --d-bord-arriere: 0ms; --d-bord-retard: 0ms; --d-etirement: 0ms;
     --d-remplissage-retard: 0ms; --d-glisse: 0ms; --d-flou: 0ms;
     --echelle-appui: 1; --echelle-touche: 1;

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { transitionner } from "./transitions";
 
 export interface Route {
   chemin: string;
@@ -14,34 +15,36 @@ function lire(): Route {
   return { chemin: `/${premier}`, param: suite[0] ?? null, suite };
 }
 
-/** Routage par hash : le lien du passeport fonctionne sans serveur ni réécriture d'URL. */
-export function useRoute(): Route {
-  const [route, setRoute] = useState<Route>(lire);
-  useEffect(() => {
-    const maj = () => setRoute((r) => {
-      const n = lire();
-      return n.chemin === r.chemin && n.suite.join("/") === r.suite.join("/") ? r : n;
-    });
-    window.addEventListener("hashchange", maj);
-    // Une redirection faite au premier rendu (useLayoutEffect de Bienvenue ou du premier lancement)
-    // a pu changer l'adresse avant cet abonnement : on relit l'adresse une fois abonné.
-    maj();
-    return () => window.removeEventListener("hashchange", maj);
-  }, []);
-  return route;
-}
-
+// Une seule source de vérité pour la route, écoutée dès le chargement du module : tous les
+// écrans changent dans la même mise à jour, ce qui permet de l'envelopper dans une View
+// Transition (lib/transitions.ts). Une redirection faite au premier rendu (Bienvenue, premier
+// lancement) est captée aussi, puisque l'écouteur existe avant tout rendu.
+let routeActuelle = lire();
 // Route quittée en dernier : un écran de flux (E6) revient à l'Accueil par history.back() s'il en
 // vient (pas de doublon dans l'historique), et par remplacement sinon (un lien direct ne doit pas
-// faire quitter l'application). Écouteur posé une fois, au chargement du module.
-let routeCourante = lire().chemin;
+// faire quitter l'application).
 let routePrecedente: string | null = null;
+const abonnes = new Set<() => void>();
+
 window.addEventListener("hashchange", () => {
-  const suivante = lire().chemin;
-  if (suivante === routeCourante) return;
-  routePrecedente = routeCourante;
-  routeCourante = suivante;
+  const n = lire();
+  if (n.chemin === routeActuelle.chemin && n.suite.join("/") === routeActuelle.suite.join("/")) return;
+  const de = routeActuelle.chemin;
+  transitionner(de, n.chemin, () => {
+    if (n.chemin !== de) routePrecedente = de;
+    routeActuelle = n;
+    for (const f of abonnes) f();
+  });
 });
+
+const abonner = (f: () => void) => { abonnes.add(f); return () => { abonnes.delete(f); }; };
+const instantane = () => routeActuelle;
+
+/** Routage par hash : le lien du passeport fonctionne sans serveur ni réécriture d'URL. */
+export function useRoute(): Route {
+  return useSyncExternalStore(abonner, instantane);
+}
+
 export const cheminPrecedent = (): string | null => routePrecedente;
 
 /** Nouvelle entrée d'historique (le retour Android revient à l'écran précédent). */

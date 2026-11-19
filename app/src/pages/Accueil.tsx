@@ -73,8 +73,12 @@ export function Accueil() {
     }
   };
 
+  // Pendant la création, la demande existe déjà mais l'écran du QR arrive : ce n'est pas une
+  // demande « en suspens » (l'alerte apparaîtrait le temps de la transition vers E4).
+  const enSuspens = demande !== null && !creation;
+
   return (
-    <div className={`accueil${!portefeuille || demande ? " accueil--alerte" : ""}`}>
+    <div className={`accueil${!portefeuille || enSuspens ? " accueil--alerte" : ""}`}>
       <header className="accueil__entete">
         {/* Rubans dans le coin haut droit seulement : effacés avant les textes, jamais sous le montant. */}
         <RibbonBackground variante="coin" className="accueil__rubans" />
@@ -94,7 +98,7 @@ export function Accueil() {
         <Alert niveau="info" compact action={<a href="#/reglages">Connecter</a>}>
           Connectez votre portefeuille pour encaisser en Lightning.
         </Alert>
-      ) : demande && (
+      ) : enSuspens && (
         // Quitter E4 sans annuler (deux retours rapides…) ne doit pas faire perdre un paiement
         // que le client est peut-être en train de faire : la demande reste reprenable.
         <Alert niveau="info" compact action={<a href="#/paiement">Reprendre</a>}>

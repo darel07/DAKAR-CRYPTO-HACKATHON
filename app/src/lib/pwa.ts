@@ -23,7 +23,7 @@ export const estIos = (): boolean =>
 
 export const peutInstaller = (): boolean => invitation !== null;
 
-export const CONSIGNE_IOS = "Pour installer : touchez Partager, puis « Sur l'écran d'accueil ».";
+export const CONSIGNE_IOS = "Pour installer : touchez Partager, puis « Sur l'écran d'accueil ».";
 
 /** Ouvre l'invitation du navigateur. Vrai si le commerçant a accepté. */
 export async function installer(): Promise<boolean> {

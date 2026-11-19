@@ -152,12 +152,18 @@
 }
 /* Le pavé et l'action restent en bas, sous le pouce ; le montant se centre dans l'espace libre. */
 .accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
-/* Le montant est l'écran de la caisse : le seul panneau surélevé, qui prend la hauteur libre
-   (plus de vide entre l'en-tête et le pavé), montant centré dedans. */
+/* Surface forte : les deux objets clés du produit, l'afficheur de la caisse et la couverture du
+   passeport. Elle redéfinit localement les couleurs de texte : AmountDisplay et les autres
+   composants posés dessus lisent les mêmes tokens, sans variante à maintenir. */
+.accueil__caisse > .montant, .chiffre-cle.chiffre-cle--passeport, .preteur__periode {
+  background: var(--c-forte); box-shadow: var(--ombre-forte); border-color: transparent; color: var(--c-forte-texte);
+  --c-texte: var(--c-forte-texte); --c-texte-doux: var(--c-forte-doux); --c-erreur-texte: var(--c-forte-erreur);
+}
+/* Le montant est l'écran de la caisse, comme celui d'un terminal de paiement : il prend la hauteur
+   libre entre l'en-tête et le pavé, montant centré dedans. */
 .accueil__caisse > .montant {
   flex: 1; align-content: center; min-block-size: 0;
-  padding: var(--e-4) var(--e-3);
-  background: var(--c-ecran-caisse); border-radius: var(--rayon); box-shadow: var(--ombre-ecran);
+  padding: var(--e-4) var(--e-3); border-radius: var(--rayon);
 }
 .accueil__actions { display: grid; gap: var(--e-1); }
 /* Écrans courts (360 × 740) : tout doit tenir même avec le bandeau hors ligne et une alerte
@@ -296,6 +302,9 @@
 .chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
 .chiffre-cle__valeur { font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 700; }
 .chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
+/* Couverture du passeport : un filet doré en retrait, comme la dorure d'un vrai passeport. La même
+   couverture chez le commerçant (E9) et chez l'agent de microfinance (E12) : le même objet. */
+.chiffre-cle--passeport, .preteur__periode { outline: 1px solid var(--c-dorure); outline-offset: calc(-1 * var(--e-2)); }
 .lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
 .liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
@@ -309,7 +318,7 @@
 .preteur__marque img { border-radius: var(--rayon-s); }
 .preteur__squelettes { display: grid; gap: var(--e-3); }
 /* Un relevé se lit en colonne, aligné à gauche comme le reste du document. */
-.preteur__periode { display: grid; gap: var(--e-1); }
+.preteur__periode { display: grid; gap: var(--e-1); padding: var(--e-5); border-radius: var(--rayon); }
 .preteur__periode > .montant { justify-items: start; text-align: start; }
 .preteur__totaux, .preteur__plafonds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 .preteur__cle { font-weight: 600; }
@@ -319,6 +328,11 @@
   .preteur__imprimer, .toasts, .bandeau-reseau { display: none !important; }
   .coque--libre { max-width: none; padding: 0; gap: var(--e-4); }
   .preteur :is(.stat, .alerte, .rubrique, .preteur__periode) { break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  /* La couverture redevient un cadre sur papier : un aplat bleu nuit boit l'encre et grise mal. */
+  .preteur__periode {
+    background: none; box-shadow: none; outline-color: var(--c-bord); color: inherit;
+    --c-texte: inherit; --c-texte-doux: inherit; --c-erreur-texte: inherit;
+  }
 }
 
 .rubrique { display: grid; gap: var(--e-3); }

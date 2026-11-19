@@ -14,8 +14,9 @@ const MOTIF = /(?<=[\p{L}\p{N}»)%]) ([:;?!])(?=$|[\s"'`»<)])/gu;
 function fichiers(dossier) {
   return readdirSync(dossier).flatMap((nom) => {
     const chemin = join(dossier, nom);
-    if (statSync(chemin).isDirectory()) return fichiers(chemin);
-    return /\.tsx?$/.test(nom) && !nom.endsWith(".d.ts") ? [chemin] : [];
+    // Les tests unitaires ne sont jamais affichés : on n'y touche pas.
+    if (statSync(chemin).isDirectory()) return nom === "__tests__" ? [] : fichiers(chemin);
+    return /\.tsx?$/.test(nom) && !/\.(d|test)\.ts$/.test(nom) ? [chemin] : [];
   });
 }
 

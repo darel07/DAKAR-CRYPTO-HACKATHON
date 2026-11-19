@@ -68,7 +68,7 @@ export function demarrerDemande(demande: DemandePaiement): void {
 export async function creerDemande(portefeuille: Portefeuille, montantFcfa: number, taux: Taux): Promise<DemandePaiement> {
   const sats = fcfaVersSats(montantFcfa, taux);
   const facture = await avecDelai(
-    portefeuille.creerFacture(sats, `Caisse Lightning : ${formatFcfa(montantFcfa)}`),
+    portefeuille.creerFacture(sats, `Caisse Lightning : ${formatFcfa(montantFcfa)}`),
     DELAI_FACTURE_MS,
   );
   const demande = { facture, montantFcfa, sats, creeLe: Math.floor(Date.now() / 1000) };

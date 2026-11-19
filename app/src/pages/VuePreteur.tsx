@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { CircleCheck, Printer, TriangleAlert } from "lucide-react";
 import { Alert, AmountDisplay, Button, Skeleton, StatCard } from "../components/ui";
 import { appelerApi, ErreurApi } from "../lib/api";
-import { formatFcfa } from "../lib/domain/format";
+import { formatNombreSimple } from "../lib/domain/format";
 import { decoder, PART_PLAFOND, verifier } from "../lib/nostr/verification";
 import type { Verification } from "../lib/nostr/verification";
 import { appliquerTheme, lirePreferences } from "../lib/preferences";
@@ -18,7 +18,13 @@ type Etat =
 const ID_VALIDE = /^[0-9A-Za-z]{10}$/;
 const DELAI = 8000;
 const date = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+const jourMois = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
 const dateDe = (s: number) => date.format(new Date(s * 1000));
+/** « Du 20 octobre au 19 novembre 2026 » : l'année n'est écrite qu'une fois si elle ne change pas. */
+const periode = (debut: number, fin: number) => {
+  const memeAnnee = new Date(debut * 1000).getFullYear() === new Date(fin * 1000).getFullYear();
+  return `Du ${memeAnnee ? jourMois.format(new Date(debut * 1000)) : dateDe(debut)} au ${dateDe(fin)}`;
+};
 const pluriel = (n: number, un: string, plusieurs: string) => `${n} ${n > 1 ? plusieurs : un}`;
 
 /** Lien court : la charge est lue sur le serveur (GET /api/passeports/:id), puis vérifiée ici
@@ -91,7 +97,7 @@ export function VuePreteur({ charge = null, id }: VuePreteurProps) {
       )}
       {etat.nom === "expire" && (
         <Alert niveau="erreur" titre="Passeport introuvable">
-          Ce passeport n'existe pas ou a expiré : un lien court reste valable 30 jours. Demandez au commerçant d'en générer un nouveau.
+          Ce passeport n'existe pas ou a expiré : un lien court reste valable 30 jours. Demandez au commerçant d'en générer un nouveau.
         </Alert>
       )}
       {etat.nom === "injoignable" && (
@@ -116,15 +122,15 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
         <AmountDisplay montant={total} taille="secondaire" libelle={`Sur ${v.jours} jours`} />
         {v.contenu && (
           <p className="texte-secondaire">
-            Du {dateDe(v.contenu.debut)} au {dateDe(v.contenu.fin)}, signé le {dateDe(v.contenu.fin)}.
+            {periode(v.contenu.debut, v.contenu.fin)}, signé le {dateDe(v.contenu.fin)}.
             {expireLe ? ` Ce lien expire le ${dateDe(expireLe)}.` : ""}
           </p>
         )}
       </section>
 
       <div className="preteur__totaux">
-        <StatCard ton="prouve" valeur={formatFcfa(v.totalProuve)} libelle="Prouvé" variation={pluriel(v.nbProuvees, "paiement vérifié", "paiements vérifiés")} />
-        <StatCard ton="declare" valeur={formatFcfa(v.totalDeclare)} libelle="Déclaré" variation={pluriel(v.nbDeclarees, "vente", "ventes")} />
+        <StatCard ton="prouve" valeur={formatNombreSimple(v.totalProuve)} unite="FCFA" libelle="Prouvé" variation={pluriel(v.nbProuvees, "paiement vérifié", "paiements vérifiés")} />
+        <StatCard ton="declare" valeur={formatNombreSimple(v.totalDeclare)} unite="FCFA" libelle="Déclaré" variation={pluriel(v.nbDeclarees, "vente", "ventes")} />
       </div>
 
       {v.preuvesRejetees > 0 && (
@@ -140,8 +146,8 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
         <section className="rubrique">
           <h2>Plafond de prêt indicatif</h2>
           <div className="preteur__plafonds">
-            <StatCard valeur={formatFcfa(v.plafondTotal)} libelle={`${Math.round(PART_PLAFOND * 100)} % du flux mensuel estimé`} />
-            <StatCard ton="prouve" valeur={formatFcfa(v.plafondProuve)} libelle="en ne comptant que le prouvé" />
+            <StatCard valeur={formatNombreSimple(v.plafondTotal)} unite="FCFA" libelle={`${Math.round(PART_PLAFOND * 100)} % du flux mensuel estimé`} />
+            <StatCard ton="prouve" valeur={formatNombreSimple(v.plafondProuve)} unite="FCFA" libelle="en ne comptant que le prouvé" />
           </div>
           <Alert niveau="info">Indicatif, non contraignant. La décision de crédit reste la vôtre.</Alert>
         </section>
@@ -155,17 +161,17 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
             <span className="chiffres preteur__cle">{v.auteur.slice(0, 8)}…</span>
           </Point>
           {v.nbProuvees + v.preuvesRejetees === 0
-            ? <Point ok={false}>Aucun paiement Lightning dans ce relevé : rien n'y est prouvé.</Point>
+            ? <Point ok={false}>Aucun paiement Lightning dans ce relevé : rien n'y est prouvé.</Point>
             : v.preuvesRejetees === 0
-              ? <Point ok>Chaque paiement prouvé : la preuve correspond à la demande de paiement.</Point>
+              ? <Point ok>Chaque paiement prouvé : la preuve correspond à la demande de paiement.</Point>
               : <Point ok={false}>
                 {v.preuvesRejetees > 1
                   ? `${v.preuvesRejetees} preuves ne correspondent pas à leur demande de paiement.`
                   : "1 preuve ne correspond pas à sa demande de paiement."}
               </Point>}
           <Point ok={false}>
-            Non vérifié : les ventes déclarées reposent sur la parole du commerçant. Un commerçant peut aussi se
-            payer lui-même : comparez avec ce que vous voyez sur place.
+            Non vérifié : les ventes déclarées reposent sur la parole du commerçant. Un commerçant peut aussi se
+            payer lui-même : comparez avec ce que vous voyez sur place.
           </Point>
         </ul>
       </section>
@@ -182,7 +188,7 @@ function Point({ ok, children }: { ok: boolean; children: ReactNode }) {
   return (
     <li className={ok ? "liste-verif__ok" : "liste-verif__attention"}>
       <Icone aria-hidden="true" />
-      <span><span className="sr-only">{ok ? "Vérifié : " : "Attention : "}</span>{children}</span>
+      <span><span className="sr-only">{ok ? "Vérifié : " : "Attention : "}</span>{children}</span>
     </li>
   );
 }

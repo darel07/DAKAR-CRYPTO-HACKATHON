@@ -79,13 +79,13 @@ export function Accueil() {
         {/* Rubans dans le coin haut droit seulement : effacés avant les textes, jamais sous le montant. */}
         <RibbonBackground variante="coin" className="accueil__rubans" />
         <div className="accueil__salut">
-          <h1>Bonjour !</h1>
+          <h1>Bonjour !</h1>
           <WalletStatus etat={etatWallet} />
         </div>
-        <p className="accueil__question">Prêt à encaisser votre prochaine vente ?</p>
+        <p className="accueil__question">Prêt à encaisser votre prochaine vente ?</p>
         {jour.nombre > 0 && (
           <p className="accueil__jour">
-            Aujourd'hui : {jour.nombre} {jour.nombre > 1 ? "ventes" : "vente"} · <span className="chiffres">{formatFcfa(jour.total)}</span>
+            Aujourd'hui : {jour.nombre} {jour.nombre > 1 ? "ventes" : "vente"} · <span className="chiffres">{formatFcfa(jour.total)}</span>
           </p>
         )}
       </header>
@@ -104,7 +104,7 @@ export function Accueil() {
 
       <section className="accueil__caisse" aria-label="Caisse">
         <AmountDisplay
-          libelle="Quel montant souhaitez-vous encaisser ?"
+          libelle="Quel montant souhaitez-vous encaisser ?"
           montant={montant}
           sats={satsVisibles && taux ? (montant > 0 ? fcfaVersSats(montant, taux) : 0) : null}
           cours={taux}

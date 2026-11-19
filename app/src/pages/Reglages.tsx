@@ -104,14 +104,14 @@ function RestaurationCle({ ouvert, onFermer }: { ouvert: boolean; onFermer(): vo
     if (!ok) { setErreur("Ces 12 mots ne forment pas une clé valide. Vérifiez l'orthographe et l'ordre."); return; }
     modifierPreferences({ cleSauvegardee: true });
     fermer();
-    afficherToast("Clé restaurée : votre identité de signature est rétablie.");
+    afficherToast("Clé restaurée : votre identité de signature est rétablie.");
   };
 
   const complets = mots.every((m) => m.trim());
   return (
     <Sheet ouvert={ouvert} onFermer={fermer} titre="Restaurer avec mes 12 mots">
       <form className="reglages__formulaire" onSubmit={restaurer}>
-        <p>Écrivez vos 12 mots dans l'ordre. La clé actuelle de ce téléphone sera remplacée ; les passeports déjà envoyés restent valables.</p>
+        <p>Écrivez vos 12 mots dans l'ordre. La clé actuelle de ce téléphone sera remplacée ; les passeports déjà envoyés restent valables.</p>
         <ol className="mots">
           {mots.map((m, i) => (
             <li key={i} className="mots__mot">
@@ -167,9 +167,9 @@ export function Reglages() {
         <Ligne icone={<Wallet />} libelle="État"><WalletStatus etat={etat} /></Ligne>
         <p className="reglages__aide">
           {nwc
-            ? "La caisse peut seulement créer des demandes de paiement : elle ne peut jamais dépenser votre argent."
+            ? "La caisse peut seulement créer des demandes de paiement : elle ne peut jamais dépenser votre argent."
             : demo
-              ? "Les paiements sont simulés : rien n'est encaissé. Connectez votre portefeuille pour encaisser pour de vrai."
+              ? "Les paiements sont simulés : rien n'est encaissé. Connectez votre portefeuille pour encaisser pour de vrai."
               : "Connectez votre portefeuille pour encaisser en Lightning."}
         </p>
         <div className="reglages__bouton">
@@ -225,7 +225,7 @@ export function Reglages() {
       <Groupe titre="Données">
         <Ligne
           icone={<Download />} libelle="Exporter l'historique" desactivee={ventes.length === 0}
-          onClick={() => afficherToast(`Historique exporté : ${telechargerHistorique(ventes)}`)}
+          onClick={() => afficherToast(`Historique exporté : ${telechargerHistorique(ventes)}`)}
         />
         <div className="reglages__bouton">
           <Button variante="danger" bloc icone={<Trash2 aria-hidden="true" />} disabled={ventes.length === 0} onClick={() => setEffacement(true)}>
@@ -243,7 +243,7 @@ export function Reglages() {
       <RestaurationCle ouvert={restauration} onFermer={() => setRestauration(false)} />
       <Confirmation
         ouvert={deconnexion}
-        titre="Déconnecter votre portefeuille ?"
+        titre="Déconnecter votre portefeuille ?"
         confirmer="Déconnecter"
         danger
         onConfirmer={() => { deconnecter(); setDeconnexion(false); afficherToast("Portefeuille déconnecté."); }}
@@ -253,7 +253,7 @@ export function Reglages() {
       </Confirmation>
       <Confirmation
         ouvert={effacement}
-        titre={`Effacer ${ventes.length > 1 ? `${ventes.length} ventes` : "1 vente"} de ce téléphone ?`}
+        titre={`Effacer ${ventes.length > 1 ? `${ventes.length} ventes` : "1 vente"} de ce téléphone ?`}
         confirmer={`Effacer ${ventes.length > 1 ? `${ventes.length} ventes` : "1 vente"}`}
         danger
         onConfirmer={() => { supprimerToutes(); setEffacement(false); afficherToast("Ventes effacées."); }}

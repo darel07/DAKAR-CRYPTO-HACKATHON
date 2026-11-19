@@ -63,7 +63,7 @@ export function resumeLocal(e: EntreeResume): string {
   const preuve = e.totalProuveFcfa === 0 ? "."
     : e.totalProuveFcfa === e.totalFcfa ? `, ${e.nbVentes > 1 ? "toutes prouvées" : "prouvée"}.`
     : `, dont ${formatFcfa(e.totalProuveFcfa)} prouvés.`;
-  const heure = e.meilleureHeure ? ` Votre meilleure heure : ${e.meilleureHeure}.` : "";
+  const heure = e.meilleureHeure ? ` Votre meilleure heure : ${e.meilleureHeure}.` : "";
   return `Aujourd'hui, ${ventes} pour ${formatFcfa(e.totalFcfa)}${preuve}${heure}`;
 }
 

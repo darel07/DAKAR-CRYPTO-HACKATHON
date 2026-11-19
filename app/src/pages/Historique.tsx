@@ -5,7 +5,7 @@ import {
 } from "../components/ui";
 import { PERIODES, filtrerPeriode, periodeParDefaut, telechargerHistorique, totaux } from "../lib/domain/historique";
 import type { Periode } from "../lib/domain/historique";
-import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/format";
+import { formatDateHeure, formatNombreSimple, referenceCourte } from "../lib/domain/format";
 import { statutVente } from "../lib/domain/statut";
 import type { MoyenVente, Vente } from "../lib/domain/types";
 import { chargerExemple, useVentes } from "../lib/domain/ventesStore";
@@ -17,7 +17,7 @@ const MOYENS: Record<MoyenVente, string> = { especes: "Espèces", wave: "Wave", 
 const nombreVentes = (n: number) => (n === 0 ? "Aucune vente" : n === 1 ? "1 vente" : `${n} ventes`);
 
 function telecharger(ventes: Vente[]) {
-  afficherToast(`Historique exporté : ${telechargerHistorique(ventes)}`);
+  afficherToast(`Historique exporté : ${telechargerHistorique(ventes)}`);
 }
 
 /** E8 : détail d'une vente, en feuille du bas sur l'historique. */
@@ -57,10 +57,10 @@ function DetailVente({ vente, onFermer }: { vente: Vente | null; onFermer(): voi
           </dl>
           <p className="texte-secondaire">
             {prouvee
-              ? "Paiement confirmé par votre portefeuille : la preuve peut être vérifiée par un agent de microfinance."
+              ? "Paiement confirmé par votre portefeuille : la preuve peut être vérifiée par un agent de microfinance."
               : statut === "demo"
-                ? "Paiement simulé en mode démonstration : il ne compte pas comme preuve."
-                : "Vente notée à la main : elle compte moins qu'un paiement prouvé."}
+                ? "Paiement simulé en mode démonstration : il ne compte pas comme preuve."
+                : "Vente notée à la main : elle compte moins qu'un paiement prouvé."}
           </p>
         </>
       )}
@@ -118,8 +118,8 @@ export function Historique() {
       </header>
       <Segmented label="Période" options={PERIODES} valeur={periode} onChange={setPeriode} />
       <div className="historique__totaux">
-        <StatCard ton="prouve" valeur={formatFcfa(t.prouve)} libelle="Prouvé" variation={nombreVentes(t.nbProuvees)} />
-        <StatCard ton="declare" valeur={formatFcfa(t.declare)} libelle="Déclaré" variation={nombreVentes(t.nbDeclarees)} />
+        <StatCard ton="prouve" valeur={formatNombreSimple(t.prouve)} unite="FCFA" libelle="Prouvé" variation={nombreVentes(t.nbProuvees)} />
+        <StatCard ton="declare" valeur={formatNombreSimple(t.declare)} unite="FCFA" libelle="Déclaré" variation={nombreVentes(t.nbDeclarees)} />
       </div>
       {affichees.length === 0 ? (
         <EmptyState titre="Aucune vente sur cette période." />

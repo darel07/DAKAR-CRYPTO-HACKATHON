@@ -38,7 +38,7 @@ export function PaiementRecu() {
     if (!premiereVisite()) return;
     navigator.vibrate?.(200);
     // La région live existe déjà (vide) : son remplissage est annoncé par le lecteur d'écran.
-    setAnnonce(`Paiement reçu avec succès ! ${formatFcfa(recu.vente.montantFcfa)}`);
+    setAnnonce(`Paiement reçu avec succès ! ${formatFcfa(recu.vente.montantFcfa)}`);
   }, [recu]);
 
   if (!recu) return null;
@@ -56,7 +56,7 @@ export function PaiementRecu() {
       catch (e) { if (e instanceof DOMException && e.name === "AbortError") return; }
     }
     const ok = await copierTexte(texte);
-    afficherToast(ok ? "Reçu copié : collez-le dans un message au client" : "Copie impossible sur ce téléphone.", { niveau: ok ? "info" : "erreur" });
+    afficherToast(ok ? "Reçu copié : collez-le dans un message au client" : "Copie impossible sur ce téléphone.", { niveau: ok ? "info" : "erreur" });
   };
 
   return (
@@ -64,7 +64,7 @@ export function PaiementRecu() {
       <p className="sr-only" role="status">{annonce}</p>
       <CoinFcfa mode={revisite ? "fixe" : "entree"} />
       <header className="flux__entete flux__entete--centre">
-        <h1 ref={titre} tabIndex={-1}>Paiement reçu !</h1>
+        <h1 ref={titre} tabIndex={-1}>Paiement reçu !</h1>
         <p>Votre vente a été confirmée avec succès.</p>
       </header>
       <AmountDisplay montant={vente.montantFcfa} sats={satsVisibles ? sats : null} taille="secondaire" />

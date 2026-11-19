@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { ExternalLink, Wand } from "lucide-react";
-import { Alert, Button, Field, LienBouton, afficherToast } from "../components/ui";
+import { ExternalLink } from "lucide-react";
+import { Alert, BoutonRetour, Button, Field, LienBouton, afficherToast } from "../components/ui";
 import { useWallet } from "../lib/lightning/WalletContext";
 import { ALBY_HUB, creerConnexionAlby, ErreurWallet, testerNwc } from "../lib/lightning/portefeuille";
 import type { ConnexionTestee } from "../lib/lightning/portefeuille";
@@ -80,20 +80,21 @@ export function Connexion() {
   const occupe = etat.nom === "verification";
   return (
     <div className="flux connexion">
+      <BoutonRetour vers="/reglages" />
       <header className="flux__entete">
         <h1 ref={titre} tabIndex={-1}>Connecter mon portefeuille</h1>
-        <p>Votre portefeuille reçoit l'argent. La caisse peut seulement créer des demandes de paiement : elle ne peut jamais dépenser.</p>
+        <p>Votre portefeuille reçoit l'argent. La caisse peut seulement créer des demandes de paiement : elle ne peut jamais dépenser.</p>
       </header>
 
       <section className="carte connexion__etape" aria-labelledby="etape-1">
         <h2 id="etape-1" className="carte__titre"><span className="connexion__numero">1</span> Créer la connexion</h2>
-        <Button bloc icone={<Wand aria-hidden="true" />} onClick={automatique} chargement={auto === "attente" && "Ouverture d'Alby Hub…"} disabled={occupe}>
+        <Button bloc onClick={automatique} chargement={auto === "attente" && "Ouverture d'Alby Hub…"} disabled={occupe}>
           Créer la connexion automatiquement
         </Button>
         {auto === "echec" && (
           <p className="texte-secondaire" role="status">La création automatique n'a pas abouti. Faites-le à la main, puis collez le lien ci-dessous.</p>
         )}
-        <p>Ou : ouvrez Alby Hub, créez une connexion d'application et copiez le lien.</p>
+        <p>Ou : ouvrez Alby Hub, créez une connexion d'application et copiez le lien.</p>
         <LienBouton variante="secondaire" bloc href={ALBY_HUB} target="_blank" rel="noopener" icone={<ExternalLink aria-hidden="true" />}>
           Ouvrir Alby Hub
         </LienBouton>

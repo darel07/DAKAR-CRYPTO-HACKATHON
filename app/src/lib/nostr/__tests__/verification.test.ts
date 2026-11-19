@@ -1,6 +1,6 @@
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { sha256 } from "@noble/hashes/sha2.js";
-import { finalizeEvent, generateSecretKey } from "nostr-tools/pure";
+import { finalizeEvent, generateSecretKey, getPublicKey } from "nostr-tools/pure";
 import { describe, expect, it, vi } from "vitest";
 import type { ReferenceCours } from "../controleMontants";
 
@@ -18,13 +18,25 @@ const hash = bytesToHex(sha256(Uint8Array.from(Buffer.from(preimage, "hex"))));
 const ts = Date.UTC(2026, 10, 18, 14) / 1000;
 const ref: ReferenceCours = { niveau: "jour", parJour: new Map([["2026-11-18", 40_000_000]]) };
 
+const cleCommercant = generateSecretKey();
+const commercant = getPublicKey(cleCommercant);
+
 function passeport(lignes: unknown[]) {
   const contenu = { v: 1, devise: "XOF", debut: ts - 30 * 86_400, fin: ts + 60, lignes };
   return finalizeEvent(
     { kind: 30078, created_at: ts + 60, tags: [["d", "passeport-revenus"]], content: JSON.stringify(contenu) },
-    generateSecretKey(),
+    cleCommercant,
   );
 }
+
+function confirmation(options: { cle?: Uint8Array; h?: string; p?: string } = {}) {
+  return finalizeEvent(
+    { kind: 30078, created_at: ts, tags: [["d", `confirmation:${options.h ?? hash}`], ["p", options.p ?? commercant]], content: "" },
+    options.cle ?? generateSecretKey(),
+  );
+}
+
+const ligne = (c?: unknown) => [ts, 4_000, "L", `lnbc-10000000-${hash}`, preimage, ...(c ? [c] : [])];
 
 describe("vérification d'un passeport par le prêteur", () => {
   it("paiement de 10 000 sats déclaré 4 000 FCFA : prouvé", () => {
@@ -46,5 +58,23 @@ describe("vérification d'un passeport par le prêteur", () => {
   it("ventes déclarées inchangées", () => {
     const v = verifier(passeport([[ts, 15_000, "D"]]), ref);
     expect(v).toMatchObject({ totalDeclare: 15_000, nbDeclarees: 1 });
+  });
+
+  it("contresignatures : valides comptées, clients distincts", () => {
+    const client = generateSecretKey();
+    const v = verifier(passeport([ligne(confirmation({ cle: client })), ligne(confirmation({ cle: client })), ligne(confirmation())]), ref);
+    expect(v).toMatchObject({ nbProuvees: 3, nbContresignees: 3, clientsDistincts: 2 });
+  });
+
+  it("contresignatures refusées : par le commerçant, autre paiement, autre commerçant, altérée", () => {
+    const alteree = { ...confirmation(), content: "modifié" };
+    const v = verifier(passeport([
+      ligne(confirmation({ cle: cleCommercant })),
+      ligne(confirmation({ h: "ab".repeat(32) })),
+      ligne(confirmation({ p: "f".repeat(64) })),
+      ligne(alteree),
+      ligne("pas un événement"),
+    ]), ref);
+    expect(v).toMatchObject({ nbProuvees: 5, nbContresignees: 0, clientsDistincts: 0 });
   });
 });

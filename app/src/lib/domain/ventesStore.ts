@@ -30,6 +30,15 @@ export function ajouterVente(v: Omit<Vente, "id" | "ts"> & { ts?: number }): Ven
   return vente;
 }
 
+/** Complète une vente existante (reçu déposé, confirmation du client). Sans effet si elle a disparu. */
+export function mettreAJourVente(id: string, complement: Partial<Pick<Vente, "recuId" | "confirmation">>): void {
+  if (!ventes.some((v) => v.id === id)) return;
+  emettre(ventes.map((v) => (v.id === id ? { ...v, ...complement } : v)));
+}
+
+/** Lecture ponctuelle hors React (après une mise à jour asynchrone). */
+export const lireVentes = (): Vente[] => ventes;
+
 export function supprimerToutes() { emettre([]); }
 
 export function useVentes(): Vente[] {

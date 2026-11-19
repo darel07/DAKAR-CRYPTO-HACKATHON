@@ -435,3 +435,8 @@ button.reglage { cursor: pointer; }
   border: 1px dashed var(--c-bord-champ); border-radius: var(--rayon-rond); background: var(--c-surface); color: var(--c-texte-doux); cursor: help;
 }
 .declarer__micro svg { inline-size: var(--icone-s); block-size: var(--icone-s); }
+
+/* ---------- Reçu client (#18) : feuille d'envoi sur E5 et page E13 ouverte par le client ---------- */
+.feuille-recu { display: grid; gap: var(--e-3); text-align: center; }
+.feuille-recu__qr { display: grid; justify-items: center; }
+.recu-client__ticket { justify-items: start; }

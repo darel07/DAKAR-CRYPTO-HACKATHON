@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
 import { CoinFcfa } from "../components/signature/CoinFcfa";
 import { AmountDisplay, Button, LienBouton, PastilleVente, afficherToast } from "../components/ui";
@@ -7,6 +7,9 @@ import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/form
 import { usePreferences } from "../lib/preferences";
 import { copierTexte } from "../lib/pressePapiers";
 import { sortirDuFlux, useSortieSi } from "../lib/useRoute";
+
+// Feuille du reçu à confirmer : chargée seulement quand le commerçant l'ouvre (budget JS §3.2).
+const FeuilleRecu = lazy(() => import("../components/recu/FeuilleRecu").then((m) => ({ default: m.FeuilleRecu })));
 
 const dejaVu = (): boolean => Boolean((history.state as { vu?: boolean } | null)?.vu);
 
@@ -27,6 +30,7 @@ export function PaiementRecu() {
   const titre = useRef<HTMLHeadingElement>(null);
   const [annonce, setAnnonce] = useState("");
   const [revisite] = useState(dejaVu);
+  const [feuilleRecu, setFeuilleRecu] = useState(false);
 
   // Rechargée (le reçu ne vit qu'en mémoire) : retour à l'Accueil.
   const [ouvertSansRecu] = useState(() => recu === null);
@@ -45,7 +49,8 @@ export function PaiementRecu() {
   const { vente, sats } = recu;
   const reference = vente.paymentHash ? referenceCourte(vente.paymentHash) : null;
 
-  const envoyerRecu = async () => {
+  /** Repli sans serveur : reçu en texte (partage ou copie), que le client ne peut pas confirmer. */
+  const envoyerRecuTexte = async () => {
     const texte = [
       "Reçu Caisse Lightning",
       `${formatFcfa(vente.montantFcfa)} payés le ${formatDateHeure(vente.ts)}`,
@@ -76,10 +81,16 @@ export function PaiementRecu() {
       <div className="flux__actions">
         <Button taille="lg" bloc onClick={sortirDuFlux}>Nouvelle vente</Button>
         <LienBouton variante="secondaire" bloc href="#/ventes">Voir l'historique</LienBouton>
-        <Button variante="discret" bloc icone={<Share2 aria-hidden="true" />} onClick={envoyerRecu}>
+        <Button variante="discret" bloc icone={<Share2 aria-hidden="true" />} onClick={() => setFeuilleRecu(true)}>
           Envoyer un reçu au client
         </Button>
       </div>
+      {feuilleRecu && (
+        <Suspense fallback={null}>
+          <FeuilleRecu vente={vente} ouvert onFermer={() => setFeuilleRecu(false)}
+            onRecuTexte={() => { setFeuilleRecu(false); void envoyerRecuTexte(); }} />
+        </Suspense>
+      )}
     </div>
   );
 }

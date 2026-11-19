@@ -6,9 +6,10 @@ import {
 import { activite, apercuPasseport, semaine } from "../lib/domain/activite";
 import { formatDateHeure, formatFcfa, formatNombreSimple } from "../lib/domain/format";
 import type { Vente } from "../lib/domain/types";
-import { useVentes } from "../lib/domain/ventesStore";
+import { lireVentes, useVentes } from "../lib/domain/ventesStore";
 import { entreeResume, resumerJour } from "../lib/ia/resumeJour";
-import { construireContenu, encoder, signerPasseport } from "../lib/nostr/passeport";
+import { clePublique, construireContenu, encoder, signerPasseport } from "../lib/nostr/passeport";
+import { recupererConfirmations } from "../lib/nostr/recu";
 import { lienPasseport } from "../lib/nostr/passeportCourt";
 import type { LienPasseport } from "../lib/nostr/passeportCourt";
 import { usePreferences } from "../lib/preferences";
@@ -126,12 +127,16 @@ export function Passeport() {
   const jours = useMemo(() => semaine(ventes), [ventes]);
   const apercu = useMemo(() => apercuPasseport(ventes, Number(periode)), [ventes, periode]);
   const total = apercu.prouve + apercu.declare;
+  const confirmees = useMemo(() => ventes.filter((v) => v.confirmation && !v.demo).length, [ventes]);
 
   const generer = async () => {
     setErreur(null);
     setGeneration(true);
     try {
-      const contenu = construireContenu(ventes, Number(periode));
+      // Confirmations des clients arrivées depuis l'envoi des reçus (8 s au plus, sinon on signe
+      // sans elles) : elles partent dans les lignes du passeport et le prêteur les revérifie.
+      await recupererConfirmations(clePublique(), AbortSignal.timeout(8000)).catch(() => 0);
+      const contenu = construireContenu(lireVentes(), Number(periode));
       const charge = await encoder(signerPasseport(contenu));
       const l = await lienPasseport(charge);
       setGenereLe(contenu.fin);
@@ -205,6 +210,11 @@ export function Passeport() {
             {apercu.nbDemo > 1
               ? `${apercu.nbDemo} paiements de démonstration ne comptent pas : ils sont simulés.`
               : "1 paiement de démonstration ne compte pas : il est simulé."}
+          </p>
+        )}
+        {confirmees > 0 && (
+          <p className="texte-secondaire">
+            {confirmees > 1 ? `${confirmees} ventes confirmées par vos clients.` : "1 vente confirmée par un client."}
           </p>
         )}
         <p className="texte-secondaire">Plus la part prouvée est grande, plus votre passeport est solide.</p>

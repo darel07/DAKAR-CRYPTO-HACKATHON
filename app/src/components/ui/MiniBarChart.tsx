@@ -13,7 +13,7 @@ export interface JourGraphe {
 
 function resumer(jours: JourGraphe[]): string {
   const meilleur = jours.reduce<JourGraphe | null>((m, j) => (!m || j.valeur > m.valeur ? j : m), null);
-  if (!meilleur || meilleur.valeur <= 0) return "Ventes des 7 derniers jours : aucune vente";
+  if (!meilleur || meilleur.valeur <= 0) return "Ventes des 7 derniers jours : aucune vente";
   return `Ventes des 7 derniers jours, maximum ${meilleur.long} : ${formatFcfa(meilleur.valeur)}`;
 }
 

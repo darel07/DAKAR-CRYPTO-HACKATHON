@@ -185,7 +185,34 @@
 .flux__entete { display: grid; gap: var(--e-2); }
 .flux__entete p { color: var(--c-texte-doux); }
 .flux__actions { display: grid; gap: var(--e-2); width: 100%; margin-block-start: auto; }
-.paiement__qr { display: grid; justify-items: center; width: 100%; }
+/* E4 : le QR et le montant forment un ticket de caisse, le même que le reçu E5. Le pointillé
+   sépare ce qu'on scanne de ce qu'on vérifie. */
+.paiement__ticket {
+  display: grid; justify-items: center; inline-size: min(100%, calc(var(--qr) + 2 * var(--e-4)));
+  padding: var(--e-4) var(--e-4) var(--e-3);
+  background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
+}
+.paiement__ticket > .montant {
+  inline-size: 100%; margin-block-start: var(--e-3); padding-block-start: var(--e-3);
+  border-block-start: 2px dashed var(--c-bord);
+}
+/* Demande expirée : le QR ne doit plus pouvoir être scanné. Pâlir ne suffit pas (un appareil
+   photo lit un QR à faible contraste) : il est flouté. Le montant reste lisible pour recréer. */
+.paiement__ticket .qr-code { transition: filter var(--d-normale) var(--ease-sortie), opacity var(--d-normale) var(--ease-sortie); }
+.paiement__ticket[data-etat="expire"] .qr-code { filter: blur(var(--flou-perime)); opacity: 0.35; }
+/* Le délai s'aligne sous le texte du statut, pas sous l'anneau. */
+.paiement__suivi { display: grid; justify-items: start; gap: var(--e-1); text-align: start; }
+.paiement__suivi > .compte { padding-inline-start: calc(var(--icone) + var(--e-2)); }
+/* Comme la pièce d'E5 : ticket et statut centrés dans la hauteur libre, actions en bas. */
+.flux--paiement > .paiement__ticket { margin-block-start: auto; }
+@media (max-height: 740px) {
+  .flux--paiement { gap: var(--e-3); padding-block: calc(env(safe-area-inset-top) + var(--e-4)) calc(env(safe-area-inset-bottom) + var(--e-4)); }
+  .flux--paiement .flux__entete { gap: var(--e-1); }
+}
+@media (max-height: 680px) {
+  .paiement__ticket { padding: var(--e-3) var(--e-3) var(--e-2); }
+  .paiement__ticket > .montant { margin-block-start: var(--e-2); padding-block-start: var(--e-2); }
+}
 /* Seul le fond passe au vert en fondu : le montant est lisible dès la première image. Pleine largeur. */
 .flux--recu {
   max-width: none; padding-inline: max(var(--gouttiere), (100% - var(--largeur-app)) / 2);
@@ -216,7 +243,7 @@
 .total__libelle { font-size: var(--t-secondaire); font-weight: 700; }
 
 /* E7 : deux StatCard côte à côte (Prouvé, Déclaré). */
-.historique__totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.historique__totaux { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 /* E8 : détail d'une vente dans la feuille. */
 .detail__libelle { font-size: var(--t-sous-titre); font-weight: 600; text-align: center; overflow-wrap: anywhere; }
 .detail__lignes { display: grid; gap: var(--e-2); margin: 0; }
@@ -240,8 +267,10 @@
 .preteur__marque { display: flex; align-items: center; gap: var(--e-2); font-family: var(--f-titre); font-weight: 700; color: var(--c-primaire); }
 .preteur__marque img { border-radius: var(--rayon-s); }
 .preteur__squelettes { display: grid; gap: var(--e-3); }
-.preteur__periode { display: grid; gap: var(--e-1); justify-items: center; text-align: center; }
-.preteur__totaux, .preteur__plafonds { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+/* Un relevé se lit en colonne, aligné à gauche comme le reste du document. */
+.preteur__periode { display: grid; gap: var(--e-1); }
+.preteur__periode > .montant { justify-items: start; text-align: start; }
+.preteur__totaux, .preteur__plafonds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 .preteur__cle { font-weight: 600; }
 
 @media print {
@@ -253,7 +282,7 @@
 
 .rubrique { display: grid; gap: var(--e-3); }
 /* E9 : 4 StatCard en 2 × 2, carte « Résumé du jour », mentions de la feuille « Passeport signé ». */
-.passeport__stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.passeport__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 .carte { display: grid; gap: var(--e-2); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
 /* Résumé du jour : un liseré ambre le distingue des chiffres (liseré = usage d'accent permis, §4.2). */
 .resume { border-inline-start: 4px solid var(--c-ambre); }
@@ -276,7 +305,7 @@
 .apercu-bloc > h2 { padding-block-end: var(--e-2); border-block-end: 1px solid var(--c-bord); }
 .apercu-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
 .apercu-centre { display: grid; justify-items: center; }
-.apercu-grille { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.apercu-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); }
 .apercu-nuancier { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: var(--e-2); font-size: var(--t-secondaire); }
 .apercu-nuancier li { display: flex; align-items: center; gap: var(--e-2); }
 .apercu-nuancier__pastille { flex: none; width: var(--e-6); height: var(--e-6); border-radius: var(--rayon-s); background: var(--nuance); border: 1px solid var(--c-bord); }
@@ -303,9 +332,12 @@
 .reglages__groupe { display: grid; gap: var(--e-2); }
 .reglages__carte {
   display: grid; padding-inline: var(--e-4);
-  background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon);
+  background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
 }
-.reglages__carte > * + * { border-block-start: 1px solid var(--c-bord); }
+/* Filet entre les lignes. Le second sélecteur l'emporte sur la remise à zéro « border: 0 » de
+   .reglage (même spécificité, déclarée plus bas) : sans lui, seules les lignes qui ne sont pas des
+   .reglage avaient leur filet. */
+.reglages__carte > * + *, .reglages__carte > * + .reglage { border-block-start: 1px solid var(--c-bord); }
 .reglages__carte > .reglages__aide { border-block-start: 0; padding-block: 0 var(--e-3); }
 .reglages__aide { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
 .reglages__bouton, .reglages__champ { padding-block: var(--e-3); }
@@ -379,15 +411,18 @@ button.reglage { cursor: pointer; }
 
 /* ---- E1 Connexion du portefeuille ---- */
 .connexion { align-items: stretch; text-align: start; }
+/* Le retour remonte dans la marge du haut : il appartient à l'en-tête, pas au contenu. */
+:is(.flux, .declarer) > .retour:first-child { margin-block: calc(-1 * var(--e-3)) calc(-1 * var(--e-2)); }
 .connexion h1:focus { outline: none; }
 .connexion__etape { gap: var(--e-3); }
 .connexion__numero {
   display: inline-grid; place-items: center; inline-size: var(--e-5); block-size: var(--e-5); margin-inline-end: var(--e-2);
   border-radius: var(--rayon-rond); background: var(--c-primaire); color: var(--c-sur-primaire); font-size: var(--t-secondaire);
 }
-/* « Créer la connexion automatiquement » ne tient pas sur une ligne à 390 px : il passe à la ligne. */
+/* « Créer la connexion automatiquement » tient sur une ligne à 390 px (sans icône) ; plus étroit,
+   il passe sur deux lignes équilibrées. */
 .connexion__etape > * { min-inline-size: 0; }
-.connexion__etape .btn { white-space: normal; text-align: center; block-size: auto; min-block-size: var(--bouton-md); padding-block: var(--e-2); }
+.connexion__etape .btn { white-space: normal; text-align: center; text-wrap: balance; block-size: auto; min-block-size: var(--bouton-md); padding-block: var(--e-2); }
 
 /* ---- E6 Vente en espèces ou Wave ---- */
 .declarer, .declarer__saisie, .declarer__proposition { display: grid; gap: var(--e-4); }

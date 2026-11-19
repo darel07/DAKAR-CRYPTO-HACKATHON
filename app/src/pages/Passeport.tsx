@@ -4,7 +4,7 @@ import {
   Alert, Button, EmptyState, MiniBarChart, QrCode, Segmented, Sheet, Skeleton, StatCard, afficherToast,
 } from "../components/ui";
 import { activite, apercuPasseport, semaine } from "../lib/domain/activite";
-import { formatDateHeure, formatFcfa } from "../lib/domain/format";
+import { formatDateHeure, formatFcfa, formatNombreSimple } from "../lib/domain/format";
 import type { Vente } from "../lib/domain/types";
 import { useVentes } from "../lib/domain/ventesStore";
 import { entreeResume, resumerJour } from "../lib/ia/resumeJour";
@@ -73,7 +73,7 @@ function PasseportSigne({ lien, genereLe, onFermer }: { lien: LienPasseport | nu
   const partager = async () => {
     if (!l) return;
     try {
-      await navigator.share({ title: "Mon passeport de revenus", text: "Voici mon passeport de revenus, signé et vérifiable :", url: l.url });
+      await navigator.share({ title: "Mon passeport de revenus", text: "Voici mon passeport de revenus, signé et vérifiable :", url: l.url });
     } catch (e) {
       if (!(e instanceof DOMException && e.name === "AbortError")) void copier();
     }
@@ -158,7 +158,7 @@ export function Passeport() {
         </header>
         {rappel}
         <EmptyState titre="Pas encore de ventes">
-          Enregistrez quelques ventes : votre passeport se construit à partir d'elles.
+          Enregistrez quelques ventes : votre passeport se construit à partir d'elles.
         </EmptyState>
       </>
     );
@@ -175,12 +175,12 @@ export function Passeport() {
       <section className="rubrique" aria-labelledby={idActivite}>
         <h2 id={idActivite}>Mon activité</h2>
         <div className="passeport__stats">
-          <StatCard valeur={formatFcfa(stats.total)} libelle="Ventes sur 30 jours" />
+          <StatCard valeur={formatNombreSimple(stats.total)} unite="FCFA" libelle="Ventes sur 30 jours" />
           <StatCard valeur={String(stats.nombre)} libelle="Nombre de ventes" variation="sur 30 jours" />
-          <StatCard valeur={formatFcfa(stats.panierMoyen)} libelle="Panier moyen" />
+          <StatCard valeur={formatNombreSimple(stats.panierMoyen)} unite="FCFA" libelle="Panier moyen" />
           <StatCard
             ton="prouve"
-            valeur={stats.partProuvee === null ? "—" : `${Math.round(stats.partProuvee * 100)} %`}
+            valeur={`${Math.round((stats.partProuvee ?? 0) * 100)} %`}
             libelle="Part prouvée"
           />
         </div>
@@ -202,7 +202,9 @@ export function Passeport() {
         </div>
         {apercu.nbDemo > 0 && (
           <p className="texte-secondaire">
-            {apercu.nbDemo > 1 ? `${apercu.nbDemo} paiements de démonstration ne comptent pas` : "1 paiement de démonstration ne compte pas"} : ils sont simulés.
+            {apercu.nbDemo > 1
+              ? `${apercu.nbDemo} paiements de démonstration ne comptent pas : ils sont simulés.`
+              : "1 paiement de démonstration ne compte pas : il est simulé."}
           </p>
         )}
         <p className="texte-secondaire">Plus la part prouvée est grande, plus votre passeport est solide.</p>

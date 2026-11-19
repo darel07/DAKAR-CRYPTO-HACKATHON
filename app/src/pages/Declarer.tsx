@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Mic } from "lucide-react";
-import { Badge, Button, Field, Segmented, afficherToast } from "../components/ui";
+import { Badge, BoutonRetour, Button, Field, Segmented, afficherToast } from "../components/ui";
 import { formatFcfa } from "../lib/domain/format";
 import type { MoyenVente } from "../lib/domain/types";
 import { ajouterVente } from "../lib/domain/ventesStore";
@@ -15,7 +15,7 @@ const MOYENS = [
   { valeur: "autre", libelle: "Autre" },
 ] as const;
 const MONTANT_MAX = 10_000_000;
-const SANS_MONTANT = "Je n'ai pas trouvé de montant. Exemple : 2 sacs de riz, 15 000";
+const SANS_MONTANT = "Je n'ai pas trouvé de montant. Exemple : 2 sacs de riz, 15 000";
 
 interface Proposition { libelle: string; montant: string; confiance: Confiance; parIa: boolean }
 
@@ -90,17 +90,18 @@ export function Declarer() {
 
   return (
     <div className="declarer">
+      <BoutonRetour vers="/" />
       <header className="page-titre">
         <h1>Vente en espèces ou Wave</h1>
         <p>Écrivez la vente comme vous la diriez.</p>
       </header>
       <form className="declarer__saisie" onSubmit={analyser}>
         <div className="declarer__ligne">
-          <Field label="Que s'est-il vendu ?" aide="Exemple : 2 sacs de riz, 15 000" value={texte} maxLength={120} autoComplete="off"
+          <Field label="Que s'est-il vendu ?" aide="Exemple : 2 sacs de riz, 15 000" value={texte} maxLength={120} autoComplete="off"
             onChange={(e) => { setTexte(e.target.value); setErreur(null); }} erreur={erreur} />
           {/* Bonus annoncé, pas encore branché : un vrai bouton (focusable) qui le dit, plutôt qu'une infobulle. */}
-          <button type="button" className="declarer__micro" aria-disabled="true" aria-label="Dictée en wolof : bientôt"
-            onClick={() => afficherToast("Bientôt : dictée en wolof")}>
+          <button type="button" className="declarer__micro" aria-disabled="true" aria-label="Dictée en wolof : bientôt"
+            onClick={() => afficherToast("Bientôt : dictée en wolof")}>
             <Mic aria-hidden="true" />
           </button>
         </div>

@@ -91,17 +91,24 @@ export function Paiement() {
   const continuer = () => { setAnnulation(false); poserGarde(); };
 
   return (
-    <div className="flux">
+    <div className="flux flux--paiement">
       <header className="flux__entete">
         <h1>Faire payer le client</h1>
         <p>Présentez ce QR code à votre client pour qu'il puisse payer.</p>
       </header>
-      {portefeuille?.mode === "demo" && <Badge ton="ambre">Mode démonstration : le paiement sera simulé</Badge>}
+      {portefeuille?.mode === "demo" && <Badge ton="ambre">Mode démonstration : le paiement sera simulé</Badge>}
 
-      <div className="paiement__qr"><PaymentQRCode facture={affichee.facture.bolt11} /></div>
-      <AmountDisplay montant={affichee.montantFcfa} sats={satsVisibles ? affichee.sats : null} taille="secondaire" />
-      {etatAffiche === "attente" && <Countdown expireLe={affichee.facture.expireLe} onExpire={() => setEtat("expire")} />}
-      <PaymentStatus etat={etatAffiche} debut={affichee.creeLe} expireLe={affichee.facture.expireLe} />
+      {/* Un ticket de caisse : le client vérifie le montant sur la surface même qu'il scanne. */}
+      <section className="paiement__ticket" data-etat={etatAffiche} aria-label="Demande de paiement">
+        <PaymentQRCode facture={affichee.facture.bolt11} />
+        <AmountDisplay montant={affichee.montantFcfa} sats={satsVisibles ? affichee.sats : null} taille="secondaire" />
+      </section>
+      {/* Statut puis délai sur un seul bloc. Le compte à rebours reste hors de la région role=status
+          (il serait sinon annoncé à chaque seconde). */}
+      <div className="paiement__suivi">
+        <PaymentStatus etat={etatAffiche} debut={affichee.creeLe} expireLe={affichee.facture.expireLe} />
+        {etatAffiche === "attente" && <Countdown expireLe={affichee.facture.expireLe} onExpire={() => setEtat("expire")} />}
+      </div>
 
       <div className="flux__actions">
         {etatAffiche === "expire" && (
@@ -119,7 +126,7 @@ export function Paiement() {
       </div>
 
       <Confirmation
-        ouvert={annulation} titre="Annuler cette demande de paiement ?"
+        ouvert={annulation} titre="Annuler cette demande de paiement ?"
         confirmer="Annuler la demande" annuler="Continuer à attendre" danger
         onConfirmer={annuler} onAnnuler={continuer}
       >

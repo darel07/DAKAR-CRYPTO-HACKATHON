@@ -2,6 +2,7 @@ export { Alert } from "./Alert";
 export type { NiveauAlerte } from "./Alert";
 export { AmountDisplay } from "./AmountDisplay";
 export { Badge } from "./Badge";
+export { BoutonRetour } from "./BoutonRetour";
 export type { TonBadge } from "./Badge";
 export { Button, LienBouton } from "./Button";
 export type { TailleBouton, VarianteBouton } from "./Button";

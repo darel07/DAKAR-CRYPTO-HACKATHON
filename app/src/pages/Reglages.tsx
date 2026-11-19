@@ -10,7 +10,8 @@ import type { EtatPortefeuille } from "../components/ui";
 import { formatFcfa } from "../lib/domain/format";
 import { telechargerHistorique } from "../lib/domain/historique";
 import { supprimerToutes, useVentes } from "../lib/domain/ventesStore";
-import { ErreurWallet, useWallet } from "../lib/lightning/WalletContext";
+import { useWallet } from "../lib/lightning/WalletContext";
+import { aller } from "../lib/useRoute";
 import { NOMBRE_MOTS, restaurerDepuisMots } from "../lib/nostr/mots";
 import { clePublique } from "../lib/nostr/passeport";
 import { modifierPreferences, PLAFOND_MAX, usePreferences } from "../lib/preferences";
@@ -73,41 +74,6 @@ function Groupe({ titre, children }: { titre: string; children: ReactNode }) {
       <h2 id={id}>{titre}</h2>
       <div className="reglages__carte">{children}</div>
     </section>
-  );
-}
-
-/** Lien de connexion (en attendant l'écran Connexion E1 de l'issue #6). */
-function ConnexionPortefeuille({ ouvert, onFermer }: { ouvert: boolean; onFermer(): void }) {
-  const { connecter } = useWallet();
-  const [lien, setLien] = useState("");
-  const [erreur, setErreur] = useState<string | null>(null);
-
-  const brancher = (e: FormEvent) => {
-    e.preventDefault();
-    setErreur(null);
-    try {
-      connecter(lien);
-      setLien("");
-      onFermer();
-      afficherToast("Votre portefeuille est connecté.");
-    } catch (err) {
-      setErreur(err instanceof ErreurWallet ? err.message : "Connexion impossible.");
-    }
-  };
-
-  return (
-    <Sheet ouvert={ouvert} onFermer={onFermer} titre="Connecter mon portefeuille">
-      <form className="reglages__formulaire" onSubmit={brancher}>
-        <p>Votre portefeuille reçoit l'argent. La caisse peut seulement créer des demandes de paiement : elle ne peut jamais dépenser.</p>
-        <Field
-          label="Lien de connexion"
-          aide="Il commence par nostr+walletconnect:// et reste sur ce téléphone."
-          type="password" revelable autoComplete="off" spellCheck={false}
-          value={lien} onChange={(e) => setLien(e.target.value)} erreur={erreur}
-        />
-        <Button type="submit" bloc disabled={!lien.trim()} data-autofocus>Connecter mon portefeuille</Button>
-      </form>
-    </Sheet>
   );
 }
 
@@ -174,7 +140,6 @@ export function Reglages() {
   const { portefeuille, activerDemo, deconnecter } = useWallet();
   const prefs = usePreferences();
   const ventes = useVentes();
-  const [connexion, setConnexion] = useState(false);
   const [restauration, setRestauration] = useState(false);
   const [deconnexion, setDeconnexion] = useState(false);
   const [effacement, setEffacement] = useState(false);
@@ -210,7 +175,7 @@ export function Reglages() {
         <div className="reglages__bouton">
           {nwc
             ? <Button variante="secondaire" bloc onClick={() => setDeconnexion(true)}>Déconnecter</Button>
-            : <Button bloc onClick={() => setConnexion(true)}>Connecter mon portefeuille</Button>}
+            : <Button bloc onClick={() => aller("/connexion")}>Connecter mon portefeuille</Button>}
         </div>
         <Switch
           icone={<FlaskConical />}
@@ -275,7 +240,6 @@ export function Reglages() {
         <Ligne icone={<ShieldCheck />} libelle="Projet du Dakar Bitcoin Hack 2026" />
       </Groupe>
 
-      <ConnexionPortefeuille ouvert={connexion} onFermer={() => setConnexion(false)} />
       <RestaurationCle ouvert={restauration} onFermer={() => setRestauration(false)} />
       <Confirmation
         ouvert={deconnexion}

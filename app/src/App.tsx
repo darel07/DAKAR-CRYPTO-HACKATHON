@@ -1,10 +1,13 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 import { WalletProvider } from "./lib/lightning/WalletContext";
-import { useRoute } from "./lib/useRoute";
+import { remplacer, useRoute } from "./lib/useRoute";
+import { preferencesEnregistrees } from "./lib/preferences";
 import { Coque } from "./components/layout/Coque";
 import { ToastRegion } from "./components/ui";
 import { Accueil } from "./pages/Accueil";
+import { Bienvenue } from "./pages/Bienvenue";
+import { Connexion } from "./pages/Connexion";
 import { Declarer } from "./pages/Declarer";
 import { Historique } from "./pages/Historique";
 import { Paiement } from "./pages/Paiement";
@@ -28,6 +31,23 @@ function pageDeCoque(chemin: string): ReactNode {
   }
 }
 
+/** Première ouverture (§7) : aucune préférence enregistrée. Un téléphone qui a déjà un
+ *  portefeuille, le mode démonstration ou des ventes n'est pas renvoyé vers Bienvenue. */
+function premiereOuverture(): boolean {
+  if (preferencesEnregistrees()) return false;
+  try {
+    const ventes = localStorage.getItem("passeport.ventes.v1");
+    return !localStorage.getItem("passeport.nwc.v1") && !localStorage.getItem("passeport.demo.v1") && (!ventes || ventes === "[]");
+  } catch {
+    return true;
+  }
+}
+
+function Redirection({ vers }: { vers: string }) {
+  useLayoutEffect(() => { remplacer(vers); }, [vers]);
+  return null;
+}
+
 function Ecran() {
   const { chemin, param, suite } = useRoute();
 
@@ -42,6 +62,11 @@ function Ecran() {
     );
   }
   if (chemin === "/apercu-design-system") return <Suspense fallback={null}><ApercuDesignSystem /></Suspense>;
+
+  // Installation : Bienvenue (première ouverture) et Connexion du portefeuille, sans barre.
+  if (chemin === "/bienvenue") return <Bienvenue />;
+  if (chemin === "/connexion") return <Connexion />;
+  if (premiereOuverture()) return <Redirection vers="/bienvenue" />;
 
   // Écrans de flux : sans barre de navigation (§6.2).
   if (chemin === "/paiement") return <Paiement />;

@@ -12,6 +12,8 @@ const CLE_DEMO = "passeport.demo.v1";
 interface Contexte {
   portefeuille: Portefeuille | null;
   connecter(url: string): void;
+  /** Adopte une connexion déjà ouverte et testée (E1). */
+  adopter(portefeuille: Portefeuille, url: string): void;
   activerDemo(): void;
   deconnecter(): void;
 }
@@ -54,6 +56,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     portefeuille,
     connecter(url) {
       const p = ouvrirNwc(url); // lève ErreurWallet si le lien est invalide
+      ecrire(CLE, url.trim());
+      ecrire(CLE_DEMO, null);
+      remplacer(p);
+    },
+    adopter(p, url) {
       ecrire(CLE, url.trim());
       ecrire(CLE_DEMO, null);
       remplacer(p);

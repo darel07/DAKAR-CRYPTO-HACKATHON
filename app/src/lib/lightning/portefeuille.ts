@@ -28,6 +28,20 @@ export interface Portefeuille {
   fermer(): void;
 }
 
+/** Méthodes NIP-47 qui font sortir de l'argent : la caisse n'en a jamais besoin. */
+const METHODES_DEPENSE = ["pay_invoice", "pay_keysend", "multi_pay_invoice", "multi_pay_keysend"];
+/** Permissions minimales demandées à la création automatique. */
+const METHODES_CAISSE = ["make_invoice", "lookup_invoice", "get_info"] as const;
+/** Alby Hub (cloud) : page de création d'une connexion d'application. */
+export const ALBY_HUB = "https://my.albyhub.com";
+const DELAI_TEST_MS = 8000;
+
+export interface ConnexionTestee {
+  portefeuille: Portefeuille;
+  /** Le portefeuille accepte aussi des paiements sortants : avertir le commerçant. */
+  peutDepenser: boolean;
+}
+
 const INTERVALLE_MS = 2000;
 
 function pause(ms: number, signal: AbortSignal): Promise<void> {
@@ -37,13 +51,52 @@ function pause(ms: number, signal: AbortSignal): Promise<void> {
   });
 }
 
-export function ouvrirNwc(urlConnexion: string): Portefeuille {
-  let client: NWCClient;
+function clientNwc(urlConnexion: string): NWCClient {
   try {
-    client = new NWCClient({ nostrWalletConnectUrl: urlConnexion.trim() });
+    return new NWCClient({ nostrWalletConnectUrl: urlConnexion.trim() });
   } catch (e) {
     throw new ErreurWallet("Ce lien de connexion n'est pas valide. Copiez-le à nouveau depuis votre portefeuille.", e);
   }
+}
+
+/** E1 : ouvre la connexion et la teste (get_info, 8 s au plus) avant de l'adopter.
+ *  Le lien n'est ni journalisé ni envoyé à un serveur : il ne sert qu'à parler au portefeuille. */
+export async function testerNwc(urlConnexion: string): Promise<ConnexionTestee> {
+  const client = clientNwc(urlConnexion);
+  let minuteur = 0;
+  try {
+    const infos = await Promise.race([
+      client.getInfo(),
+      new Promise<never>((_, rejeter) => { minuteur = window.setTimeout(() => rejeter(new Error("délai dépassé")), DELAI_TEST_MS); }),
+    ]);
+    const methodes: readonly string[] = Array.isArray(infos.methods) ? infos.methods : [];
+    return { portefeuille: depuisClient(client), peutDepenser: methodes.some((m) => METHODES_DEPENSE.includes(m)) };
+  } catch (e) {
+    client.close();
+    throw new ErreurWallet("Impossible de contacter votre portefeuille.", e);
+  } finally {
+    window.clearTimeout(minuteur);
+  }
+}
+
+/** « Créer la connexion automatiquement » : Alby Hub s'ouvre dans une fenêtre, le commerçant
+ *  accepte une connexion limitée à la réception, et le lien revient sans copier-coller. */
+export async function creerConnexionAlby(): Promise<string> {
+  const client = await NWCClient.fromAuthorizationUrl(`${ALBY_HUB}/apps/new`, {
+    name: "Caisse Lightning",
+    requestMethods: [...METHODES_CAISSE],
+    notificationTypes: ["payment_received"],
+  });
+  const url = client.getNostrWalletConnectUrl(true);
+  client.close();
+  return url;
+}
+
+export function ouvrirNwc(urlConnexion: string): Portefeuille {
+  return depuisClient(clientNwc(urlConnexion));
+}
+
+function depuisClient(client: NWCClient): Portefeuille {
   return {
     mode: "nwc",
     async creerFacture(sats, description) {

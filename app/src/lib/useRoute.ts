@@ -18,8 +18,14 @@ function lire(): Route {
 export function useRoute(): Route {
   const [route, setRoute] = useState<Route>(lire);
   useEffect(() => {
-    const maj = () => setRoute(lire());
+    const maj = () => setRoute((r) => {
+      const n = lire();
+      return n.chemin === r.chemin && n.suite.join("/") === r.suite.join("/") ? r : n;
+    });
     window.addEventListener("hashchange", maj);
+    // Une redirection faite au premier rendu (useLayoutEffect de Bienvenue ou du premier lancement)
+    // a pu changer l'adresse avant cet abonnement : on relit l'adresse une fois abonné.
+    maj();
     return () => window.removeEventListener("hashchange", maj);
   }, []);
   return route;

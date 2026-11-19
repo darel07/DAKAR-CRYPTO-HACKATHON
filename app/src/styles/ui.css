@@ -159,6 +159,18 @@
 .statut-wallet--injoignable { background: var(--c-erreur-fond); border-color: transparent; color: var(--c-erreur-texte); }
 .statut-wallet--injoignable .statut-wallet__point { background: var(--c-erreur-texte); }
 
+/* ---------- BoutonRetour ---------- */
+/* Texte aligné sur la gouttière (la flèche déborde à gauche), cible de 48 px. */
+.retour {
+  justify-self: start; align-self: start; display: inline-flex; align-items: center; gap: var(--e-1);
+  min-block-size: var(--cible-min); padding-inline: var(--e-1) var(--e-3); margin-inline-start: calc(-1 * var(--e-2));
+  background: none; border: 0; border-radius: var(--rayon-s);
+  font: inherit; font-weight: 600; color: var(--c-primaire); cursor: pointer;
+  transition: background-color var(--d-rapide) var(--ease-sortie);
+}
+.retour:active { background: var(--c-surface-h); }
+.retour svg { width: var(--icone); height: var(--icone); stroke-width: var(--trait); }
+
 /* ---------- QR code ---------- */
 .qr-code {
   display: block; width: min(100%, var(--qr)); height: auto; aspect-ratio: 1;
@@ -193,7 +205,7 @@
 .transaction {
   display: grid; grid-template-columns: 1fr auto; gap: var(--e-1) var(--e-3); align-items: center;
   padding: var(--e-3) var(--e-4); min-height: var(--cible-min);
-  background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon);
+  background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
   color: var(--c-texte); text-decoration: none;
 }
 .transaction--lien { transition: background-color var(--d-rapide) var(--ease-sortie); }
@@ -210,17 +222,32 @@
   padding-block: var(--e-2); background: var(--c-fond);
   font-family: var(--f-texte); font-size: var(--t-secondaire); font-weight: 600; color: var(--c-texte-doux);
 }
-.transactions__liste { display: grid; gap: var(--e-2); }
+/* Les ventes d'un jour forment UNE surface (liste groupée), séparées par un filet qui part du
+   texte : une carte par ligne empilait des ombres et faisait du bruit. */
+.transactions__liste {
+  display: grid; overflow: hidden;
+  background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
+}
+.transactions__liste > li + li::before { content: ""; display: block; block-size: 1px; margin-inline-start: var(--e-4); background: var(--c-bord); }
+.transactions__liste .transaction { border: 0; border-radius: 0; box-shadow: none; background: none; }
+.transactions__liste .transaction--lien:active { background: var(--c-surface-h); }
+@media (hover: hover) { .transactions__liste .transaction--lien:hover { background: var(--c-surface-h); } }
+/* La surface coupe ce qui dépasse : l'anneau de focus passe à l'intérieur de la ligne. */
+.transactions__liste .transaction:focus-visible { outline-offset: calc(var(--anneau-focus) * -1); }
 
 /* ---------- StatCard ---------- */
+/* Conteneur : la taille du chiffre suit la largeur de la carte (19cqi = 24 px sur une carte de
+   158 px, la plus étroite à 360 px), pour qu'un grand montant ne fasse jamais déborder la page. */
 .stat {
+  container-type: inline-size;
   display: grid; gap: var(--e-1); align-content: start; padding: var(--e-4);
   background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
 }
 .stat__valeur {
-  font-size: var(--t-stat); font-weight: 700; line-height: 1.2; color: var(--c-texte);
+  font-size: min(var(--t-stat), 19cqi); font-weight: 700; line-height: 1.2; color: var(--c-texte);
   animation: apparition var(--d-rapide) var(--ease-sortie);
 }
+.stat__unite { font-size: 0.6em; font-weight: 600; white-space: nowrap; }
 .stat__libelle { font-size: var(--t-secondaire); font-weight: 600; color: var(--c-texte); }
 .stat__variation { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
 .stat--prouve { background: var(--c-prouve-fond); border-color: transparent; box-shadow: none; }
@@ -253,6 +280,34 @@
   scrollbar-width: none;
 }
 .segments::-webkit-scrollbar { display: none; }
+/* La barre de défilement est masquée : un fondu au bord est le seul indice qu'il reste des options
+   (« Toutes les ventes » à 390 px). Chaque fondu n'apparaît que s'il reste du contenu de ce côté,
+   piloté par le défilement du groupe lui-même ; rien quand tout tient. */
+@property --fondu-debut { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --fondu-fin { syntax: "<length>"; inherits: false; initial-value: 0px; }
+.segments {
+  --fondu: var(--e-6);
+  scroll-padding-inline: var(--fondu);
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to right, black, transparent) 0 0 / var(--fondu-debut, 0px) 100% no-repeat no-clip,
+    linear-gradient(to right, transparent, black) 100% 0 / var(--fondu-fin, 0px) 100% no-repeat no-clip;
+}
+@supports (animation-timeline: scroll()) {
+  .segments {
+    animation: segments-fondu-debut linear both, segments-fondu-fin linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: 0 var(--fondu), calc(100% - var(--fondu)) 100%;
+  }
+}
+@keyframes segments-fondu-debut { to { --fondu-debut: var(--fondu); } }
+@keyframes segments-fondu-fin { from { --fondu-fin: var(--fondu); } }
+/* Sans animations liées au défilement (iOS 18 et avant) : attributs posés par Segmented.tsx. */
+@supports not (animation-timeline: scroll()) {
+  .segments { transition: --fondu-debut var(--d-rapide) var(--ease-sortie), --fondu-fin var(--d-rapide) var(--ease-sortie); }
+  .segments[data-plus-debut] { --fondu-debut: var(--fondu); }
+  .segments[data-plus-fin] { --fondu-fin: var(--fondu); }
+}
 .segments__option {
   flex: none; min-height: var(--cible-min); padding: 0 var(--e-4);
   background: transparent; border: 0; border-radius: var(--rayon-rond);

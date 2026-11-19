@@ -68,7 +68,7 @@ export default function ApercuDesignSystem() {
         <p className="apercu-typo apercu-typo--ecran">Titre d'écran 28</p>
         <p className="apercu-typo apercu-typo--section">Titre de section 20</p>
         <p className="apercu-typo apercu-typo--sous-titre">Sous-titre 16</p>
-        <p>Texte courant 15 : une caisse simple, rapide et pensée pour les petits commerces.</p>
+        <p>Texte courant 15 : une caisse simple, rapide et pensée pour les petits commerces.</p>
         <p className="texte-secondaire">Texte secondaire 13, jamais plus petit.</p>
       </Bloc>
 
@@ -84,7 +84,7 @@ export default function ApercuDesignSystem() {
       </Bloc>
 
       <Bloc titre="Champs">
-        <Field label="Que s'est-il vendu ?" aide="Exemple : 2 sacs de riz, 15 000" maxLength={120} />
+        <Field label="Que s'est-il vendu ?" aide="Exemple : 2 sacs de riz, 15 000" maxLength={120} />
         <Field label="Montant en FCFA" inputMode="numeric" defaultValue="0" erreur="Veuillez saisir un montant valide." />
         <Field label="Lien de connexion" revelable autoComplete="off" value={lien} onChange={(e) => setLien(e.target.value)}
           aide="Il commence par nostr+walletconnect:// et reste sur ce téléphone." />
@@ -93,10 +93,10 @@ export default function ApercuDesignSystem() {
       </Bloc>
 
       <Bloc titre="Montant et pavé">
-        <AmountDisplay montant={0} sats={0} libelle="Quel montant souhaitez-vous encaisser ?" />
+        <AmountDisplay montant={0} sats={0} libelle="Quel montant souhaitez-vous encaisser ?" />
         <AmountDisplay
           montant={montant} sats={Math.round(montant * 1.515)} cours={{ majLe: maintenant - 120, enCache: false }}
-          libelle="Quel montant souhaitez-vous encaisser ?"
+          libelle="Quel montant souhaitez-vous encaisser ?"
           message={depasse ? "Montant supérieur à votre plafond. Modifiez-le dans Réglages." : null}
         />
         <NumericKeypad
@@ -132,7 +132,7 @@ export default function ApercuDesignSystem() {
 
       <Bloc titre="Statistiques">
         <div className="apercu-grille">
-          <StatCard valeur="187 400 FCFA" libelle="Ventes sur 30 jours" variation="+12 % sur 7 jours" />
+          <StatCard valeur="187 400" unite="FCFA" libelle="Ventes sur 30 jours" variation="+12 % sur 7 jours" />
           <StatCard valeur="62 %" libelle="Part prouvée" />
           <StatCard valeur="8" libelle="Prouvé" ton="prouve" />
           <StatCard valeur="13" libelle="Déclaré" ton="declare" />
@@ -174,7 +174,7 @@ export default function ApercuDesignSystem() {
           <div className="apercu-rangee"><Badge ton="prouve">Prouvé</Badge><span className="texte-secondaire">18 nov. 2026 à 14:35 · Réf. 3f9a…c21</span></div>
           <p className="texte-doux">Glissez la poignée vers le bas, touchez le voile ou appuyez sur Échap pour fermer.</p>
         </Sheet>
-        <Confirmation ouvert={confirmation} titre="Effacer 21 ventes de ce téléphone ?" confirmer="Effacer 21 ventes" danger
+        <Confirmation ouvert={confirmation} titre="Effacer 21 ventes de ce téléphone ?" confirmer="Effacer 21 ventes" danger
           onConfirmer={() => setConfirmation(false)} onAnnuler={() => setConfirmation(false)}>
           <p>Cette action est définitive. Exportez votre historique avant si vous voulez le garder.</p>
         </Confirmation>
@@ -212,8 +212,8 @@ export default function ApercuDesignSystem() {
           <figure>
             <div className="apercu-rubans__entete">
               <RibbonBackground variante="coin" enPause={rubansEnPause} className="apercu-rubans__coin" />
-              <p className="apercu-typo apercu-typo--ecran">Bonjour !</p>
-              <p className="texte-doux">Prêt à encaisser votre prochaine vente ?</p>
+              <p className="apercu-typo apercu-typo--ecran">Bonjour !</p>
+              <p className="texte-doux">Prêt à encaisser votre prochaine vente ?</p>
             </div>
             <figcaption>Coin de l'en-tête (Accueil)</figcaption>
           </figure>

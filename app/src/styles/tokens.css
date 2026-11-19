@@ -102,6 +102,7 @@
   --icone-s: 20px;
   --trait: 1.75;        /* Lucide stroke width everywhere */
   --qr: 280px;
+  --flou-perime: 6px;   /* expired QR: blurred past what a phone camera can still decode */
   --anneau-focus: 3px;
   --interrupteur-l: 52px;
   --interrupteur-h: 32px;
@@ -149,7 +150,7 @@
 
 /* Very short screens (360 x 640): 48 px keys (still >= the 48 dp touch minimum), smaller display. */
 @media (max-height: 680px) {
-  :root { --touche: 48px; --t-montant: clamp(2.25rem, 11vw, 2.75rem); }
+  :root { --touche: 48px; --t-montant: clamp(2.25rem, 11vw, 2.75rem); --qr: 200px; --t-titre-ecran: 1.5rem; }
 }
 
 /* ---------- Dark theme (opt-in from Settings only) ---------- */

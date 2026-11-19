@@ -6,7 +6,7 @@ export type EtatPaiement = "attente" | "confirme" | "expire" | "erreur";
 
 const TEXTES: Record<EtatPaiement, string> = {
   attente: "En attente du paiement…",
-  confirme: "Paiement reçu avec succès !",
+  confirme: "Paiement reçu avec succès !",
   expire: "Cette demande de paiement a expiré.",
   erreur: "Impossible de contacter votre portefeuille.",
 };

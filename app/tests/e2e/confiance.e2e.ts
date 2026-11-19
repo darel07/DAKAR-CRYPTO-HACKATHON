@@ -47,8 +47,10 @@ test("accessibilité : aucune violation grave sur les écrans principaux", async
   await activerDemo(page);
   await declarerVente(page, "tomates 1500", "1 500");
   for (const ecran of ["/#/", "/#/ventes", "/#/passeport", "/#/reglages", "/#/declarer", "/#/cle", "/#/preteur/p/demo000000"]) {
+    // Rechargement complet : changer seulement le « #… » déclenche une transition de vue (#51),
+    // et l'audit mesurerait les couleurs en plein fondu au lieu de l'écran posé.
     await page.goto(ecran);
-    await page.waitForLoadState("networkidle");
+    await page.reload({ waitUntil: "networkidle" });
     await auditAccessibilite(page);
   }
 });

@@ -29,7 +29,7 @@ const PAIRES = [
   // Demo wallet pill, offline banner
   ["c-declare-texte", "c-fond", 4.5],
   // Paiement reçu (E5): secondary text on the green background
-  ["c-texte-doux", "c-prouve-fond", 4.5], ["c-texte", "c-prouve-fond", 4.5],
+  ["c-texte-doux", "c-prouve-fond", 4.5], ["c-texte", "c-prouve-fond", 4.5], ["c-prouve-texte", "c-surface", 4.5],
 ];
 
 let echecs = 0;

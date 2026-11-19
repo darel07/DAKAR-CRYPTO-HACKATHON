@@ -1,21 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy } from "lucide-react";
 import {
   AmountDisplay, Badge, Button, Confirmation, Countdown, PaymentQRCode, PaymentStatus, afficherToast,
 } from "../components/ui";
 import { abandonnerDemande, confirmerPaiement, creerDemande, useEncaissement } from "../lib/domain/encaissement";
 import { ajouterVente } from "../lib/domain/ventesStore";
+import { preimageValide } from "../lib/lightning/preuve";
 import { useWallet } from "../lib/lightning/WalletContext";
 import { usePreferences } from "../lib/preferences";
 import { copierTexte } from "../lib/pressePapiers";
-import { remplacer } from "../lib/useRoute";
+import { useEcranAllume } from "../lib/useEcranAllume";
+import { avancerDansFlux, poserGarde, sortirDuFlux, useGardeRetour, useSortieSi } from "../lib/useRoute";
 import { useTaux } from "../lib/useTaux";
 
 type Etat = "attente" | "expire" | "erreur";
 
 /** E4 : QR affiché dès que la facture existe, puis attente de la VRAIE confirmation du
- *  portefeuille. Aucun texte de succès avant que la préimage soit reçue.
- *  (Première version ; l'issue #9 ajoute l'écran maintenu allumé et la garde du bouton retour.) */
+ *  portefeuille. Aucun texte de succès avant une préimage reçue ET vérifiée. Pendant l'attente,
+ *  l'écran reste allumé et le retour Android demande confirmation au lieu de tout perdre. */
 export function Paiement() {
   const { portefeuille } = useWallet();
   const { demande } = useEncaissement();
@@ -26,24 +28,35 @@ export function Paiement() {
   const [annulation, setAnnulation] = useState(false);
   const [recreation, setRecreation] = useState(false);
 
-  // Vérifié à l'ouverture seulement : ensuite chaque sortie (succès, annulation) navigue
-  // elle-même. Réagir à chaque changement de `demande` renverrait vers l'Accueil au moment
-  // précis où la confirmation vide la demande, avant que la route #/recu soit prise en compte.
-  const demandeInitiale = useRef(demande);
-  useEffect(() => { if (!demandeInitiale.current) remplacer("/"); }, []);
+  // Ouvert sans demande (rechargé après la fin du flux, ou atteint par le retour depuis E5) :
+  // retour à l'Accueil. Vérifié à l'ouverture seulement, chaque sortie navigue ensuite elle-même.
+  const [ouvertSansDemande] = useState(() => demande === null);
+  useSortieSi(ouvertSansDemande);
+
+  // Dernière demande affichée : l'écran reste en place pendant la traversée d'historique
+  // qui suit une annulation, au lieu de clignoter à vide.
+  const [affichee, setAffichee] = useState(demande);
+  if (demande && demande !== affichee) setAffichee(demande);
+
+  const etatAffiche: Etat = portefeuille ? etat : "erreur";
+  useEcranAllume(!!demande && etatAffiche === "attente");
+
+  /** La saisie est gardée : le commerçant retrouve son montant sur l'Accueil. */
+  const quitter = () => { abandonnerDemande(); sortirDuFlux(); };
+  useGardeRetour(!!demande, () => (etatAffiche === "attente" ? setAnnulation(true) : quitter()));
 
   useEffect(() => {
     if (!demande || !portefeuille) return;
     const ctrl = new AbortController();
     portefeuille.attendrePaiement(demande.facture, ctrl.signal)
-      .then(({ preimage, paymentHash }) => {
-        if (!preimage) throw new Error("préimage absente");
+      .then(({ preimage }) => {
+        if (!preimageValide(preimage, demande.facture.paymentHash)) throw new Error("preuve invalide");
         const vente = ajouterVente({
           montantFcfa: demande.montantFcfa, type: "lightning", libelle: "Paiement Lightning",
-          facture: demande.facture.bolt11, preimage, paymentHash,
+          facture: demande.facture.bolt11, preimage, paymentHash: demande.facture.paymentHash,
         });
         confirmerPaiement({ vente, sats: demande.sats });
-        remplacer("/recu");
+        avancerDansFlux("/recu");
       })
       .catch(() => {
         if (ctrl.signal.aborted) return;
@@ -52,11 +65,10 @@ export function Paiement() {
     return () => ctrl.abort();
   }, [demande, portefeuille, essai]);
 
-  if (!demande) return null;
-  const etatAffiche: Etat = portefeuille ? etat : "erreur";
+  if (!affichee) return null;
 
   const copier = async () => {
-    const ok = await copierTexte(demande.facture.bolt11);
+    const ok = await copierTexte(affichee.facture.bolt11);
     afficherToast(ok ? "Facture copiée" : "Copie impossible sur ce téléphone.", { niveau: ok ? "info" : "erreur" });
   };
 
@@ -64,7 +76,7 @@ export function Paiement() {
     if (!portefeuille || !taux) return;
     setRecreation(true);
     try {
-      await creerDemande(portefeuille, demande.montantFcfa, taux);
+      await creerDemande(portefeuille, affichee.montantFcfa, taux);
       setEtat("attente");
     } catch {
       setEtat("erreur");
@@ -74,9 +86,8 @@ export function Paiement() {
   };
 
   const reessayer = () => { setEtat("attente"); setEssai((n) => n + 1); };
-  /** La saisie est gardée : le commerçant retrouve son montant sur l'Accueil. */
-  const quitter = () => { abandonnerDemande(); remplacer("/"); };
   const annuler = () => { setAnnulation(false); quitter(); };
+  const continuer = () => { setAnnulation(false); poserGarde(); };
 
   return (
     <div className="flux">
@@ -86,10 +97,10 @@ export function Paiement() {
       </header>
       {portefeuille?.mode === "demo" && <Badge ton="ambre">Mode démonstration : le paiement sera simulé</Badge>}
 
-      <div className="paiement__qr"><PaymentQRCode facture={demande.facture.bolt11} /></div>
-      <AmountDisplay montant={demande.montantFcfa} sats={satsVisibles ? demande.sats : null} taille="secondaire" />
-      {etatAffiche === "attente" && <Countdown expireLe={demande.facture.expireLe} onExpire={() => setEtat("expire")} />}
-      <PaymentStatus etat={etatAffiche} debut={demande.creeLe} expireLe={demande.facture.expireLe} />
+      <div className="paiement__qr"><PaymentQRCode facture={affichee.facture.bolt11} /></div>
+      <AmountDisplay montant={affichee.montantFcfa} sats={satsVisibles ? affichee.sats : null} taille="secondaire" />
+      {etatAffiche === "attente" && <Countdown expireLe={affichee.facture.expireLe} onExpire={() => setEtat("expire")} />}
+      <PaymentStatus etat={etatAffiche} debut={affichee.creeLe} expireLe={affichee.facture.expireLe} />
 
       <div className="flux__actions">
         {etatAffiche === "expire" && (
@@ -109,7 +120,7 @@ export function Paiement() {
       <Confirmation
         ouvert={annulation} titre="Annuler cette demande de paiement ?"
         confirmer="Annuler la demande" annuler="Continuer à attendre" danger
-        onConfirmer={annuler} onAnnuler={() => setAnnulation(false)}
+        onConfirmer={annuler} onAnnuler={continuer}
       >
         <p>Si le client a déjà payé, attendez la confirmation avant d'annuler.</p>
       </Confirmation>

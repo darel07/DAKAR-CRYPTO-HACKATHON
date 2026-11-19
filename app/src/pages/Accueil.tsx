@@ -33,7 +33,7 @@ export function Accueil() {
   const { taux, chargement } = useTaux();
   const { enLigne } = useReseau();
   const { satsVisibles, plafondFcfa } = usePreferences();
-  const { saisie } = useEncaissement();
+  const { saisie, demande } = useEncaissement();
   const jour = useVentesDuJour();
   const [creation, setCreation] = useState(false);
   const [injoignable, setInjoignable] = useState(false);
@@ -73,7 +73,7 @@ export function Accueil() {
   };
 
   return (
-    <div className="accueil">
+    <div className={`accueil${!portefeuille || demande ? " accueil--alerte" : ""}`}>
       <header className="accueil__entete">
         {/* Emplacement du bandeau à rubans (RibbonBackground, issue #5). */}
         <div className="accueil__rubans" aria-hidden="true" />
@@ -89,9 +89,15 @@ export function Accueil() {
         )}
       </header>
 
-      {!portefeuille && (
+      {!portefeuille ? (
         <Alert niveau="info" compact action={<a href="#/reglages">Connecter</a>}>
           Connectez votre portefeuille pour encaisser en Lightning.
+        </Alert>
+      ) : demande && (
+        // Quitter E4 sans annuler (deux retours rapides…) ne doit pas faire perdre un paiement
+        // que le client est peut-être en train de faire : la demande reste reprenable.
+        <Alert niveau="info" compact action={<a href="#/paiement">Reprendre</a>}>
+          Une demande de paiement de <span className="chiffres">{formatFcfa(demande.montantFcfa)}</span> n'est pas terminée.
         </Alert>
       )}
 

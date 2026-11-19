@@ -40,6 +40,12 @@
 .accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
 .accueil__caisse > .montant { margin-block: auto; }
 .accueil__actions { display: grid; gap: var(--e-1); }
+/* Écrans courts (360 × 740) : tout doit tenir même avec le bandeau hors ligne et une alerte
+   sur deux lignes. Écarts resserrés, et la question d'accueil cède sa place à l'alerte. */
+@media (max-height: 740px) {
+  .accueil, .accueil__caisse { gap: var(--e-2); }
+  .accueil--alerte .accueil__question { display: none; }
+}
 
 /* ---- Écrans de flux sans barre (E4 Paiement, E5 Paiement reçu) ---- */
 .flux {
@@ -61,6 +67,10 @@
 .flux--recu h1 { color: var(--c-prouve-texte); }
 .flux--recu h1:focus { outline: none; }
 .recu__details { display: grid; justify-items: center; gap: var(--e-2); font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+/* La pastille « Prouvé » a le même vert que le fond de l'écran : posée sur une surface, elle reste lisible comme pastille. */
+.flux--recu .pastille--prouve { background: var(--c-surface); }
+/* En attendant la pièce (issue #3), le bloc reçu est centré dans la hauteur libre. */
+.flux--recu > .flux__entete { margin-block-start: auto; }
 
 /* Ancien écran Passeport (refait avec l'issue #13). */
 .qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }

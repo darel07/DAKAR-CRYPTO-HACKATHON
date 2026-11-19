@@ -24,8 +24,21 @@ function emettre(suivantes: Vente[]) {
   abonnes.forEach((cb) => cb());
 }
 
+/** Identifiant de vente (UUID v4). crypto.randomUUID n'existe qu'en contexte sécurisé (https ou
+ *  localhost) : sur un téléphone qui ouvre le serveur par son adresse réseau (http://192.168.x.x),
+ *  il manque, et chaque vente (paiement démo, vente déclarée) échouait à l'enregistrement.
+ *  getRandomValues existe partout. */
+function nouvelId(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const o = crypto.getRandomValues(new Uint8Array(16));
+  o[6] = (o[6]! & 0x0f) | 0x40; // version 4
+  o[8] = (o[8]! & 0x3f) | 0x80; // variante RFC 4122
+  const h = Array.from(o, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
 export function ajouterVente(v: Omit<Vente, "id" | "ts"> & { ts?: number }): Vente {
-  const vente: Vente = { ...v, id: crypto.randomUUID(), ts: v.ts ?? Math.floor(Date.now() / 1000) };
+  const vente: Vente = { ...v, id: nouvelId(), ts: v.ts ?? Math.floor(Date.now() / 1000) };
   emettre([vente, ...ventes].sort((a, b) => b.ts - a.ts));
   return vente;
 }
@@ -60,7 +73,7 @@ export function chargerExemple() {
   for (let i = 0; i < 21; i++) {
     const [libelle, montantFcfa] = articles[i % articles.length]!;
     const type: TypeVente = "declaree";
-    exemples.push({ id: crypto.randomUUID(), ts: maintenant - Math.floor(i / 2) * jour - (i % 2) * 3600, montantFcfa, type, libelle });
+    exemples.push({ id: nouvelId(), ts: maintenant - Math.floor(i / 2) * jour - (i % 2) * 3600, montantFcfa, type, libelle });
   }
   emettre([...exemples, ...ventes].sort((a, b) => b.ts - a.ts));
 }

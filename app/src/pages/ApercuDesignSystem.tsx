@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { Copy, Zap } from "lucide-react";
+import { Copy, Pause, Play, RotateCcw, Zap } from "lucide-react";
 import {
   Alert, AmountDisplay, Badge, Button, Checkbox, Confirmation, Countdown, EmptyState, Field, LienBouton,
   MiniBarChart, NumericKeypad, OfflineBanner, PaymentQRCode, PaymentStatus, Segmented, Sheet, Skeleton,
   StatCard, Switch, TransactionCard, TransactionList, WalletStatus, afficherToast,
 } from "../components/ui";
+import { CoinFcfa } from "../components/signature/CoinFcfa";
 import { appliquerTheme, lirePreferences, PLAFOND_DEFAUT } from "../lib/preferences";
 import type { Theme } from "../lib/preferences";
 import { COULEURS, FACTURE_EXEMPLE, SEMAINE_EXEMPLE, ventesExemple } from "./apercu/donnees";
@@ -36,6 +37,8 @@ export default function ApercuDesignSystem() {
   const [coche, setCoche] = useState(false);
   const [feuille, setFeuille] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
+  const [pieceEnPause, setPieceEnPause] = useState(false);
+  const [entree, setEntree] = useState(0);
 
   useEffect(() => { appliquerTheme(theme); }, [theme]);
   useEffect(() => () => appliquerTheme(lirePreferences().theme), []);
@@ -173,6 +176,29 @@ export default function ApercuDesignSystem() {
           onConfirmer={() => setConfirmation(false)} onAnnuler={() => setConfirmation(false)}>
           <p>Cette action est définitive. Exportez votre historique avant si vous voulez le garder.</p>
         </Confirmation>
+      </Bloc>
+
+      <Bloc titre="Pièce (animation signature)">
+        <div className="apercu-pieces">
+          <figure>
+            <CoinFcfa mode="boucle" enPause={pieceEnPause} />
+            <figcaption>Boucle (Bienvenue)</figcaption>
+          </figure>
+          <figure>
+            <CoinFcfa key={entree} mode="entree" />
+            <figcaption>Entrée (Paiement reçu)</figcaption>
+          </figure>
+          <figure>
+            <CoinFcfa mode="fixe" taille={120} />
+            <figcaption>Fixe, 120 px</figcaption>
+          </figure>
+        </div>
+        <div className="apercu-rangee">
+          <Button variante="secondaire" icone={pieceEnPause ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />} onClick={() => setPieceEnPause((p) => !p)}>
+            {pieceEnPause ? "Relancer la boucle" : "Mettre la boucle en pause"}
+          </Button>
+          <Button variante="secondaire" icone={<RotateCcw aria-hidden="true" />} onClick={() => setEntree((n) => n + 1)}>Rejouer l'entrée</Button>
+        </div>
       </Bloc>
 
       <Bloc titre="Vide et chargement">

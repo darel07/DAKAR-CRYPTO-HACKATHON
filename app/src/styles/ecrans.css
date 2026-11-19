@@ -169,8 +169,12 @@
 .recu__details { display: grid; justify-items: center; gap: var(--e-2); font-size: var(--t-secondaire); color: var(--c-texte-doux); }
 /* La pastille « Prouvé » a le même vert que le fond de l'écran : posée sur une surface, elle reste lisible comme pastille. */
 .flux--recu .pastille--prouve { background: var(--c-surface); }
-/* En attendant la pièce (issue #3), le bloc reçu est centré dans la hauteur libre. */
-.flux--recu > .flux__entete { margin-block-start: auto; }
+/* La pièce et le reçu sont centrés dans la hauteur libre, les actions restent en bas. */
+.flux--recu > .piece { margin-block-start: auto; }
+@media (max-height: 740px) {
+  .flux--recu > .piece { --piece-taille: 112px; }
+  .flux--recu { gap: var(--e-3); }
+}
 
 /* Ancien écran Passeport (refait avec l'issue #13). */
 .qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }
@@ -226,3 +230,6 @@
   padding: var(--e-3) var(--e-4); border: 1px solid var(--c-bord); border-radius: var(--rayon); background: var(--c-surface);
 }
 .coque--libre { max-width: var(--largeur-app); margin-inline: auto; padding: var(--e-5) var(--e-4) var(--e-7); display: grid; gap: var(--e-5); }
+.apercu-pieces { display: flex; flex-wrap: wrap; gap: var(--e-4); }
+.apercu-pieces figure { display: grid; justify-items: center; gap: var(--e-2); margin: 0; }
+.apercu-pieces figcaption { font-size: var(--t-secondaire); color: var(--c-texte-doux); }

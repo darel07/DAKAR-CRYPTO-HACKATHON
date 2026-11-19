@@ -1,0 +1,263 @@
+/* Signature animations (assets/PROMPT_FRONTEND.md §6). Like tokens.css, this file
+   may hold literal colours and timings: they ARE the signature, measured against
+   the reference videos (assets/references/*_planche.*).
+   Rule for every loop here: the static state is the default, motion is opted in
+   under prefers-reduced-motion: no-preference and off on modest devices
+   ([data-simple]); [data-pause] freezes it (hidden tab, off screen, pause button). */
+
+/* ======================================================================
+   CoinFcfa (§6.1): glass FCFA coin on a dark medallion
+   ====================================================================== */
+.piece {
+  --piece-taille: 160px;
+  --piece-epaisseur: calc(var(--piece-taille) * 0.075);  /* 12 px at 160 */
+  --piece-lisere-l: calc(var(--piece-taille) * 0.025);   /* 4 px outer ring */
+  --piece-medaillon: calc(var(--piece-taille) * 1.375);  /* 220 px at 160 */
+  --piece-medaillon-rayon: 24px;
+
+  /* Glass (from references_coin_to_put_Dakar_currency_sign.png) */
+  --piece-reflet: rgb(255 255 255 / 0.35);
+  --piece-verre-1: rgb(70 185 138 / 0.28);
+  --piece-verre-2: rgb(22 134 91 / 0.1);
+  --piece-verre-3: rgb(102 252 241 / 0.22);
+  --piece-lisere: rgb(150 255 215 / 0.75);
+  --piece-lueur: rgb(70 185 138 / 0.65);
+  --piece-lueur-int: rgb(255 255 255 / 0.25);
+  --piece-anneau: rgb(200 255 235 / 0.35);
+  --piece-texte: rgb(220 255 240 / 0.8);
+  --piece-relief: rgb(225 255 245 / 0.9);
+  --piece-relief-clair: rgb(255 255 255 / 0.5);
+  --piece-relief-sombre: rgb(0 60 40 / 0.5);
+  --piece-tranche: rgb(70 185 138 / 0.55);
+  --piece-tranche-clair: rgb(150 255 215 / 0.6);
+  /* Glint: white-gold, the coin's only amber touch (§4.2: amber = accents) */
+  --piece-eclat: rgb(255 251 240);
+  --piece-eclat-or: rgb(255 222 160 / 0.6);
+  --piece-halo: rgb(255 236 190 / 0.5);
+  --piece-halo-vert: rgb(70 185 138 / 0.28);
+  /* Medallion stays dark in both themes, to keep the glass-on-black look */
+  --piece-medaillon-centre: #0E1A24;
+  --piece-medaillon-bord: #101820;
+
+  /* Resting state (reduced motion, modest device, end of the entry) */
+  --piece-eclat-repos: 0.45;
+  --piece-halo-repos: 0.35;
+
+  --d-piece-cycle: 4800ms;
+  --d-piece-entree: 4200ms;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: var(--piece-medaillon);
+  block-size: var(--piece-medaillon);
+  border-radius: var(--piece-medaillon-rayon);
+  background: radial-gradient(circle at 50% 45%, var(--piece-medaillon-centre), var(--piece-medaillon-bord) 70%);
+  perspective: 900px;
+}
+
+/* General halo behind the coin, in the medallion plane */
+.piece::before {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--piece-halo), var(--piece-halo-vert) 45%, transparent 70%);
+  opacity: var(--piece-halo-repos);
+  pointer-events: none;
+}
+
+.piece__corps {
+  position: relative;
+  inline-size: var(--piece-taille);
+  block-size: var(--piece-taille);
+  transform-style: preserve-3d;
+  transform: rotateY(0deg);
+}
+
+/* Edge: a 24-facet cylinder. FIXED (prompt: 10 stacked discs): a disc seen exactly edge-on has
+   no area, so the coin vanished at every profile instead of showing its edge. Each facet stands
+   on the rim, faces outwards and hides its back: only the near half of the edge is drawn, and
+   the stripes along the thickness keep the "stacked discs" look of the video. */
+.piece__facette {
+  position: absolute;
+  inset-inline-start: calc(50% - var(--piece-taille) * 0.06625);
+  inset-block-start: calc(50% - var(--piece-epaisseur) / 2);
+  inline-size: calc(var(--piece-taille) * 0.1325);    /* chord of 15deg, plus a hair against seams */
+  block-size: var(--piece-epaisseur);
+  background: repeating-linear-gradient(to bottom, var(--piece-tranche-clair) 0 1px, var(--piece-tranche) 1px 3px);
+  backface-visibility: hidden;
+  transform: rotateZ(calc(var(--n) * 15deg)) translateY(calc(var(--piece-taille) * -0.4957)) rotateX(90deg);
+}
+
+.piece__face {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--piece-lisere-l) solid var(--piece-lisere);
+  background:
+    radial-gradient(circle at 35% 28%, var(--piece-reflet), transparent 42%),
+    linear-gradient(135deg, var(--piece-verre-1), var(--piece-verre-2) 55%, var(--piece-verre-3));
+  box-shadow: 0 0 22px var(--piece-lueur), inset 0 0 18px var(--piece-lueur-int);
+  backface-visibility: hidden;
+  color: var(--piece-relief);
+}
+.piece__face--avant { transform: translateZ(calc(var(--piece-epaisseur) / 2)); }
+.piece__face--arriere { transform: rotateY(180deg) translateZ(calc(var(--piece-epaisseur) / 2)); }
+
+.piece__anneau,
+.piece__marque {
+  position: absolute;
+  inset: calc(var(--piece-lisere-l) * -1);
+  inline-size: var(--piece-taille);
+  block-size: var(--piece-taille);
+  overflow: visible;
+}
+.piece__anneau-trait { fill: none; stroke: var(--piece-anneau); stroke-width: 1; }
+.piece__anneau-texte {
+  fill: var(--piece-texte);
+  font-family: var(--f-titre);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+/* FCFA mark and back lightning bolt, embossed. The relief is a filter on the outer <svg>
+   (filters on inner SVG elements are not reliable in Safari). */
+.piece__marque { fill: currentColor; font-family: var(--f-titre); }
+.piece__cfa { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; }
+.piece__f { font-size: 62px; font-weight: 800; }
+.piece__marque,
+.piece__eclair {
+  filter: drop-shadow(0 1px 0 var(--piece-relief-clair)) drop-shadow(0 -1px 1px var(--piece-relief-sombre));
+}
+
+.piece__eclair {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  inline-size: calc(var(--piece-taille) * 0.34);
+  block-size: calc(var(--piece-taille) * 0.34);
+}
+
+/* Glints, in the plane of each face: ::after = top-left flare, front ::before = weaker top-centre one */
+.piece__face::after,
+.piece__face--avant::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: -14%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+.piece__face::after {
+  background: radial-gradient(circle at 30% 27%, var(--piece-eclat), var(--piece-eclat-or) 7%, transparent 22%);
+}
+.piece__face--avant::after { opacity: var(--piece-eclat-repos); }
+/* The back face is mirrored: its local 70 % is the viewer's top-left */
+.piece__face--arriere::after {
+  background: radial-gradient(circle at 70% 27%, var(--piece-eclat), var(--piece-eclat-or) 7%, transparent 22%);
+}
+.piece__face--avant::before {
+  background: radial-gradient(circle at 50% 14%, var(--piece-eclat), var(--piece-eclat-or) 5%, transparent 16%);
+}
+
+/* ---- Motion: opted in only ---- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Loop (Welcome): 4.8 s, one continuous turn with a dwell on each face.
+     Profile → front 0.85 s, sway 0.8 s, front → back through the profile 1.7 s, sway 0.6 s,
+     back → profile 0.85 s: the end meets the start without a jump (the reference video is a cut). */
+  .piece--boucle:not([data-simple]) .piece__corps { animation: piece-boucle var(--d-piece-cycle) linear infinite both; }
+  .piece--boucle:not([data-simple])::before { animation: piece-halo-boucle var(--d-piece-cycle) linear infinite both; }
+  .piece--boucle:not([data-simple]) .piece__face--avant::after { animation: piece-eclat-avant var(--d-piece-cycle) ease-in-out infinite both; }
+  .piece--boucle:not([data-simple]) .piece__face--avant::before { animation: piece-eclat-haut var(--d-piece-cycle) ease-in-out infinite both; }
+  .piece--boucle:not([data-simple]) .piece__face--arriere::after { animation: piece-eclat-arriere var(--d-piece-cycle) ease-in-out infinite both; }
+
+  /* Entry (Payment received): 1.25 turn decelerated in 1.2 s, front face, glint,
+     one ±10° sway at 3 s, still by 4.2 s (WCAG 2.2.2: no auto motion past 5 s). */
+  .piece--entree:not([data-simple]) .piece__corps { animation: piece-entree var(--d-piece-entree) linear both; }
+  .piece--entree:not([data-simple])::before { animation: piece-halo-entree var(--d-piece-entree) ease-out both; }
+  .piece--entree:not([data-simple]) .piece__face--avant::after { animation: piece-eclat-entree var(--d-piece-entree) ease-in-out both; }
+  .piece--entree:not([data-simple]) .piece__face--avant::before { animation: piece-eclat-balancement var(--d-piece-entree) ease-in-out both; }
+}
+
+/* Static coin (fixed mode, modest device, reduced motion): only the front face, flat. The 3D
+   layers (24 facets, back face) are not kept in GPU memory on the phones that need it most. */
+.piece--fixe :is(.piece__facette, .piece__face--arriere),
+.piece[data-simple] :is(.piece__facette, .piece__face--arriere) { display: none; }
+.piece--fixe :is(.piece__corps, .piece__face--avant),
+.piece[data-simple] :is(.piece__corps, .piece__face--avant) { transform: none; transform-style: flat; }
+@media (prefers-reduced-motion: reduce) {
+  .piece :is(.piece__facette, .piece__face--arriere) { display: none; }
+  .piece :is(.piece__corps, .piece__face--avant) { transform: none; transform-style: flat; }
+}
+
+.piece[data-pause]::before,
+.piece[data-pause] .piece__corps,
+.piece[data-pause] .piece__face::before,
+.piece[data-pause] .piece__face::after { animation-play-state: paused; }
+
+/* Fitted to the video (0.25 s: 70deg, 0.75 s: 20deg): near-constant speed, softly slowing
+   onto each face. Departure is the mirror curve, so the speed matches at every profile crossing.
+   Times: profile 0, front 0.85 s, sway, profile 2.5 s, back 3.35 s, sway, profile 4.8 s. */
+@keyframes piece-boucle {
+  0%      { transform: rotateY(90deg);   animation-timing-function: cubic-bezier(0.6, 0.4, 0.85, 0.95); }
+  17.708% { transform: rotateY(0deg);    animation-timing-function: ease-in-out; }   /* 0.85 s front */
+  26.042% { transform: rotateY(-15deg);  animation-timing-function: ease-in-out; }   /* 1.25 s sway */
+  34.375% { transform: rotateY(0deg);    animation-timing-function: cubic-bezier(0.15, 0.05, 0.4, 0.6); }
+  52.083% { transform: rotateY(-90deg);  animation-timing-function: cubic-bezier(0.6, 0.4, 0.85, 0.95); } /* 2.5 s */
+  69.792% { transform: rotateY(-180deg); animation-timing-function: ease-in-out; }   /* 3.35 s back */
+  76.042% { transform: rotateY(-190deg); animation-timing-function: ease-in-out; }
+  82.292% { transform: rotateY(-180deg); animation-timing-function: cubic-bezier(0.15, 0.05, 0.4, 0.6); }
+  100%    { transform: rotateY(-270deg); }                                             /* 4.8 s = 90deg */
+}
+@keyframes piece-eclat-avant {
+  0%, 12.5%      { opacity: 0; }
+  18.75%         { opacity: 0.9; }   /* 0.9 s, top left */
+  27.083%, 100%  { opacity: 0; }
+}
+@keyframes piece-eclat-haut {
+  0%, 27.083%    { opacity: 0; }
+  30.208%        { opacity: 0.5; }   /* 1.45 s, weaker, top centre */
+  35.417%, 100%  { opacity: 0; }
+}
+@keyframes piece-eclat-arriere {
+  0%, 65.625%    { opacity: 0; }
+  71.875%        { opacity: 0.9; }   /* 3.45 s */
+  80.208%, 100%  { opacity: 0; }
+}
+@keyframes piece-halo-boucle {
+  0%, 12.5%         { opacity: 0; scale: 0.8; }
+  19.792%           { opacity: 0.65; scale: 1; }
+  33.333%           { opacity: 0; scale: 1.2; }
+  33.334%, 65.625%  { opacity: 0; scale: 0.8; }
+  72.917%           { opacity: 0.55; scale: 1; }
+  85.417%, 100%     { opacity: 0; scale: 1.2; }
+}
+
+@keyframes piece-entree {
+  0%      { transform: rotateY(450deg); animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+  28.571% { transform: rotateY(0deg); }                                                  /* 1.2 s */
+  71.429% { transform: rotateY(0deg);   animation-timing-function: ease-in-out; }        /* 3.0 s */
+  78.571% { transform: rotateY(10deg);  animation-timing-function: ease-in-out; }
+  92.857% { transform: rotateY(-10deg); animation-timing-function: ease-in-out; }
+  100%    { transform: rotateY(0deg); }                                                  /* 4.2 s */
+}
+@keyframes piece-eclat-entree {
+  0%, 26.19%     { opacity: 0; }
+  30.952%        { opacity: 0.9; }                      /* 1.3 s */
+  42.857%, 100%  { opacity: var(--piece-eclat-repos); }
+}
+@keyframes piece-eclat-balancement {
+  0%, 73.81%     { opacity: 0; }
+  80.952%        { opacity: 0.4; }                      /* 3.4 s */
+  90.476%, 100%  { opacity: 0; }
+}
+@keyframes piece-halo-entree {
+  0%, 23.81%     { opacity: 0; scale: 0.8; }
+  32.143%        { opacity: 0.7; scale: 1.05; }         /* 1.35 s */
+  52.381%, 100%  { opacity: var(--piece-halo-repos); scale: 1; }
+}

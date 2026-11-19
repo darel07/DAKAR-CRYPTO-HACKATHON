@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
+import { CoinFcfa } from "../components/signature/CoinFcfa";
 import { AmountDisplay, Badge, Button, LienBouton, afficherToast } from "../components/ui";
 import { useEncaissement } from "../lib/domain/encaissement";
 import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/format";
@@ -7,22 +8,25 @@ import { usePreferences } from "../lib/preferences";
 import { copierTexte } from "../lib/pressePapiers";
 import { sortirDuFlux, useSortieSi } from "../lib/useRoute";
 
+const dejaVu = (): boolean => Boolean((history.state as { vu?: boolean } | null)?.vu);
+
 /** Marque l'entrée d'historique de E5 comme déjà vue : revenir sur le reçu depuis
- *  l'Historique ne refait ni vibrer le téléphone ni annoncer un nouveau paiement. */
+ *  l'Historique ne refait ni vibrer le téléphone, ni annoncer un nouveau paiement,
+ *  ni tourner la pièce. */
 function premiereVisite(): boolean {
-  const etat = (history.state ?? {}) as { vu?: boolean };
-  if (etat.vu) return false;
-  history.replaceState({ ...etat, vu: true }, "");
+  if (dejaVu()) return false;
+  history.replaceState({ ...(history.state ?? {}), vu: true }, "");
   return true;
 }
 
 /** E5 : n'existe que pour une vente confirmée par le portefeuille (préimage reçue et vérifiée).
- *  Le montant est là dès la première image. (La pièce en mode « entrée » arrive avec l'issue #3.) */
+ *  Le montant est là dès la première image : la pièce tourne à côté, sans rien retarder. */
 export function PaiementRecu() {
   const { recu } = useEncaissement();
   const { satsVisibles } = usePreferences();
   const titre = useRef<HTMLHeadingElement>(null);
   const [annonce, setAnnonce] = useState("");
+  const [revisite] = useState(dejaVu);
 
   // Rechargée (le reçu ne vit qu'en mémoire) : retour à l'Accueil.
   const [ouvertSansRecu] = useState(() => recu === null);
@@ -58,6 +62,7 @@ export function PaiementRecu() {
   return (
     <div className="flux flux--recu">
       <p className="sr-only" role="status">{annonce}</p>
+      <CoinFcfa mode={revisite ? "fixe" : "entree"} />
       <header className="flux__entete flux__entete--centre">
         <h1 ref={titre} tabIndex={-1}>Paiement reçu !</h1>
         <p>Votre vente a été confirmée avec succès.</p>

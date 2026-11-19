@@ -440,3 +440,9 @@ button.reglage { cursor: pointer; }
 .feuille-recu { display: grid; gap: var(--e-3); text-align: center; }
 .feuille-recu__qr { display: grid; justify-items: center; }
 .recu-client__ticket { justify-items: start; }
+
+/* ---------- E2 Sauvegarde de la clé : grille en lecture seule ---------- */
+.mots--lecture { padding: var(--e-4); background: var(--c-surface); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
+.mots--lecture .mots__mot { display: flex; align-items: baseline; gap: var(--e-2); }
+/* Recopier à la main, pas copier : un presse-papiers est lu par d'autres applications. */
+.mots--lecture .mots__texte { font-size: var(--t-texte); font-weight: 600; user-select: none; -webkit-user-select: none; }

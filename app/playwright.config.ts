@@ -17,7 +17,8 @@ export default defineConfig({
     locale: "fr-FR",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    // Vidéo seulement en local : en CI elle exige le ffmpeg de Playwright ; traces et captures suffisent.
+    video: process.env.CI ? "off" : "retain-on-failure",
   },
   projects: [
     { name: "mobile-chromium", use: { ...devices["Pixel 7"], channel: "chrome" } },

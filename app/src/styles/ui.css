@@ -76,6 +76,10 @@
 .alerte__corps { display: grid; gap: var(--e-1); min-width: 0; }
 .alerte__titre { font-weight: 700; }
 .alerte a { color: inherit; font-weight: 700; }
+.alerte--compact { gap: var(--e-2); padding: var(--e-2) var(--e-3); font-size: var(--t-secondaire); }
+.alerte--compact .alerte__corps { display: block; }
+.alerte--compact .alerte__action { margin-inline-start: var(--e-1); }
+.alerte--compact .alerte__icone { width: var(--t-texte); height: var(--t-texte); }
 .alerte--info { background: var(--c-surface-h); color: var(--c-texte); }
 .alerte--info .alerte__icone { color: var(--c-primaire); }
 .alerte--succes { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
@@ -278,11 +282,12 @@
 /* ---------- Toast ---------- */
 .toasts {
   position: fixed; inset-inline: 0; inset-block-start: calc(env(safe-area-inset-top) + var(--e-3)); z-index: 50;
-  display: grid; justify-items: center; padding-inline: var(--gouttiere); pointer-events: none;
+  display: grid; padding-inline: var(--gouttiere); pointer-events: none;
 }
+.toasts > div { width: 100%; max-width: var(--largeur-app); margin-inline: auto; }
 .toast {
   display: flex; align-items: center; gap: var(--e-1);
-  width: min(100%, var(--largeur-app)); padding-inline-start: var(--e-4);
+  width: 100%; padding-inline-start: var(--e-4);
   background: var(--c-texte); color: var(--c-fond);
   border-radius: var(--rayon); box-shadow: var(--ombre-nav); pointer-events: auto;
   animation: toast-entree var(--d-normale) var(--ease-sortie);

@@ -1,8 +1,14 @@
 /* Styles propres aux écrans et au cadre de l'application.
    Les couleurs et espacements viennent exclusivement de tokens.css. */
 
+/* ---- Coque : contenu + barre du bas ---- */
 .coque { max-width: var(--largeur-app); margin-inline: auto; min-height: 100dvh; display: flex; flex-direction: column; }
-.coque__contenu { flex: 1; padding: var(--e-4) var(--e-4) calc(5.5rem + env(safe-area-inset-bottom)); display: grid; gap: var(--e-4); align-content: start; }
+/* Colonne flexible : un écran peut occuper toute la hauteur libre (Accueil). Le bas réserve
+   la place du dock flottant (72 px à 12 px du bord) pour que rien ne passe dessous. */
+.coque__contenu {
+  flex: 1; display: flex; flex-direction: column; gap: var(--e-4);
+  padding: var(--e-4) var(--gouttiere) calc(var(--nav-hauteur) + var(--nav-marge) + var(--e-3) + env(safe-area-inset-bottom));
+}
 
 .barre {
   position: fixed; inset: auto 0 0 0; max-width: var(--largeur-app); margin-inline: auto;
@@ -12,34 +18,52 @@
 }
 .barre__lien {
   display: grid; justify-items: center; gap: var(--e-1); padding: var(--e-3) var(--e-1);
-  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-secondaire); font-weight: 600;
+  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-nav); font-weight: 600;
 }
 .barre__lien[aria-current="page"] { color: var(--c-primaire); }
 
 .page-titre { display: grid; gap: var(--e-1); }
 .page-titre p { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
 
-/* ---- Caisse ---- */
-.montant { display: grid; gap: var(--e-1); justify-items: center; padding: var(--e-2) 0; text-align: center; }
-.montant__valeur { font-family: var(--f-titre); font-size: var(--t-montant); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
-.montant__valeur--vide { color: var(--c-texte-doux); }
-.montant__sats { color: var(--c-texte-doux); font-size: var(--t-secondaire); min-height: 1.5em; }
-
-.pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
-.pave__touche {
-  min-height: 3.5rem; border-radius: var(--rayon); border: 1px solid var(--c-bord);
-  background: var(--c-surface); font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 600;
-  transition: transform var(--d-rapide) var(--ease-sortie), background var(--d-rapide) var(--ease-sortie);
+/* ---- E3 Accueil / caisse ---- */
+.accueil { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); isolation: isolate; }
+.accueil__entete { position: relative; display: grid; gap: var(--e-1); }
+.accueil__rubans {
+  position: absolute; z-index: -1; pointer-events: none;
+  inset-block-start: calc(var(--e-4) * -1); inset-inline: calc(var(--gouttiere) * -1);
+  height: var(--bandeau-rubans);
 }
-.pave__touche:active { transform: scale(0.96); background: var(--c-surface-h); }
-.pave__touche--action { color: var(--c-texte-doux); font-family: var(--f-texte); font-size: var(--t-texte); }
+.accueil__salut { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2) var(--e-3); }
+.accueil__question { color: var(--c-texte-doux); }
+.accueil__jour { font-size: var(--t-secondaire); font-weight: 600; }
+/* Le pavé et l'action restent en bas, sous le pouce ; le montant se centre dans l'espace libre. */
+.accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
+.accueil__caisse > .montant { margin-block: auto; }
+.accueil__actions { display: grid; gap: var(--e-1); }
 
-.actions { display: grid; gap: var(--e-3); }
+/* ---- Écrans de flux sans barre (E4 Paiement, E5 Paiement reçu) ---- */
+.flux {
+  max-width: var(--largeur-app); min-height: 100dvh; margin-inline: auto;
+  display: flex; flex-direction: column; align-items: center; gap: var(--e-4);
+  padding: calc(env(safe-area-inset-top) + var(--e-5)) var(--gouttiere) calc(env(safe-area-inset-bottom) + var(--e-5));
+  text-align: center;
+}
+.flux__entete { display: grid; gap: var(--e-2); }
+.flux__entete p { color: var(--c-texte-doux); }
+.flux__actions { display: grid; gap: var(--e-2); width: 100%; margin-block-start: auto; }
+.paiement__qr { display: grid; justify-items: center; width: 100%; }
+/* Seul le fond passe au vert en fondu : le montant est lisible dès la première image. Pleine largeur. */
+.flux--recu {
+  max-width: none; padding-inline: max(var(--gouttiere), (100% - var(--largeur-app)) / 2);
+  background: var(--c-prouve-fond); animation: fond-prouve var(--d-normale) var(--ease-sortie);
+}
+@keyframes fond-prouve { from { background-color: var(--c-fond); } }
+.flux--recu h1 { color: var(--c-prouve-texte); }
+.flux--recu h1:focus { outline: none; }
+.recu__details { display: grid; justify-items: center; gap: var(--e-2); font-size: var(--t-secondaire); color: var(--c-texte-doux); }
 
+/* Ancien écran Passeport (refait avec l'issue #13). */
 .qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }
-
-.recu { display: grid; gap: var(--e-4); justify-items: center; text-align: center; padding: var(--e-6) var(--e-4); background: var(--c-prouve-fond); color: var(--c-prouve-texte); border-radius: var(--rayon); }
-.recu__montant { font-family: var(--f-titre); font-size: var(--t-montant); font-weight: 700; line-height: 1.1; }
 
 /* ---- Historique ---- */
 .totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
@@ -59,7 +83,6 @@
 .chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
 .chiffre-cle__valeur { font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 700; }
 .chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
-.segments { display: grid; grid-auto-flow: column; gap: var(--e-2); }
 .lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
 .liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }

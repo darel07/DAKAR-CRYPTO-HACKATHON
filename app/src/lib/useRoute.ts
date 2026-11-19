@@ -19,4 +19,8 @@ export function useRoute(): Route {
   return route;
 }
 
+/** Nouvelle entrée d'historique (le retour Android revient à l'écran précédent). */
 export const aller = (chemin: string) => { window.location.hash = chemin; };
+
+/** Remplace l'entrée courante : le retour ne ramène pas à un écran de flux terminé. */
+export const remplacer = (chemin: string) => { window.location.replace(`#${chemin}`); };

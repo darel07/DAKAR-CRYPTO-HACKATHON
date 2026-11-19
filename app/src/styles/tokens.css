@@ -86,6 +86,7 @@
   --interrupteur-h: 32px;
   --graphe-h: 88px;      /* MiniBarChart bars area */
   --poignee-l: 40px;     /* sheet drag handle */
+  --bandeau-rubans: 180px; /* ribbon band at the top of Home */
 
   /* ---------- Motion (§4.4) ---------- */
   --d-instant: 80ms;

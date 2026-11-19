@@ -11,18 +11,20 @@ interface AlertProps {
   children?: ReactNode;
   /** Lien ou bouton discret qui dit quoi faire (« Connecter », « Réessayer »). */
   action?: ReactNode;
+  /** Bandeau fin (13 px, action à la suite du texte) : pour l'Accueil, où chaque pixel compte. */
+  compact?: boolean;
 }
 
 /** Bandeau dans le flux de la page. Les erreurs sont annoncées (role=alert), le reste poliment. */
-export function Alert({ niveau, titre, children, action }: AlertProps) {
+export function Alert({ niveau, titre, children, action, compact }: AlertProps) {
   const Icone = ICONES[niveau];
   return (
-    <div className={`alerte alerte--${niveau}`} role={niveau === "erreur" ? "alert" : "status"}>
+    <div className={`alerte alerte--${niveau}${compact ? " alerte--compact" : ""}`} role={niveau === "erreur" ? "alert" : "status"}>
       <Icone className="alerte__icone" aria-hidden="true" />
       <div className="alerte__corps">
         {titre && <strong className="alerte__titre">{titre}</strong>}
-        {children && <div>{children}</div>}
-        {action && <div className="alerte__action">{action}</div>}
+        {children && <span className="alerte__texte">{children}</span>}
+        {action && <span className="alerte__action">{action}</span>}
       </div>
     </div>
   );

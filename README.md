@@ -106,6 +106,24 @@ Dans les **Réglages**, collez le lien de connexion NWC d'Alby Hub ou LNbits, ou
 | Backend : cours en cache, analyse et résumé par Claude, liens courts, `docker compose up` | fait côté serveur (branche `back`) ; à brancher dans le front |
 | Wolof | à faire |
 
+### Tester un vrai paiement sans posséder de wallet
+
+Le [faucet NWC d'Alby](https://github.com/getAlby/nwc-faucet) crée en une requête un wallet de test (sats sans valeur) relié par NWC à Alby Hub. Les factures sont de vraies factures Lightning (`lnbc…`), réglées avec une vraie préimage.
+
+```bash
+curl -X POST "https://faucet.nwc.dev?balance=1000"     # renvoie un lien nostr+walletconnect://…
+```
+
+1. Dans l'app : Connexion, coller le lien. L'app prévient que cette connexion peut dépenser (le wallet de test autorise tout) : « Continuer quand même ».
+2. Encaisser un montant, puis « Copier la facture ».
+3. Faire payer la facture par le faucet, qui joue le téléphone du client :
+   ```bash
+   curl -X POST "https://faucet.nwc.dev/pay-invoice?invoice=lnbc…"
+   ```
+4. L'écran passe à « Paiement reçu », pastille **Prouvé** ; le passeport et la vue prêteur comptent ce paiement comme vérifié.
+
+Parcours vérifié le 19 novembre 2026 : facture de 1 357 sats pour 500 FCFA, réglée, reçu confirmé par un client, passeport « 1 paiement vérifié, 1 paiement confirmé par 1 client, montant contrôlé au cours du jour ».
+
 ## 4 ter. Backend
 
 Une petite API **sans compte et sans secret utilisateur** (dossier `backend/`, Fastify 5 et TypeScript). Le backend ne voit jamais le lien de connexion du portefeuille, la clé de signature ni une facture : le paiement se passe entre le téléphone et le portefeuille. S'il est éteint, le front continue de marcher.

@@ -31,7 +31,9 @@ export function construireContenu(ventes: Vente[], jours: number, maintenant = M
     .filter((v) => v.ts >= debut)
     .map((v): LignePasseport =>
       v.type === "lightning" && v.facture && v.preimage
-        ? [v.ts, v.montantFcfa, "L", v.facture, v.preimage]
+        ? v.confirmation
+          ? [v.ts, v.montantFcfa, "L", v.facture, v.preimage, v.confirmation]
+          : [v.ts, v.montantFcfa, "L", v.facture, v.preimage]
         : [v.ts, v.montantFcfa, "D"],
     );
   return { v: 1, devise: "XOF", debut, fin: maintenant, lignes };

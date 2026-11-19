@@ -181,6 +181,13 @@ function Resultat({ v, expireLe }: { v: Verification; expireLe: number | null })
                   ? `${v.preuvesRejetees} preuves ne correspondent pas à leur demande de paiement.`
                   : "1 preuve ne correspond pas à sa demande de paiement."}
               </Point>}
+          {v.nbProuvees > 0 && (
+            <Point ok={v.nbContresignees > 0}>
+              {v.nbContresignees === 0
+                ? "Aucun paiement confirmé par un client."
+                : `${pluriel(v.nbContresignees, "paiement confirmé", "paiements confirmés")} par ${pluriel(v.clientsDistincts, "client", "clients différents")} (signature du client vérifiée). Une confirmation prouve une clé, pas une personne.`}
+            </Point>
+          )}
           {v.nbProuvees + v.montantsRejetes > 0 && (
             <Point ok={v.controle === "jour" && v.montantsRejetes === 0}>{libelleControle(v.controle)}</Point>
           )}

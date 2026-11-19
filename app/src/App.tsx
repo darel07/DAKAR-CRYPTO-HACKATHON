@@ -19,6 +19,8 @@ import { Reglages } from "./pages/Reglages";
 // et la vue prêteur avec la vérification et le décodeur de factures (seul l'agent l'ouvre).
 const ApercuDesignSystem = lazy(() => import("./pages/ApercuDesignSystem"));
 const VuePreteur = lazy(() => import("./pages/VuePreteur").then((m) => ({ default: m.VuePreteur })));
+// Reçu ouvert par le CLIENT (E13) : chargé à la demande, comme la vue prêteur.
+const RecuClient = lazy(() => import("./pages/RecuClient"));
 
 /** Routes de la coque (dock + balayage). Aussi utilisée pour la page voisine d'un balayage. */
 function pageDeCoque(chemin: string): ReactNode {
@@ -60,6 +62,10 @@ function Ecran() {
         {param === "p" ? <VuePreteur id={suite[1] ?? ""} /> : <VuePreteur charge={param} />}
       </Suspense>
     );
+  }
+  // #/recu-client/r/<id> : le client n'a pas l'application, il ne passe jamais par Bienvenue.
+  if (chemin === "/recu-client") {
+    return <Suspense fallback={null}><RecuClient id={param === "r" ? (suite[1] ?? "") : ""} /></Suspense>;
   }
   if (chemin === "/apercu-design-system") return <Suspense fallback={null}><ApercuDesignSystem /></Suspense>;
 

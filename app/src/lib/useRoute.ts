@@ -31,6 +31,19 @@ export function useRoute(): Route {
   return route;
 }
 
+// Route quittée en dernier : un écran de flux (E6) revient à l'Accueil par history.back() s'il en
+// vient (pas de doublon dans l'historique), et par remplacement sinon (un lien direct ne doit pas
+// faire quitter l'application). Écouteur posé une fois, au chargement du module.
+let routeCourante = lire().chemin;
+let routePrecedente: string | null = null;
+window.addEventListener("hashchange", () => {
+  const suivante = lire().chemin;
+  if (suivante === routeCourante) return;
+  routePrecedente = routeCourante;
+  routeCourante = suivante;
+});
+export const cheminPrecedent = (): string | null => routePrecedente;
+
 /** Nouvelle entrée d'historique (le retour Android revient à l'écran précédent). */
 export const aller = (chemin: string) => { window.location.hash = chemin; };
 

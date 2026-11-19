@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Share2 } from "lucide-react";
 import { CoinFcfa } from "../components/signature/CoinFcfa";
-import { AmountDisplay, Badge, Button, LienBouton, afficherToast } from "../components/ui";
+import { AmountDisplay, Button, LienBouton, PastilleVente, afficherToast } from "../components/ui";
 import { useEncaissement } from "../lib/domain/encaissement";
 import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/format";
 import { usePreferences } from "../lib/preferences";
@@ -69,7 +69,7 @@ export function PaiementRecu() {
       </header>
       <AmountDisplay montant={vente.montantFcfa} sats={satsVisibles ? sats : null} taille="secondaire" />
       <div className="recu__details">
-        <Badge ton="prouve">Prouvé</Badge>
+        <PastilleVente vente={vente} />
         <p>{formatDateHeure(vente.ts)}</p>
         {reference && <p className="chiffres">Réf. {reference}</p>}
       </div>

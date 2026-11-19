@@ -54,6 +54,7 @@ export function Paiement() {
         const vente = ajouterVente({
           montantFcfa: demande.montantFcfa, type: "lightning", libelle: "Paiement Lightning",
           facture: demande.facture.bolt11, preimage, paymentHash: demande.facture.paymentHash,
+          ...(portefeuille.mode === "demo" ? { demo: true } : {}),
         });
         confirmerPaiement({ vente, sats: demande.sats });
         avancerDansFlux("/recu");

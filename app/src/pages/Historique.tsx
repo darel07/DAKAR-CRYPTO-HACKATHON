@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Copy, Download } from "lucide-react";
 import {
-  AmountDisplay, Badge, Button, EmptyState, Segmented, Sheet, StatCard, TransactionList, afficherToast,
+  AmountDisplay, Button, EmptyState, PastilleVente, Segmented, Sheet, StatCard, TransactionList, afficherToast,
 } from "../components/ui";
 import { PERIODES, filtrerPeriode, periodeParDefaut, telechargerHistorique, totaux } from "../lib/domain/historique";
 import type { Periode } from "../lib/domain/historique";
 import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/format";
+import { statutVente } from "../lib/domain/statut";
 import type { MoyenVente, Vente } from "../lib/domain/types";
 import { chargerExemple, useVentes } from "../lib/domain/ventesStore";
 import { copierTexte } from "../lib/pressePapiers";
@@ -25,7 +26,9 @@ function DetailVente({ vente, onFermer }: { vente: Vente | null; onFermer(): voi
   const [affichee, setAffichee] = useState(vente);
   if (vente && vente !== affichee) setAffichee(vente);
   const v = vente ?? affichee;
-  const prouvee = v?.type === "lightning";
+  const statut = v ? statutVente(v) : "declare";
+  const prouvee = statut === "prouve";
+  const lightning = v?.type === "lightning";
 
   const copierPreuve = async () => {
     if (!v?.preimage) return;
@@ -48,14 +51,16 @@ function DetailVente({ vente, onFermer }: { vente: Vente | null; onFermer(): voi
           <p className="detail__libelle">{v.libelle}</p>
           <dl className="detail__lignes">
             <div><dt>Date</dt><dd>{formatDateHeure(v.ts)}</dd></div>
-            <div><dt>Statut</dt><dd><Badge ton={prouvee ? "prouve" : "declare"}>{prouvee ? "Prouvé" : "Déclaré"}</Badge></dd></div>
-            {(prouvee || v.moyen) && <div><dt>Moyen</dt><dd>{prouvee ? "Lightning" : MOYENS[v.moyen!]}</dd></div>}
-            {prouvee && v.paymentHash && <div><dt>Réf.</dt><dd className="chiffres">{referenceCourte(v.paymentHash)}</dd></div>}
+            <div><dt>Statut</dt><dd><PastilleVente vente={v} /></dd></div>
+            {(lightning || v.moyen) && <div><dt>Moyen</dt><dd>{lightning ? "Lightning" : MOYENS[v.moyen!]}</dd></div>}
+            {lightning && v.paymentHash && <div><dt>Réf.</dt><dd className="chiffres">{referenceCourte(v.paymentHash)}</dd></div>}
           </dl>
           <p className="texte-secondaire">
             {prouvee
               ? "Paiement confirmé par votre portefeuille : la preuve peut être vérifiée par un agent de microfinance."
-              : "Vente notée à la main : elle compte moins qu'un paiement prouvé."}
+              : statut === "demo"
+                ? "Paiement simulé en mode démonstration : il ne compte pas comme preuve."
+                : "Vente notée à la main : elle compte moins qu'un paiement prouvé."}
           </p>
         </>
       )}

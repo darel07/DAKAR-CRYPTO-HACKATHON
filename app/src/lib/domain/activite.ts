@@ -1,5 +1,5 @@
-import { construireContenu } from "../nostr/passeport";
 import { cleJour } from "./format";
+import { estProuvee, statutVente } from "./statut";
 import type { Vente } from "./types";
 
 const JOUR = 86400;
@@ -16,7 +16,7 @@ export interface Activite {
 export function activite(ventes: Vente[], maintenant = Math.floor(Date.now() / 1000)): Activite {
   const recentes = ventes.filter((v) => v.ts >= maintenant - 30 * JOUR);
   const total = recentes.reduce((s, v) => s + v.montantFcfa, 0);
-  const prouve = recentes.filter((v) => v.type === "lightning").reduce((s, v) => s + v.montantFcfa, 0);
+  const prouve = recentes.filter(estProuvee).reduce((s, v) => s + v.montantFcfa, 0);
   return {
     total,
     nombre: recentes.length,
@@ -46,17 +46,21 @@ export interface ApercuPasseport {
   nbProuvees: number;
   declare: number;
   nbDeclarees: number;
+  /** Ventes du mode démonstration : dans le passeport, l'agent les verra rejetées. */
+  nbDemo: number;
 }
 
-/** Ce que l'agent verra : les mêmes lignes que le passeport signé (une vente Lightning sans facture
- *  ou sans préimage y est déclarée), calculées sans signer. Signer à chaque affichage coûtait une
- *  signature Schnorr par rendu, jusque dans la page voisine d'un balayage. */
-export function apercuPasseport(ventes: Vente[], jours: number): ApercuPasseport {
-  const a: ApercuPasseport = { prouve: 0, nbProuvees: 0, declare: 0, nbDeclarees: 0 };
-  for (const ligne of construireContenu(ventes, jours).lignes) {
-    if (ligne[1] <= 0) continue;
-    if (ligne[2] === "L") { a.prouve += ligne[1]; a.nbProuvees++; }
-    else { a.declare += ligne[1]; a.nbDeclarees++; }
+/** Ce que l'agent verra comme prouvé ou déclaré (une vente Lightning sans facture ou sans préimage
+ *  y est déclarée ; une vente démo y est rejetée), calculé sans signer. Signer à chaque affichage
+ *  coûtait une signature Schnorr par rendu, jusque dans la page voisine d'un balayage. */
+export function apercuPasseport(ventes: Vente[], jours: number, maintenant = Math.floor(Date.now() / 1000)): ApercuPasseport {
+  const a: ApercuPasseport = { prouve: 0, nbProuvees: 0, declare: 0, nbDeclarees: 0, nbDemo: 0 };
+  for (const v of ventes) {
+    if (v.ts < maintenant - jours * JOUR || v.montantFcfa <= 0) continue;
+    const statut = statutVente(v);
+    if (statut === "demo") a.nbDemo++;
+    else if (statut === "prouve" && v.facture && v.preimage) { a.prouve += v.montantFcfa; a.nbProuvees++; }
+    else { a.declare += v.montantFcfa; a.nbDeclarees++; }
   }
   return a;
 }

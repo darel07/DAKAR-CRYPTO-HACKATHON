@@ -87,7 +87,8 @@
 .dock__contenu {
   display: grid; justify-items: center; gap: 2px;
   translate: 0 calc(var(--d) * var(--d) * var(--arc-descente));
-  rotate: calc(var(--d) * var(--arc-inclinaison));
+  /* Droites au repos ; rotation de roue pendant le mouvement seulement (§6.2 corrigé le 19 nov.). */
+  rotate: var(--rotation-roue);
   scale: max(var(--arc-echelle-min), var(--arc-echelle-max) - var(--d-abs) * var(--arc-echelle-pas));
 }
 .dock__icone {
@@ -104,8 +105,12 @@
 
 .dock[data-pret] .dock__onglet { transition: color var(--d-rapide) ease; }
 .dock[data-pret] .dock__contenu {
-  transition: translate var(--d-glisse) var(--ease-ressort), rotate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
+  transition: translate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
 }
+/* Rotation de roue : une seule variable pour toutes les icônes, écrite à chaque image pendant le
+   balayage (sans transition), puis ramenée à 0 avec le ressort quand la roue s'arrête. */
+@property --rotation-roue { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.dock[data-pret]:not([data-glisse]) { transition: --rotation-roue var(--d-glisse) var(--ease-ressort); }
 .dock[data-pret] .dock__icone {
   transition:
     fill-opacity var(--d-apparition) ease var(--d-remplissage-retard),
@@ -356,3 +361,15 @@ button.reglage { cursor: pointer; }
 /* « Créer la connexion automatiquement » ne tient pas sur une ligne à 390 px : il passe à la ligne. */
 .connexion__etape > * { min-inline-size: 0; }
 .connexion__etape .btn { white-space: normal; text-align: center; block-size: auto; min-block-size: var(--bouton-md); padding-block: var(--e-2); }
+
+/* ---- E6 Vente en espèces ou Wave ---- */
+.declarer, .declarer__saisie, .declarer__proposition { display: grid; gap: var(--e-4); }
+.declarer__ligne { display: flex; align-items: flex-start; gap: var(--e-2); }
+.declarer__ligne > .champ { flex: 1; min-inline-size: 0; }
+/* Aligné sur le champ (sous son libellé) ; « bientôt » : contour doux, jamais une couleur seule. */
+.declarer__micro {
+  flex: none; display: grid; place-items: center; margin-block-start: calc(var(--t-texte) * 1.5 + var(--e-1));
+  inline-size: var(--cible-min); block-size: var(--cible-min);
+  border: 1px dashed var(--c-bord-champ); border-radius: var(--rayon-rond); background: var(--c-surface); color: var(--c-texte-doux); cursor: help;
+}
+.declarer__micro svg { inline-size: var(--icone-s); block-size: var(--icone-s); }

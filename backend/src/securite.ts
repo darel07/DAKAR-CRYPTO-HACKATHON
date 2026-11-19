@@ -2,6 +2,9 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { FastifyInstance } from "fastify";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Config } from "./config.js";
 import { erreurs } from "./erreurs.js";
 
@@ -21,7 +24,8 @@ export const CSP = {
   scriptSrc: ["'self'"],
   styleSrc: ["'self'", "'unsafe-inline'"],
   imgSrc: ["'self'", "data:", "blob:"],
-  fontSrc: ["'self'"],
+  // data: : Vite intègre les petits fichiers de police directement dans le CSS.
+  fontSrc: ["'self'", "data:"],
   connectSrc: ["'self'", "wss:", "https://api.coingecko.com"],
   workerSrc: ["'self'"],
   manifestSrc: ["'self'"],
@@ -35,9 +39,27 @@ export const CSP = {
 /** Taille de corps maximale acceptée par le serveur (la charge d'un passeport fait ≤ 64 Kio). */
 export const CORPS_MAX_OCTETS = 72 * 1024;
 
+const SCRIPT_EN_LIGNE = /<script(?![^>]*\bsrc\s*=)[^>]*>([\s\S]*?)<\/script>/gi;
+
+/** Empreintes CSP des scripts en ligne de l'index.html servi (le script qui applique le thème
+ *  avant l'affichage). Seuls ces scripts exacts sont autorisés : un script injecté reste bloqué,
+ *  et une modification du front est prise en compte au prochain démarrage. */
+export function empreintesScriptsEnLigne(html: string): string[] {
+  return [...html.matchAll(SCRIPT_EN_LIGNE)]
+    .map((m) => m[1] ?? "")
+    .filter((code) => code.trim().length > 0)
+    .map((code) => `'sha256-${createHash("sha256").update(code).digest("base64")}'`);
+}
+
+function lireIndex(frontDist: string): string {
+  const chemin = join(frontDist, "index.html");
+  return existsSync(chemin) ? readFileSync(chemin, "utf8") : "";
+}
+
 export async function installerSecurite(app: FastifyInstance, config: Config): Promise<void> {
+  const scriptSrc = [...CSP.scriptSrc, ...empreintesScriptsEnLigne(lireIndex(config.frontDist))];
   await app.register(helmet, {
-    contentSecurityPolicy: { useDefaults: false, directives: CSP },
+    contentSecurityPolicy: { useDefaults: false, directives: { ...CSP, scriptSrc } },
     referrerPolicy: { policy: "no-referrer" },
     crossOriginEmbedderPolicy: false,
   });

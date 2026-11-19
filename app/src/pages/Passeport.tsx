@@ -1,44 +1,165 @@
-import { useMemo, useState } from "react";
-import { Alert, Button, EmptyState } from "../components/ui";
-import { QrCode } from "../components/QrCode";
-import { formatFcfa } from "../lib/domain/format";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Copy, Share2 } from "lucide-react";
+import {
+  Alert, Button, EmptyState, MiniBarChart, QrCode, Segmented, Sheet, Skeleton, StatCard, afficherToast,
+} from "../components/ui";
+import { activite, apercuPasseport, semaine } from "../lib/domain/activite";
+import { formatDateHeure, formatFcfa } from "../lib/domain/format";
+import type { Vente } from "../lib/domain/types";
 import { useVentes } from "../lib/domain/ventesStore";
-import { construireContenu, encoder, signerPasseport, verifier } from "../lib/nostr/passeport";
+import { entreeResume, resumerJour } from "../lib/ia/resumeJour";
+import { construireContenu, encoder, signerPasseport } from "../lib/nostr/passeport";
+import { lienPasseport } from "../lib/nostr/passeportCourt";
+import type { LienPasseport } from "../lib/nostr/passeportCourt";
+import { usePreferences } from "../lib/preferences";
+import { copierTexte } from "../lib/pressePapiers";
 
-const PERIODES = [7, 30, 90] as const;
-/** Au-delà, un QR devient trop dense pour être scanné de façon fiable avec un téléphone d'entrée de gamme. */
+const PERIODES = [
+  { valeur: "7", libelle: "7 jours" },
+  { valeur: "30", libelle: "30 jours" },
+  { valeur: "90", libelle: "90 jours" },
+] as const;
+type Periode = (typeof PERIODES)[number]["valeur"];
+
+/** Au-delà, un QR devient trop dense pour un téléphone d'entrée de gamme. */
 const LIMITE_QR = 1800;
 
-export function Passeport() {
-  const ventes = useVentes();
-  const [jours, setJours] = useState<number>(30);
-  const [lien, setLien] = useState<string | null>(null);
-  const [erreur, setErreur] = useState<string | null>(null);
+const dateCourte = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+/** Carte « Résumé du jour » : texte de l'IA (chiffres agrégés seulement), sinon phrase locale.
+ *  Masquée s'il n'y a aucune vente aujourd'hui. */
+function ResumeDuJour({ ventes }: { ventes: Vente[] }) {
+  const entree = useMemo(() => entreeResume(ventes), [ventes]);
+  const [resume, setResume] = useState<{ pour: typeof entree; texte: string } | null>(null);
+  const idTitre = useId();
+
+  useEffect(() => {
+    if (!entree) return;
+    let actif = true;
+    void resumerJour(entree).then((texte) => { if (actif) setResume({ pour: entree, texte }); });
+    return () => { actif = false; };
+  }, [entree]);
+
+  if (!entree) return null;
+  const texte = resume?.pour === entree ? resume.texte : null;
+  return (
+    <section className="carte resume" aria-labelledby={idTitre} aria-busy={texte === null}>
+      <h3 id={idTitre} className="carte__titre">Résumé du jour</h3>
+      {texte ? <p>{texte}</p> : <><Skeleton largeur="100%" /><Skeleton largeur="70%" /></>}
+    </section>
+  );
+}
+
+/** Feuille « Passeport signé » : QR, Partager, Copier le lien, validité, date de génération. */
+function PasseportSigne({ lien, genereLe, onFermer }: { lien: LienPasseport | null; genereLe: number; onFermer(): void }) {
   const [copie, setCopie] = useState(false);
+  const [affiche, setAffiche] = useState(lien);
+  if (lien && lien !== affiche) { setAffiche(lien); setCopie(false); }
+  const l = lien ?? affiche;
+  const partageable = typeof navigator.share === "function";
+  const minuteur = useRef(0);
+  useEffect(() => () => window.clearTimeout(minuteur.current), []);
 
-  const apercu = useMemo(() => verifier(signerPasseport(construireContenu(ventes, jours))), [ventes, jours]);
-  const total = apercu.totalProuve + apercu.totalDeclare;
-
-  const generer = async () => {
-    setErreur(null); setCopie(false);
+  // « Lien copié » sur le bouton (vu) et dans une région role=status hors du bouton (annoncé :
+  // un texte qui change à l'intérieur d'un bouton ne l'est pas de façon fiable), effacé après 2 s.
+  const copier = async () => {
+    if (!l) return;
+    const ok = await copierTexte(l.url);
+    if (!ok) { afficherToast("Copie impossible sur ce téléphone.", { niveau: "erreur" }); return; }
+    window.clearTimeout(minuteur.current);
+    setCopie(true);
+    minuteur.current = window.setTimeout(() => setCopie(false), 2000);
+  };
+  const partager = async () => {
+    if (!l) return;
     try {
-      const charge = await encoder(signerPasseport(construireContenu(ventes, jours)));
-      setLien(`${window.location.origin}${window.location.pathname}#/preteur/${charge}`);
-    } catch {
-      setErreur("Impossible de générer le passeport sur cet appareil. Mettez à jour votre navigateur.");
+      await navigator.share({ title: "Mon passeport de revenus", text: "Voici mon passeport de revenus, signé et vérifiable :", url: l.url });
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) void copier();
     }
   };
 
-  const copier = async () => {
-    if (!lien) return;
-    try { await navigator.clipboard.writeText(lien); setCopie(true); } catch { setErreur("Copie impossible. Sélectionnez le lien à la main."); }
+  return (
+    <Sheet
+      ouvert={lien !== null}
+      onFermer={onFermer}
+      titre="Passeport signé"
+      pied={l && (
+        <>
+          {partageable && <Button bloc icone={<Share2 aria-hidden="true" />} onClick={partager} data-autofocus>Partager</Button>}
+          <Button variante="secondaire" bloc icone={<Copy aria-hidden="true" />} onClick={copier}>{copie ? "Lien copié" : "Copier le lien"}</Button>
+        </>
+      )}
+    >
+      {l && (
+        <>
+          <p>Montrez ce code ou envoyez le lien à l'agent de microfinance.</p>
+          {l.url.length <= LIMITE_QR
+            ? <div className="qr"><QrCode valeur={l.url} label="QR code du passeport de revenus" /></div>
+            : <Alert niveau="info">Votre passeport est trop détaillé pour un code QR. Envoyez le lien.</Alert>}
+          {l.court && (
+            <p className="texte-secondaire passeport__validite">
+              Lien valable 30 jours{l.expireLe ? `, jusqu'au ${dateCourte.format(new Date(l.expireLe * 1000))}` : ""}.
+            </p>
+          )}
+          <p className="texte-secondaire passeport__validite">Généré le {formatDateHeure(genereLe)}</p>
+          <p className="sr-only" role="status">{copie ? "Lien copié" : ""}</p>
+        </>
+      )}
+    </Sheet>
+  );
+}
+
+/** E9 : activité et passeport de revenus. */
+export function Passeport() {
+  const ventes = useVentes();
+  const { cleSauvegardee } = usePreferences();
+  const [periode, setPeriode] = useState<Periode>("30");
+  const [generation, setGeneration] = useState(false);
+  const [lien, setLien] = useState<LienPasseport | null>(null);
+  const [genereLe, setGenereLe] = useState(0);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const idActivite = useId();
+  const idPasseport = useId();
+
+  const stats = useMemo(() => activite(ventes), [ventes]);
+  const jours = useMemo(() => semaine(ventes), [ventes]);
+  const apercu = useMemo(() => apercuPasseport(ventes, Number(periode)), [ventes, periode]);
+  const total = apercu.prouve + apercu.declare;
+
+  const generer = async () => {
+    setErreur(null);
+    setGeneration(true);
+    try {
+      const contenu = construireContenu(ventes, Number(periode));
+      const charge = await encoder(signerPasseport(contenu));
+      const l = await lienPasseport(charge);
+      setGenereLe(contenu.fin);
+      setLien(l);
+    } catch {
+      setErreur("Impossible de générer le passeport sur ce téléphone. Mettez à jour votre navigateur.");
+    } finally {
+      setGeneration(false);
+    }
   };
+
+  const rappel = !cleSauvegardee && (
+    <Alert niveau="attention" action={<a href="#/cle">Sauvegarder ma clé</a>}>
+      Sauvegardez votre clé pour ne pas perdre vos preuves.
+    </Alert>
+  );
 
   if (ventes.length === 0) {
     return (
       <>
-        <header className="page-titre"><h1>Mon passeport</h1></header>
-        <EmptyState titre="Pas encore de ventes">Enregistrez quelques ventes : votre passeport de revenus se construit à partir d'elles.</EmptyState>
+        <header className="page-titre">
+          <h1>Mon passeport</h1>
+          <p>Une preuve de vos revenus, que l'agent de microfinance peut vérifier lui-même.</p>
+        </header>
+        {rappel}
+        <EmptyState titre="Pas encore de ventes">
+          Enregistrez quelques ventes : votre passeport se construit à partir d'elles.
+        </EmptyState>
       </>
     );
   }
@@ -49,36 +170,44 @@ export function Passeport() {
         <h1>Mon passeport</h1>
         <p>Une preuve de vos revenus, que l'agent de microfinance peut vérifier lui-même.</p>
       </header>
+      {rappel}
 
-      <div className="segments" role="group" aria-label="Période">
-        {PERIODES.map((p) => (
-          <Button key={p} variante={p === jours ? "primaire" : "secondaire"} aria-pressed={p === jours}
-            onClick={() => { setJours(p); setLien(null); }}>{p} jours</Button>
-        ))}
-      </div>
+      <section className="rubrique" aria-labelledby={idActivite}>
+        <h2 id={idActivite}>Mon activité</h2>
+        <div className="passeport__stats">
+          <StatCard valeur={formatFcfa(stats.total)} libelle="Ventes sur 30 jours" />
+          <StatCard valeur={String(stats.nombre)} libelle="Nombre de ventes" variation="sur 30 jours" />
+          <StatCard valeur={formatFcfa(stats.panierMoyen)} libelle="Panier moyen" />
+          <StatCard
+            ton="prouve"
+            valeur={stats.partProuvee === null ? "—" : `${Math.round(stats.partProuvee * 100)} %`}
+            libelle="Part prouvée"
+          />
+        </div>
+        <MiniBarChart jours={jours} />
+      </section>
 
-      <div className="chiffre-cle">
-        <span className="chiffre-cle__valeur">{formatFcfa(total)}</span>
-        <span className="chiffre-cle__libelle">
-          dont {formatFcfa(apercu.totalProuve)} prouvés ({apercu.nbProuvees}) et {formatFcfa(apercu.totalDeclare)} déclarés ({apercu.nbDeclarees})
-        </span>
-      </div>
+      <ResumeDuJour ventes={ventes} />
 
-      {total === 0 && <Alert niveau="info">Aucune vente sur cette période.</Alert>}
-      {erreur && <Alert niveau="erreur">{erreur}</Alert>}
+      <section className="rubrique" aria-labelledby={idPasseport}>
+        <h2 id={idPasseport}>Mon passeport de revenus</h2>
+        <Segmented label="Période du passeport" options={PERIODES} valeur={periode} onChange={setPeriode} bloc />
+        <div className="chiffre-cle">
+          <span className="chiffre-cle__valeur chiffres">{formatFcfa(total)}</span>
+          <span className="chiffre-cle__libelle">
+            {total === 0
+              ? "Aucune vente sur cette période."
+              : <>dont {formatFcfa(apercu.prouve)} prouvés ({apercu.nbProuvees}) et {formatFcfa(apercu.declare)} déclarés ({apercu.nbDeclarees})</>}
+          </span>
+        </div>
+        <p className="texte-secondaire">Plus la part prouvée est grande, plus votre passeport est solide.</p>
+        {erreur && <Alert niveau="erreur">{erreur}</Alert>}
+        <Button taille="lg" bloc onClick={generer} disabled={total === 0} chargement={generation && "Génération du passeport…"}>
+          Générer mon passeport
+        </Button>
+      </section>
 
-      <Button grand bloc onClick={generer} disabled={total === 0}>Générer mon passeport</Button>
-
-      {lien && (
-        <section className="rubrique" aria-live="polite">
-          <Alert niveau="succes" titre="Passeport signé">Montrez le code ou envoyez le lien à l'agent de microfinance.</Alert>
-          {lien.length <= LIMITE_QR
-            ? <div className="qr"><QrCode valeur={lien} alt="Code QR du passeport de revenus" /></div>
-            : <Alert niveau="info">Votre passeport est trop détaillé pour un code QR. Envoyez le lien.</Alert>}
-          <p className="lien-partage">{lien}</p>
-          <Button variante="secondaire" bloc onClick={copier}>{copie ? "Lien copié" : "Copier le lien"}</Button>
-        </section>
-      )}
+      <PasseportSigne lien={lien} genereLe={genereLe} onFermer={() => setLien(null)} />
     </>
   );
 }

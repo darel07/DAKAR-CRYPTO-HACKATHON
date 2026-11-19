@@ -1,6 +1,9 @@
 /** Une vente est soit encaissée en Lightning (prouvée), soit saisie à la main (déclarée). */
 export type TypeVente = "lightning" | "declaree";
 
+/** Moyen d'une vente déclarée (E6). Absent sur les anciennes ventes. */
+export type MoyenVente = "especes" | "wave" | "autre";
+
 export interface Vente {
   id: string;
   /** Horodatage en secondes Unix. */
@@ -8,6 +11,8 @@ export interface Vente {
   montantFcfa: number;
   type: TypeVente;
   libelle: string;
+  /** Vente déclarée : espèces, Wave ou autre (choisi sur E6). */
+  moyen?: MoyenVente;
   /** Présents seulement pour une vente Lightning : preuve de règlement. */
   facture?: string;
   preimage?: string;

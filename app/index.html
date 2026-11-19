@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme="clair">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0B5D44" />
-    <meta name="description" content="Encaissez, gardez vos ventes et prouvez vos revenus pour obtenir un crédit." />
+    <meta name="theme-color" content="#18324A" />
+    <meta name="description" content="Encaissez en FCFA, recevez en bitcoin Lightning et prouvez vos revenus pour obtenir un crédit." />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icone.svg" type="image/svg+xml" />
-    <title>Passeport de revenus</title>
+    <title>Caisse Lightning</title>
+    <!-- Applies the saved theme before the first paint (no flash). Light by default,
+         never follows the system theme (brief decision). Key: lib/preferences.ts. -->
+    <script>
+      try {
+        var p = JSON.parse(localStorage.getItem("caisse.preferences.v1") || "{}");
+        if (p.theme === "sombre") {
+          document.documentElement.dataset.theme = "sombre";
+          document.querySelector('meta[name="theme-color"]').setAttribute("content", "#101820");
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="racine"></div>

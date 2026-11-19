@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-type Ton = "prouve" | "declare" | "neutre";
+export type TonBadge = "prouve" | "declare" | "neutre" | "ambre";
 
 /** Le libellé porte toujours le sens : la couleur seule ne suffit jamais. */
-export function Badge({ ton, children }: { ton: Ton; children: ReactNode }) {
-  return <span className={`pastille pastille--${ton}`}>{children}</span>;
+export function Badge({ ton, icone, children }: { ton: TonBadge; icone?: ReactNode; children: ReactNode }) {
+  return <span className={`pastille pastille--${ton}`}>{icone}{children}</span>;
 }

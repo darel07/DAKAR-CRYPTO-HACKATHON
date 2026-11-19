@@ -1,18 +1,36 @@
 import { useEffect, useState } from "react";
-import { chargerTaux } from "./fx/taux";
+import { chargerTaux, lireCache } from "./fx/taux";
 import type { Taux } from "./fx/taux";
 
 interface EtatTaux { taux: Taux | null; chargement: boolean }
 
-/** Lit le cours une fois au montage ; annulé au démontage pour ne pas écraser un état périmé. */
+/** Rafraîchissement tant que l'écran reste ouvert (un étal reste ouvert des heures). */
+const RAFRAICHIR_MS = 5 * 60 * 1000;
+
+/** Cours BTC/FCFA. Le dernier cours connu s'affiche dès la première image, puis le cours
+ *  est relu au montage, toutes les 5 minutes et au retour du réseau. Annulé au démontage. */
 export function useTaux(): EtatTaux {
-  const [etat, setEtat] = useState<EtatTaux>({ taux: null, chargement: true });
+  const [etat, setEtat] = useState<EtatTaux>(() => ({ taux: lireCache(), chargement: true }));
+
   useEffect(() => {
-    const ctrl = new AbortController();
-    chargerTaux(ctrl.signal)
-      .then((taux) => setEtat({ taux, chargement: false }))
-      .catch((e) => { if (!(e instanceof DOMException && e.name === "AbortError")) setEtat({ taux: null, chargement: false }); });
-    return () => ctrl.abort();
+    let ctrl = new AbortController();
+    const charger = () => {
+      ctrl.abort();
+      ctrl = new AbortController();
+      const { signal } = ctrl;
+      chargerTaux(signal)
+        .then((taux) => { if (!signal.aborted) setEtat((e) => ({ taux: taux ?? e.taux, chargement: false })); })
+        .catch(() => { if (!signal.aborted) setEtat((e) => ({ ...e, chargement: false })); });
+    };
+    charger();
+    const minuteur = window.setInterval(charger, RAFRAICHIR_MS);
+    window.addEventListener("online", charger);
+    return () => {
+      ctrl.abort();
+      window.clearInterval(minuteur);
+      window.removeEventListener("online", charger);
+    };
   }, []);
+
   return etat;
 }

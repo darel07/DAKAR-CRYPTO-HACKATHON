@@ -196,11 +196,14 @@
 .total__valeur { font-family: var(--f-titre); font-size: var(--t-titre-section); font-weight: 700; }
 .total__libelle { font-size: var(--t-secondaire); font-weight: 700; }
 
-.jour { display: grid; gap: var(--e-2); }
-.jour__titre { font-size: var(--t-secondaire); font-weight: 700; color: var(--c-texte-doux); text-transform: capitalize; padding-top: var(--e-2); }
-.ligne { display: grid; grid-template-columns: 1fr auto; gap: var(--e-1) var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
-.ligne__montant { font-family: var(--f-titre); font-weight: 700; text-align: right; }
-.ligne__meta { grid-column: 1 / -1; display: flex; gap: var(--e-2); align-items: center; color: var(--c-texte-doux); font-size: var(--t-secondaire); }
+/* E7 : deux StatCard côte à côte (Prouvé, Déclaré). */
+.historique__totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+/* E8 : détail d'une vente dans la feuille. */
+.detail__libelle { font-size: var(--t-sous-titre); font-weight: 600; text-align: center; overflow-wrap: anywhere; }
+.detail__lignes { display: grid; gap: var(--e-2); margin: 0; }
+.detail__lignes > div { display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); padding-block: var(--e-2); border-block-end: 1px solid var(--c-bord); }
+.detail__lignes dt { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
+.detail__lignes dd { margin: 0; font-weight: 600; text-align: end; }
 
 /* ---- Passeport et vue prêteur ---- */
 .chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }

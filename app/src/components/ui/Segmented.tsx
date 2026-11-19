@@ -31,7 +31,8 @@ export function Segmented<T extends string>({ options, valeur, onChange, label, 
   }, [valeur]);
 
   return (
-    <div ref={groupe} className={`segments${bloc ? " segments--bloc" : ""}`} role="group" aria-label={label}>
+    // data-sans-balayage : un glissement horizontal sur le groupe le fait défiler, il ne change pas d'onglet.
+    <div ref={groupe} className={`segments${bloc ? " segments--bloc" : ""}`} role="group" aria-label={label} data-sans-balayage="">
       {options.map((o) => (
         <button
           key={o.valeur}

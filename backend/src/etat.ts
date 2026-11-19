@@ -1,6 +1,7 @@
 import type { Base } from "./base.js";
 import type { Config } from "./config.js";
-import { creerClientClaude, type ClientIA } from "./ia/claude.js";
+import type { ClientIA } from "./ia/claude.js";
+import { creerClientIA } from "./ia/fabrique.js";
 import { creerServiceIA, type ServiceIA } from "./ia/service.js";
 import { creerDepotPasseports, type DepotPasseports } from "./passeports/depot.js";
 import { creerServicePasseports, type ServicePasseports } from "./passeports/service.js";
@@ -37,12 +38,7 @@ export interface Substitutions {
 }
 
 export function creerEtat(config: Config, db: Base, sub: Substitutions = {}): Etat {
-  const clientIA =
-    sub.clientIA !== undefined
-      ? sub.clientIA
-      : config.anthropicApiKey
-        ? creerClientClaude(config.anthropicApiKey, config.iaModele)
-        : null;
+  const clientIA = sub.clientIA !== undefined ? sub.clientIA : creerClientIA(config);
   const depotPasseports = creerDepotPasseports(db);
   return {
     config,

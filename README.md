@@ -134,7 +134,7 @@ Une petite API **sans compte et sans secret utilisateur** (dossier `backend/`, F
 docker compose up        # puis http://localhost:8080
 ```
 
-Sans aucune variable : application, passeport de démonstration (`http://localhost:8080/#/preteur/p/demo000000`), analyse et résumé par règles locales. Pour activer Claude : `ANTHROPIC_API_KEY=... docker compose up`.
+Sans aucune variable : application, passeport de démonstration (`http://localhost:8080/#/preteur/p/demo000000`), analyse et résumé par règles locales. Pour activer l'IA : Claude (`ANTHROPIC_API_KEY=... docker compose up`) ou un fournisseur gratuit compatible OpenAI, par exemple Groq : `IA_FOURNISSEUR=compatible-openai IA_URL_BASE=https://api.groq.com/openai/v1 IA_CLE=... IA_MODELE=... docker compose up`.
 
 Développement du back seul :
 
@@ -165,13 +165,13 @@ Documentation OpenAPI : `/api/docs` (interface) et `/api/openapi.json`. Erreurs 
 
 ### Variables d'environnement
 
-Toutes facultatives ; voir `backend/.env.example`. Les principales : `ANTHROPIC_API_KEY` (absente : règles locales), `IA_MODELE` (`claude-opus-5-5`), `PUBLIC_URL`, `CORS_ORIGINS` (jamais `*`), `DATABASE_PATH`, `TRUST_PROXY`, `SEED_DEMO`. Une valeur invalide empêche le démarrage, avec un message qui donne les valeurs admises.
+Toutes facultatives ; voir `backend/.env.example`. IA : `IA_FOURNISSEUR=anthropic` avec `ANTHROPIC_API_KEY`, ou `IA_FOURNISSEUR=compatible-openai` avec `IA_URL_BASE`, `IA_CLE` et `IA_MODELE` (Groq ou Gemini, offres gratuites sans carte ; Ollama en local) ; sans configuration, règles locales. Les autres : `PUBLIC_URL`, `CORS_ORIGINS` (jamais `*`), `DATABASE_PATH`, `TRUST_PROXY`, `SEED_DEMO`. Une valeur invalide empêche le démarrage, avec un message qui donne les valeurs admises.
 
 ### Mode dégradé
 
 | Panne | Comportement |
 |---|---|
-| Claude absent, en erreur, trop lent (8 s) ou qui refuse | Règle locale, réponse 200 avec `"source": "regle"` ; jamais de 5xx |
+| IA (Claude ou fournisseur compatible) absente, en erreur, trop lente (8 s), qui refuse ou répond hors schéma | Règle locale, réponse 200 avec `"source": "regle"` ; jamais de 5xx |
 | Résumé de Claude qui cite un chiffre absent des entrées | Résumé par gabarit (`"source": "modele"`) |
 | CoinGecko en panne | mempool.space |
 | Tous les fournisseurs de cours en panne | Dernier cours connu (`"enCache": true`) ; 503 seulement si aucun cours n'a jamais été obtenu |

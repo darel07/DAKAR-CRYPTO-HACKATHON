@@ -1,5 +1,7 @@
-import { lireConfig } from "./config.js";
-import { creerClientClaude } from "./ia/claude.js";
+import { lireConfig, type Config } from "./config.js";
+import type { ClientIA } from "./ia/claude.js";
+import { listerModeles } from "./ia/compatibleOpenai.js";
+import { creerClientIA, descriptionIA } from "./ia/fabrique.js";
 import { analyserParRegle } from "./ia/regle.js";
 import { resumeAcceptable } from "./ia/resume.js";
 
@@ -26,33 +28,50 @@ const CHIFFRES = {
   articlesFrequents: ["riz", "huile"],
 };
 
-async function principal(): Promise<void> {
-  const config = lireConfig();
-  if (!config.anthropicApiKey) {
-    console.error(
-      "ANTHROPIC_API_KEY absente : ajoutez-la dans backend/.env (jamais dans le chat ni un commit).",
-    );
-    process.exit(2);
-  }
-  const ia = creerClientClaude(config.anthropicApiKey, config.iaModele);
+/** Sans IA_MODELE : liste les modèles du fournisseur. Vrai si la liste a été affichée. */
+async function listerSiBesoin(config: Config): Promise<boolean> {
+  if (config.iaFournisseur !== "compatible-openai" || !config.iaCle || !config.iaUrlBase || config.iaModele)
+    return false;
+  const modeles = await listerModeles(config.iaUrlBase, config.iaCle);
+  console.log(`IA_MODELE est vide. Modèles disponibles :\n  ${modeles.join("\n  ")}`);
+  console.log(
+    "\nChoisissez-en un (un modèle « instruct » de taille moyenne suffit), mettez-le dans IA_MODELE, relancez.",
+  );
+  return true;
+}
+
+async function essayerAnalyses(ia: ClientIA): Promise<number> {
   let ok = 0;
   for (const cas of CAS) {
     const debut = Date.now();
     const r = await ia.analyser(cas.texte).catch((e: unknown) => (e instanceof Error ? e.message : "erreur"));
     const ms = Date.now() - debut;
-    const montant = typeof r === "object" && r ? r.montantFcfa : undefined;
-    const juste = montant === cas.montant;
+    const juste = (typeof r === "object" && r ? r.montantFcfa : undefined) === cas.montant;
     ok += juste ? 1 : 0;
     const regle = analyserParRegle(cas.texte).montantFcfa;
     console.log(
       `${juste ? "OK " : "KO "} ${ms} ms | « ${cas.texte} » → ${JSON.stringify(r)} | règle : ${regle}`,
     );
   }
+  return ok;
+}
+
+async function principal(): Promise<void> {
+  const config = lireConfig();
+  if (await listerSiBesoin(config)) return;
+  const ia = creerClientIA(config);
+  if (!ia) {
+    console.error(
+      "IA non configurée : renseignez backend/.env (voir .env.example), jamais dans le chat ni un commit.",
+    );
+    process.exit(2);
+  }
+  console.log(`Modèle : ${descriptionIA(config)}\n`);
+  const ok = await essayerAnalyses(ia);
   const resume = await ia.resumer(CHIFFRES);
-  console.log(
-    `\nRésumé : ${resume}\nGarde-fou : ${resume && resumeAcceptable(resume, CHIFFRES) ? "accepté" : "rejeté"}`,
-  );
-  console.log(`\n${ok}/${CAS.length} montants justes (modèle ${config.iaModele}).`);
+  const garde = resume && resumeAcceptable(resume, CHIFFRES) ? "accepté" : "rejeté";
+  console.log(`\nRésumé : ${resume}\nGarde-fou : ${garde}`);
+  console.log(`\n${ok}/${CAS.length} montants justes (${descriptionIA(config)}).`);
 }
 
 await principal();

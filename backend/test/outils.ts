@@ -38,15 +38,15 @@ export async function appDeTest(sub: Substitutions = {}, avantRoutes?: (app: Fas
   return { app, etat, db, journaux: () => journaux.join("") };
 }
 
-type Ligne = [number, number, "D"] | [number, number, "L", string, string];
+type Ligne = [number, number, "D"] | [number, number, "L", string, string, ...unknown[]];
 
 /** Fabrique une charge de passeport signée, au format exact de `encoder()` du front. */
 export function chargeSignee(
-  options: { lignes?: Ligne[]; kind?: number; etiquette?: string; alterer?: boolean } = {},
+  options: { lignes?: Ligne[]; kind?: number; etiquette?: string; alterer?: boolean; v?: number } = {},
 ): string {
   const fin = Math.floor(Date.now() / 1000);
   const contenu = {
-    v: 1,
+    v: options.v ?? 1,
     devise: "XOF",
     debut: fin - 30 * 86_400,
     fin,

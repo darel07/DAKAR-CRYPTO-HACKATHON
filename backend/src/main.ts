@@ -16,8 +16,11 @@ async function demarrer(): Promise<void> {
   if (!etat.ia.active) app.log.warn("ANTHROPIC_API_KEY absente : analyse et résumé par règles locales");
   if (config.seedDemo) semerDemo(etat.depotPasseports);
 
-  // Nettoyage des passeports expirés dans le processus (limite connue : un seul réplica).
-  const nettoyage = setInterval(() => etat.passeports.purger(), UNE_HEURE_MS);
+  // Nettoyage des passeports et reçus expirés dans le processus (limite connue : un seul réplica).
+  const nettoyage = setInterval(() => {
+    etat.passeports.purger();
+    etat.recus.purger();
+  }, UNE_HEURE_MS);
   nettoyage.unref();
 
   const arreter = async () => {

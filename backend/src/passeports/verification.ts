@@ -19,13 +19,16 @@ const Evenement = z.object({
   sig: z.string().regex(/^[0-9a-f]{128}$/),
 });
 
+// Les éléments au-delà des 5 premiers d'une ligne Lightning sont acceptés sans être interprétés :
+// le front y ajoute le cours du jour (v2, issue #37) et la contresignature du client (#18).
+// Le serveur ne recalcule rien ; la vue prêteur vérifie tout.
 const Ligne = z.union([
-  z.tuple([z.number(), z.number(), z.literal("L"), z.string(), z.string()]),
+  z.tuple([z.number(), z.number(), z.literal("L"), z.string(), z.string()]).rest(z.unknown()),
   z.tuple([z.number(), z.number(), z.literal("D")]),
 ]);
 
 const Contenu = z.object({
-  v: z.literal(1),
+  v: z.union([z.literal(1), z.literal(2)]),
   devise: z.literal("XOF"),
   debut: z.number().int(),
   fin: z.number().int(),

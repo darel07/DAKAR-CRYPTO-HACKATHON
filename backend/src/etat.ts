@@ -4,6 +4,8 @@ import { creerClientClaude, type ClientIA } from "./ia/claude.js";
 import { creerServiceIA, type ServiceIA } from "./ia/service.js";
 import { creerDepotPasseports, type DepotPasseports } from "./passeports/depot.js";
 import { creerServicePasseports, type ServicePasseports } from "./passeports/service.js";
+import { creerDepotRecus } from "./recus/depot.js";
+import { creerServiceRecus, type ServiceRecus } from "./recus/service.js";
 import { creerDepotTaux } from "./taux/depot.js";
 import { FOURNISSEURS_PAR_DEFAUT, type Fournisseur } from "./taux/fournisseurs.js";
 import { creerServiceTaux, type ServiceTaux } from "./taux/service.js";
@@ -15,6 +17,7 @@ export interface Etat {
   ia: ServiceIA;
   taux: ServiceTaux;
   passeports: ServicePasseports;
+  recus: ServiceRecus;
   depotPasseports: DepotPasseports;
 }
 
@@ -39,6 +42,7 @@ export function creerEtat(config: Config, db: Base, sub: Substitutions = {}): Et
     ia: creerServiceIA(clientIA, sub.delaiIaMs),
     taux: creerServiceTaux(creerDepotTaux(db), sub.fournisseurs ?? FOURNISSEURS_PAR_DEFAUT),
     passeports: creerServicePasseports(depotPasseports, config.publicUrl),
+    recus: creerServiceRecus(creerDepotRecus(db), config.publicUrl),
     depotPasseports,
   };
 }

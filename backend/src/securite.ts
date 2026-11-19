@@ -17,6 +17,9 @@ export const LIMITES = {
   ia: { max: 20, timeWindow: "1 minute" },
   creationPasseport: { max: 10, timeWindow: "1 hour" },
   lecturePasseport: { max: 60, timeWindow: "1 minute" },
+  // Un reçu par vente Lightning : un commerçant actif peut en créer plusieurs dizaines par heure.
+  creationRecu: { max: 120, timeWindow: "1 hour" },
+  confirmation: { max: 10, timeWindow: "1 minute" },
 } as const;
 
 export const CSP = {

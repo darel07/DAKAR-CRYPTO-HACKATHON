@@ -13,7 +13,7 @@ async function demarrer(): Promise<void> {
   const etat = creerEtat(config, db);
   const app = await construireApp(etat);
 
-  if (!etat.ia.active) app.log.warn("ANTHROPIC_API_KEY absente : analyse et résumé par règles locales");
+  if (!etat.ia.active) app.log.warn("IA non configurée : analyse et résumé par règles locales");
   if (config.seedDemo) semerDemo(etat.depotPasseports);
 
   // Nettoyage des passeports et reçus expirés dans le processus (limite connue : un seul réplica).

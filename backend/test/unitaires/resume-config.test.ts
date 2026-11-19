@@ -45,6 +45,7 @@ describe("configuration", () => {
     expect(c).toMatchObject({
       port: 8080,
       anthropicApiKey: undefined,
+      iaFournisseur: "anthropic",
       seedDemo: false,
       iaModele: "claude-opus-5-5",
     });

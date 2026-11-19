@@ -106,6 +106,24 @@ Dans les **Réglages**, collez le lien de connexion NWC d'Alby Hub ou LNbits, ou
 | Backend : cours en cache, analyse et résumé par Claude, liens courts, `docker compose up` | fait côté serveur (branche `back`) ; à brancher dans le front |
 | Wolof | à faire |
 
+### Tester un vrai paiement sans posséder de wallet
+
+Le [faucet NWC d'Alby](https://github.com/getAlby/nwc-faucet) crée en une requête un wallet de test (sats sans valeur) relié par NWC à Alby Hub. Les factures sont de vraies factures Lightning (`lnbc…`), réglées avec une vraie préimage.
+
+```bash
+curl -X POST "https://faucet.nwc.dev?balance=1000"     # renvoie un lien nostr+walletconnect://…
+```
+
+1. Dans l'app : Connexion, coller le lien. L'app prévient que cette connexion peut dépenser (le wallet de test autorise tout) : « Continuer quand même ».
+2. Encaisser un montant, puis « Copier la facture ».
+3. Faire payer la facture par le faucet, qui joue le téléphone du client :
+   ```bash
+   curl -X POST "https://faucet.nwc.dev/pay-invoice?invoice=lnbc…"
+   ```
+4. L'écran passe à « Paiement reçu », pastille **Prouvé** ; le passeport et la vue prêteur comptent ce paiement comme vérifié.
+
+Parcours vérifié le 19 novembre 2026 : facture de 1 357 sats pour 500 FCFA, réglée, reçu confirmé par un client, passeport « 1 paiement vérifié, 1 paiement confirmé par 1 client, montant contrôlé au cours du jour ».
+
 ## 4 ter. Backend
 
 Une petite API **sans compte et sans secret utilisateur** (dossier `backend/`, Fastify 5 et TypeScript). Le backend ne voit jamais le lien de connexion du portefeuille, la clé de signature ni une facture : le paiement se passe entre le téléphone et le portefeuille. S'il est éteint, le front continue de marcher.
@@ -116,7 +134,7 @@ Une petite API **sans compte et sans secret utilisateur** (dossier `backend/`, F
 docker compose up        # puis http://localhost:8080
 ```
 
-Sans aucune variable : application, passeport de démonstration (`http://localhost:8080/#/preteur/p/demo000000`), analyse et résumé par règles locales. Pour activer Claude : `ANTHROPIC_API_KEY=... docker compose up`.
+Sans aucune variable : application, passeport de démonstration (`http://localhost:8080/#/preteur/p/demo000000`), analyse et résumé par règles locales. Pour activer l'IA : Claude (`ANTHROPIC_API_KEY=... docker compose up`) ou un fournisseur gratuit compatible OpenAI, par exemple Groq : `IA_FOURNISSEUR=compatible-openai IA_URL_BASE=https://api.groq.com/openai/v1 IA_CLE=... IA_MODELE=... docker compose up`.
 
 Développement du back seul :
 
@@ -147,13 +165,13 @@ Documentation OpenAPI : `/api/docs` (interface) et `/api/openapi.json`. Erreurs 
 
 ### Variables d'environnement
 
-Toutes facultatives ; voir `backend/.env.example`. Les principales : `ANTHROPIC_API_KEY` (absente : règles locales), `IA_MODELE` (`claude-opus-5-5`), `PUBLIC_URL`, `CORS_ORIGINS` (jamais `*`), `DATABASE_PATH`, `TRUST_PROXY`, `SEED_DEMO`. Une valeur invalide empêche le démarrage, avec un message qui donne les valeurs admises.
+Toutes facultatives ; voir `backend/.env.example`. IA : `IA_FOURNISSEUR=anthropic` avec `ANTHROPIC_API_KEY`, ou `IA_FOURNISSEUR=compatible-openai` avec `IA_URL_BASE`, `IA_CLE` et `IA_MODELE` (Groq ou Gemini, offres gratuites sans carte ; Ollama en local) ; sans configuration, règles locales. Les autres : `PUBLIC_URL`, `CORS_ORIGINS` (jamais `*`), `DATABASE_PATH`, `TRUST_PROXY`, `SEED_DEMO`. Une valeur invalide empêche le démarrage, avec un message qui donne les valeurs admises.
 
 ### Mode dégradé
 
 | Panne | Comportement |
 |---|---|
-| Claude absent, en erreur, trop lent (8 s) ou qui refuse | Règle locale, réponse 200 avec `"source": "regle"` ; jamais de 5xx |
+| IA (Claude ou fournisseur compatible) absente, en erreur, trop lente (8 s), qui refuse ou répond hors schéma | Règle locale, réponse 200 avec `"source": "regle"` ; jamais de 5xx |
 | Résumé de Claude qui cite un chiffre absent des entrées | Résumé par gabarit (`"source": "modele"`) |
 | CoinGecko en panne | mempool.space |
 | Tous les fournisseurs de cours en panne | Dernier cours connu (`"enCache": true`) ; 503 seulement si aucun cours n'a jamais été obtenu |
@@ -277,6 +295,7 @@ Conséquences :
 - [`docs/PARCOURS_ET_ECRANS.md`](docs/PARCOURS_ET_ECRANS.md) : acteurs, parcours et écrans.
 - [`docs/ECRANS_APP.md`](docs/ECRANS_APP.md) : écrans réels de l'application, décision PWA, issues proposées.
 - [`docs/ETUDE_MARCHE.md`](docs/ETUDE_MARCHE.md) : synthèse de l'étude de marché et de concurrence.
+- [`docs/SCRIPT_DEMO.md`](docs/SCRIPT_DEMO.md) : script de la vidéo de démo, plan par plan, avec préparation et consignes de montage.
 
 ## 11. Répartition de l’équipe
 À compléter une fois les compétences de chacun connues.

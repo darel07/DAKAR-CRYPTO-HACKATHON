@@ -328,7 +328,9 @@ Chaque composant : un fichier < 300 lignes, rendu < 30 lignes par fonction, vari
 | 3 | Passeport | `ShieldCheck` | `#/passeport` |
 | 4 | Réglages | `Settings` | `#/reglages` |
 
-**Indicateur liquid glass (reproduction de la vidéo, recoloré en ambre)**
+> **Remplacé le 19 nov. au soir (accord de l'utilisateur, PR #51) : la pièce qui roule.** L'indicateur n'est plus une pastille liquid glass mais une **pièce ambrée de 40 px** sous l'icône de l'onglet actif (tranche crantée, anneau gravé, icône foncée posée dessus, libellé en dessous). Sa position ET sa rotation suivent `--progression` avec la même transition (`--d-roule` 560 ms, `--ease-ressort`) : elle tourne de `--piece-tour` (240°, un pas d'onglet ÷ son rayon) par onglet, donc elle roule sans glisser ; pendant un balayage elle suit le doigt. Les icônes ne tournent plus et ne grossissent plus (la pièce marque l'onglet actif). Mouvement réduit : elle se pose sans rouler. Les spécifications de la pastille et de la rotation des icônes ci-dessous sont historiques.
+
+**Indicateur liquid glass (reproduction de la vidéo, recoloré en ambre) : historique, voir ci-dessus**
 - Pastille derrière l'onglet actif : 68 × 56 px, rayon 28 px.
 - Matière : `linear-gradient(180deg, rgb(242 194 122 / .55), rgb(217 154 69 / .38))`, reflet `radial-gradient(ellipse at 50% 18%, rgb(255 255 255 / .75), transparent 55%)`, lueur `0 0 18px rgb(217 154 69 / .45)`, liseré `inset 0 0 0 1px rgb(255 255 255 / .55)`, ombre intérieure basse `inset 0 -6px 12px rgb(217 154 69 / .25)`. Aucun `backdrop-filter` sur la pastille.
 - **Étirement liquide** (ce que montre la vidéo à 1,8 s et 4,6 s : la pastille devient une capsule qui couvre l'ancien et le nouvel onglet, puis se rétracte) : la pastille est positionnée par deux variables `--bord-gauche` et `--bord-droit`. Au changement d'onglet :
@@ -342,7 +344,7 @@ Chaque composant : un fichier < 300 lignes, rendu < 30 lignes par fonction, vari
 **Disposition en arc et balayage (reproduction de la vidéo de navigation, adaptée à 4 onglets)**
 - Variable continue `--progression` = index de l'onglet actif (0 à 3), fractionnaire pendant un glissement.
 - Pour chaque onglet `i`, avec `d = i - progression` :
-  - `translateY = d² × 5 px` (les onglets éloignés descendent : effet d'arc) ;
+  - ~~`translateY = d² × 5 px`~~ **Barre plate** (correction du 19 nov. au soir, retour de l'utilisateur) : avec l'onglet actif à un bout (Accueil, Réglages), l'arc d'un seul côté se lisait comme une barre penchée, donc comme un défaut. Aucune descente : seules la taille et l'opacité varient avec la distance ;
   - **Pas d'inclinaison au repos** (correction du 19 nov., retour de Yanis) : quand `--progression` est entier, toutes les icônes sont droites (`rotate: 0`). L'effet de la vidéo est une **rotation de roue pendant le mouvement**, pas une icône penchée en permanence.
   - Pendant un changement d'onglet (tap ou balayage), chaque icône tourne sur elle-même en suivant le mouvement de la roue : `rotate = vitesse de --progression × k`, de même signe que le déplacement, plafonné à ±18°, avec `k` réglé pour atteindre environ 12° sur un tap. La rotation revient à 0 avec le ressort (`--ease-ressort`, 320 ms) à l'arrêt. Calculer la vitesse dans la boucle `requestAnimationFrame` qui écrit déjà `--progression` (variable `--rotation-roue`), jamais avec `useState`.
   - À valider image par image contre `assets/nagivationbar scrolling animation.webm` (0,75 s à 1,25 s) et `assets/references/navigation_arc_planche.jpg`, puis par Yanis sur téléphone ;

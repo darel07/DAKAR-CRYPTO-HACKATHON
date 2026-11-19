@@ -6,8 +6,12 @@ services:
       PUBLIC_URL: http://localhost:8080
       CORS_ORIGINS: http://localhost:8080,http://localhost:5173
       SEED_DEMO: "true"
-      # Facultatif : sans clé, l'analyse et le résumé utilisent les règles locales.
+      # IA facultative (sans configuration : règles locales). Voir backend/.env.example.
+      IA_FOURNISSEUR: ${IA_FOURNISSEUR:-anthropic}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      IA_URL_BASE: ${IA_URL_BASE:-}
+      IA_CLE: ${IA_CLE:-}
+      IA_MODELE: ${IA_MODELE:-}
     volumes: ["caisse-data:/data"]
     read_only: true
     tmpfs: ["/tmp"]

@@ -34,30 +34,32 @@ export function Bienvenue() {
 
   return (
     <div className="bienvenue">
-      <RibbonBackground variante="plein" enPause={enPause} className="bienvenue__fond" />
-      {animations && (
-        <button type="button" className="bienvenue__pause" onClick={() => setEnPause((p) => !p)}>
-          {enPause ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-          <span className="sr-only">{enPause ? "Relancer les animations" : "Mettre les animations en pause"}</span>
-        </button>
-      )}
-      <div className="bienvenue__contenu">
+      {/* Scène : les rubans fleurissent derrière la pièce et s'effacent vers le texte, posé sur le fond
+          uni (contraste du fond, sans voile). */}
+      <div className="bienvenue__scene">
+        <RibbonBackground variante="plein" enPause={enPause} className="bienvenue__fond" />
+        {animations && (
+          <button type="button" className="bienvenue__pause" onClick={() => setEnPause((p) => !p)}>
+            {enPause ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+            <span className="sr-only">{enPause ? "Relancer les animations" : "Mettre les animations en pause"}</span>
+          </button>
+        )}
         <CoinFcfa mode="boucle" enPause={enPause} className="bienvenue__piece" />
-        <div className="bienvenue__voile">
-          <h1>Votre téléphone devient votre caisse Lightning.</h1>
-          <p>
-            Créez un QR code, recevez vos paiements en Bitcoin et retrouvez toutes vos ventes au même endroit.
-            Une caisse simple, rapide et pensée pour les petits commerces.
-          </p>
-          <ul className="bienvenue__arguments">
-            {ARGUMENTS.map(({ Icone, texte }) => (
-              <li key={texte}><Icone aria-hidden="true" />{texte}</li>
-            ))}
-          </ul>
-          <div className="bienvenue__actions">
-            <Button taille="lg" bloc onClick={() => aller("/connexion")}>Commencer</Button>
-            <Button variante="discret" bloc onClick={essayer}>Essayer en mode démonstration</Button>
-          </div>
+      </div>
+      <div className="bienvenue__texte">
+        <h1>Votre téléphone devient votre caisse Lightning.</h1>
+        <p>
+          Créez un QR code, recevez vos paiements en Bitcoin et retrouvez toutes vos ventes au même endroit.
+          Une caisse simple, rapide et pensée pour les petits commerces.
+        </p>
+        <ul className="bienvenue__arguments">
+          {ARGUMENTS.map(({ Icone, texte }) => (
+            <li key={texte}><Icone aria-hidden="true" />{texte}</li>
+          ))}
+        </ul>
+        <div className="bienvenue__actions">
+          <Button taille="lg" bloc onClick={() => aller("/connexion")}>Commencer</Button>
+          <Button variante="discret" bloc onClick={essayer}>Essayer en mode démonstration</Button>
         </div>
       </div>
     </div>

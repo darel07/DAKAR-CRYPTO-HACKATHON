@@ -152,13 +152,27 @@
 }
 /* Le pavé et l'action restent en bas, sous le pouce ; le montant se centre dans l'espace libre. */
 .accueil__caisse { flex: 1; display: flex; flex-direction: column; gap: var(--e-3); }
-.accueil__caisse > .montant { margin-block: auto; }
+/* Le montant est l'écran de la caisse : le seul panneau surélevé, qui prend la hauteur libre
+   (plus de vide entre l'en-tête et le pavé), montant centré dedans. */
+.accueil__caisse > .montant {
+  flex: 1; align-content: center; min-block-size: 0;
+  padding: var(--e-4) var(--e-3);
+  background: var(--c-ecran-caisse); border-radius: var(--rayon); box-shadow: var(--ombre-ecran);
+}
 .accueil__actions { display: grid; gap: var(--e-1); }
 /* Écrans courts (360 × 740) : tout doit tenir même avec le bandeau hors ligne et une alerte
    sur deux lignes. Écarts resserrés, et la question d'accueil cède sa place à l'alerte. */
 @media (max-height: 740px) {
   .accueil, .accueil__caisse { gap: var(--e-2); }
+  .accueil__caisse > .montant { padding-block: var(--e-2); }
+  /* Avec une alerte (portefeuille absent, demande à reprendre), on n'encaisse pas depuis le pavé :
+     l'alerte dit quoi faire, le libellé du montant, les sats et le cours lui cèdent la place. */
+  .accueil--alerte :is(.montant__libelle, .montant__sats, .montant__cours) { display: none; }
   .accueil--alerte .accueil__question { display: none; }
+}
+@media (max-height: 680px) {
+  .accueil__question, .accueil--alerte .accueil__jour { display: none; }
+  .accueil, .accueil__caisse { gap: var(--e-1); }
 }
 
 /* ---- Écrans de flux sans barre (E4 Paiement, E5 Paiement reçu) ---- */
@@ -316,9 +330,15 @@ button.reglage { cursor: pointer; }
 /* Changement de thème : fondu de toute la page (View Transition), 240 ms ; 0 en mouvement réduit. */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--d-normale); }
 
-/* ---- E0 Bienvenue : rubans plein écran, pièce en boucle, texte sur un voile ---- */
-.bienvenue { position: relative; isolation: isolate; display: flex; flex-direction: column; min-block-size: 100dvh; }
-.bienvenue__fond { position: fixed; inset: 0; z-index: -1; }
+/* ---- E0 Bienvenue : scène (rubans + pièce) en haut, texte sur le fond uni en bas ---- */
+.bienvenue { display: flex; flex-direction: column; min-block-size: 100dvh; background: var(--c-fond); }
+.bienvenue__scene {
+  position: relative; isolation: isolate; overflow: hidden;
+  flex: 1; display: grid; place-items: center; min-block-size: calc(var(--piece-bienvenue) * 1.375 + var(--e-6));
+  padding-block-start: env(safe-area-inset-top);
+}
+/* Les rubans remplissent la scène et se fondent dans le fond de la page avant le titre. */
+.bienvenue__fond { position: absolute; inset: 0; z-index: -1; mask-image: linear-gradient(to bottom, #000 62%, transparent); }
 .bienvenue__pause {
   position: absolute; z-index: 1;
   inset-block-start: calc(env(safe-area-inset-top) + var(--e-3)); inset-inline-end: var(--gouttiere);
@@ -326,28 +346,27 @@ button.reglage { cursor: pointer; }
   border: 1px solid var(--c-bord); border-radius: var(--rayon-rond); background: var(--c-surface); color: var(--c-texte); cursor: pointer;
 }
 .bienvenue__pause svg { inline-size: var(--icone-s); block-size: var(--icone-s); }
-.bienvenue__contenu {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--e-4);
-  inline-size: 100%; max-inline-size: var(--largeur-app); margin-inline: auto;
-  padding: calc(env(safe-area-inset-top) + var(--e-6)) var(--gouttiere) calc(env(safe-area-inset-bottom) + var(--e-4));
+.bienvenue { --piece-bienvenue: 140px; }
+.bienvenue__piece { --piece-taille: var(--piece-bienvenue); box-shadow: 0 18px 40px rgb(16 24 32 / 0.28); }
+.bienvenue__texte {
+  display: grid; gap: var(--e-4); inline-size: 100%; max-inline-size: var(--largeur-app); margin-inline: auto;
+  padding: var(--e-2) var(--gouttiere) calc(env(safe-area-inset-bottom) + var(--e-4));
 }
-.bienvenue__piece { --piece-taille: 140px; }
-/* Voile couleur fond sous le texte (§8 E0) : le contraste est mesuré sur le pire pixel des rubans. */
-.bienvenue__voile {
-  display: grid; gap: var(--e-4); inline-size: 100%; margin-block-start: auto;
-  padding: var(--e-5) var(--e-4) var(--e-4); border-radius: var(--rayon);
-  background: color-mix(in srgb, var(--c-fond) var(--voile-bienvenue, 70%), transparent);
-}
-/* Texte principal, pas texte doux : sur des rubans marine voilés à 70 %, le texte doux tombe à 3,1:1. */
-.bienvenue__voile p { color: var(--c-texte); }
+.bienvenue__texte h1 { font-size: 2rem; line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; }
+.bienvenue__texte p { color: var(--c-texte); max-inline-size: 60ch; }
 .bienvenue__arguments { display: grid; gap: var(--e-2); margin: 0; padding: 0; list-style: none; font-weight: 600; }
 .bienvenue__arguments li { display: flex; align-items: center; gap: var(--e-2); }
-.bienvenue__arguments svg { flex: none; inline-size: var(--icone-s); block-size: var(--icone-s); color: var(--c-primaire); }
+/* Petites icônes décoratives : le seul usage de l'ambre en clair autorisé par §4.2. */
+.bienvenue__arguments svg { flex: none; inline-size: var(--icone-s); block-size: var(--icone-s); color: var(--c-ambre); }
 .bienvenue__actions { display: grid; gap: var(--e-1); }
 @media (max-height: 740px) {
-  .bienvenue__piece { --piece-taille: 104px; }
-  .bienvenue__contenu { gap: var(--e-3); padding-block-start: calc(env(safe-area-inset-top) + var(--e-4)); }
-  .bienvenue__voile { gap: var(--e-3); padding-block-start: var(--e-4); }
+  .bienvenue { --piece-bienvenue: 104px; }
+  .bienvenue__texte { gap: var(--e-3); }
+  .bienvenue__texte h1 { font-size: var(--t-titre-ecran); }
+}
+@media (max-height: 680px) {
+  .bienvenue { --piece-bienvenue: 80px; }
+  .bienvenue__arguments { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: var(--e-1) var(--e-3); font-size: var(--t-secondaire); }
 }
 
 /* ---- E1 Connexion du portefeuille ---- */

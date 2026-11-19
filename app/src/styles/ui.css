@@ -130,13 +130,14 @@
 .pave { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-2); }
 .pave__touche {
   display: grid; place-items: center; min-height: var(--touche);
-  background: var(--c-surface); color: var(--c-texte);
-  border: 1px solid var(--c-bord); border-radius: var(--rayon);
+  /* Transparent border: invisible here, drawn by Windows high-contrast mode (forced colors). */
+  background: var(--c-touche); color: var(--c-texte);
+  border: 1px solid transparent; border-radius: var(--rayon);
   font-family: var(--f-titre); font-size: var(--t-touche); font-weight: 600; font-variant-numeric: tabular-nums;
   touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   transition: transform var(--d-rapide) var(--ease-sortie), background-color var(--d-rapide) var(--ease-sortie);
 }
-.pave__touche:active { transform: scale(var(--echelle-touche)); background: var(--c-surface-h); }
+.pave__touche:active { transform: scale(var(--echelle-touche)); background: var(--c-touche-appui); }
 .pave__touche--effacer { color: var(--c-texte-doux); }
 .pave__touche--effacer svg { width: var(--icone); height: var(--icone); }
 

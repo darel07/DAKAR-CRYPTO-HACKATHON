@@ -271,3 +271,42 @@
 .apercu-rubans__plein { aspect-ratio: 390 / 844; border-radius: var(--rayon); }
 .apercu-rubans__entete { position: relative; isolation: isolate; display: grid; gap: var(--e-1); padding: var(--e-4); border: 1px solid var(--c-bord); border-radius: var(--rayon); overflow: hidden; }
 .apercu-rubans__coin { position: absolute; inset: 0; z-index: -1; }
+
+/* ---- E11 Réglages : liste groupée, lignes de 56 px ---- */
+.reglages__groupe { display: grid; gap: var(--e-2); }
+.reglages__carte {
+  display: grid; padding-inline: var(--e-4);
+  background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon);
+}
+.reglages__carte > * + * { border-block-start: 1px solid var(--c-bord); }
+.reglages__carte > .reglages__aide { border-block-start: 0; padding-block: 0 var(--e-3); }
+.reglages__aide { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.reglages__bouton, .reglages__champ { padding-block: var(--e-3); }
+.reglage {
+  display: flex; align-items: center; gap: var(--e-3); inline-size: 100%; min-block-size: var(--bouton-lg);
+  padding: 0; border: 0; background: none; color: var(--c-texte); font: inherit; text-align: start; text-decoration: none;
+}
+button.reglage { cursor: pointer; }
+.reglage__icone { display: grid; color: var(--c-texte-doux); }
+.reglage__icone svg { inline-size: var(--icone); block-size: var(--icone); }
+.reglage__libelle { flex: 1; font-weight: 500; }
+.reglage__valeur { display: flex; align-items: center; color: var(--c-texte-doux); }
+.reglage__chevron { flex: none; inline-size: var(--icone-s); block-size: var(--icone-s); color: var(--c-texte-doux); }
+@media (hover: hover) { .reglage--action:not(:disabled):hover .reglage__libelle { text-decoration: underline; text-underline-offset: 0.2em; } }
+.reglage--desactivee, .reglage:disabled { cursor: not-allowed; }
+.reglage--desactivee .reglage__libelle, .reglage:disabled .reglage__libelle { color: var(--c-texte-doux); }
+.reglages__formulaire { display: grid; gap: var(--e-4); }
+
+/* Restauration : 12 champs numérotés, 2 colonnes */
+.mots { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-2) var(--e-3); margin: 0; padding: 0; list-style: none; }
+.mots label { display: flex; align-items: center; gap: var(--e-2); }
+.mots__numero { inline-size: 2ch; text-align: end; font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.mots__entree {
+  flex: 1; min-inline-size: 0; block-size: var(--cible-min); padding-inline: var(--e-3);
+  border: 1px solid var(--c-bord-champ); border-radius: var(--rayon-s);
+  background: var(--c-surface); color: var(--c-texte); font: inherit; font-size: var(--t-sous-titre);
+}
+.mots__entree[aria-invalid="true"] { border-color: var(--c-erreur-texte); }
+
+/* Changement de thème : fondu de toute la page (View Transition), 240 ms ; 0 en mouvement réduit. */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--d-normale); }

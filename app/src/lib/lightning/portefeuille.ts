@@ -42,7 +42,7 @@ export function ouvrirNwc(urlConnexion: string): Portefeuille {
   try {
     client = new NWCClient({ nostrWalletConnectUrl: urlConnexion.trim() });
   } catch (e) {
-    throw new ErreurWallet("Ce lien de connexion n'est pas valide. Copiez-le à nouveau depuis votre wallet.", e);
+    throw new ErreurWallet("Ce lien de connexion n'est pas valide. Copiez-le à nouveau depuis votre portefeuille.", e);
   }
   return {
     mode: "nwc",
@@ -52,14 +52,14 @@ export function ouvrirNwc(urlConnexion: string): Portefeuille {
         const tx = await client.makeInvoice({ amount: sats * 1000, description, expiry: 600 });
         return { bolt11: tx.invoice, paymentHash: tx.payment_hash, expireLe: tx.expires_at };
       } catch (e) {
-        throw new ErreurWallet("Impossible de créer la facture. Vérifiez la connexion du wallet et réessayez.", e);
+        throw new ErreurWallet("Impossible de créer la demande de paiement. Vérifiez la connexion du portefeuille et réessayez.", e);
       }
     },
     async attendrePaiement(facture, signal) {
       // On interroge le wallet plutôt que de compter sur une notification : c'est plus
       // lent de quelques secondes mais fonctionne avec tous les wallets, même sans notifications.
       while (!signal.aborted) {
-        if (Date.now() / 1000 > facture.expireLe) throw new ErreurWallet("La facture a expiré. Relancez l'encaissement.");
+        if (Date.now() / 1000 > facture.expireLe) throw new ErreurWallet("La demande de paiement a expiré. Relancez l'encaissement.");
         try {
           const tx = await client.lookupInvoice({ payment_hash: facture.paymentHash });
           if (tx.state === "settled" && tx.preimage) return { preimage: tx.preimage, paymentHash: facture.paymentHash };

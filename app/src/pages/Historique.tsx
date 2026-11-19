@@ -3,7 +3,7 @@ import { Copy, Download } from "lucide-react";
 import {
   AmountDisplay, Badge, Button, EmptyState, Segmented, Sheet, StatCard, TransactionList, afficherToast,
 } from "../components/ui";
-import { PERIODES, filtrerPeriode, historiqueCsv, nomExport, periodeParDefaut, totaux } from "../lib/domain/historique";
+import { PERIODES, filtrerPeriode, periodeParDefaut, telechargerHistorique, totaux } from "../lib/domain/historique";
 import type { Periode } from "../lib/domain/historique";
 import { formatDateHeure, formatFcfa, referenceCourte } from "../lib/domain/format";
 import type { MoyenVente, Vente } from "../lib/domain/types";
@@ -16,15 +16,7 @@ const MOYENS: Record<MoyenVente, string> = { especes: "Espèces", wave: "Wave", 
 const nombreVentes = (n: number) => (n === 0 ? "Aucune vente" : n === 1 ? "1 vente" : `${n} ventes`);
 
 function telecharger(ventes: Vente[]) {
-  const nom = nomExport();
-  const url = URL.createObjectURL(new Blob([historiqueCsv(ventes)], { type: "text/csv;charset=utf-8" }));
-  const lien = document.createElement("a");
-  lien.href = url;
-  lien.download = nom;
-  lien.click();
-  // Révoquée plus tard : certains navigateurs lisent l'adresse après le clic.
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
-  afficherToast(`Historique exporté : ${nom}`);
+  afficherToast(`Historique exporté : ${telechargerHistorique(ventes)}`);
 }
 
 /** E8 : détail d'une vente, en feuille du bas sur l'historique. */

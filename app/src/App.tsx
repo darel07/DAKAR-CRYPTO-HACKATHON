@@ -11,10 +11,11 @@ import { Paiement } from "./pages/Paiement";
 import { PaiementRecu } from "./pages/PaiementRecu";
 import { Passeport } from "./pages/Passeport";
 import { Reglages } from "./pages/Reglages";
-import { VuePreteur } from "./pages/VuePreteur";
 
-// Page interne, jamais vue par le commerçant : chargée à la demande (budget JS §3.2).
+// Pages jamais vues par le commerçant, chargées à la demande (budget JS §3.2) : l'aperçu interne,
+// et la vue prêteur avec la vérification et le décodeur de factures (seul l'agent l'ouvre).
 const ApercuDesignSystem = lazy(() => import("./pages/ApercuDesignSystem"));
+const VuePreteur = lazy(() => import("./pages/VuePreteur").then((m) => ({ default: m.VuePreteur })));
 
 /** Routes de la coque (dock + balayage). Aussi utilisée pour la page voisine d'un balayage. */
 function pageDeCoque(chemin: string): ReactNode {
@@ -33,7 +34,13 @@ function Ecran() {
   // Pages autonomes : la vue prêteur est ouverte par une autre personne
   // (agent de microfinance) qui n'a pas l'application.
   // #/preteur/<charge> (lien long) ou #/preteur/p/<id> (lien court, charge lue sur le serveur).
-  if (chemin === "/preteur") return param === "p" ? <VuePreteur id={suite[1] ?? ""} /> : <VuePreteur charge={param} />;
+  if (chemin === "/preteur") {
+    return (
+      <Suspense fallback={null}>
+        {param === "p" ? <VuePreteur id={suite[1] ?? ""} /> : <VuePreteur charge={param} />}
+      </Suspense>
+    );
+  }
   if (chemin === "/apercu-design-system") return <Suspense fallback={null}><ApercuDesignSystem /></Suspense>;
 
   // Écrans de flux : sans barre de navigation (§6.2).

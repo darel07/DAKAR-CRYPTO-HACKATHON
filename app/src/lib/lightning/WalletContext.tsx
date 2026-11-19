@@ -6,6 +6,8 @@ import type { Portefeuille } from "./portefeuille";
 // Le lien NWC est un secret : il reste sur cet appareil (localStorage) et n'est
 // jamais envoyé à un serveur. Compromis assumé pour le hackathon, voir le modèle de menace.
 const CLE = "passeport.nwc.v1";
+/** Mode démonstration choisi (E0, Réglages) : retrouvé au prochain lancement. */
+const CLE_DEMO = "passeport.demo.v1";
 
 interface Contexte {
   portefeuille: Portefeuille | null;
@@ -20,6 +22,14 @@ function lireLien(): string | null {
   try { return localStorage.getItem(CLE); } catch { return null; }
 }
 
+function lireDemo(): boolean {
+  try { return localStorage.getItem(CLE_DEMO) === "1"; } catch { return false; }
+}
+
+function ecrire(cle: string, valeur: string | null): void {
+  try { if (valeur === null) localStorage.removeItem(cle); else localStorage.setItem(cle, valeur); } catch { /* ignoré */ }
+}
+
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [portefeuille, setPortefeuille] = useState<Portefeuille | null>(null);
   const courant = useRef<Portefeuille | null>(null);
@@ -32,8 +42,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const lien = lireLien();
-    if (!lien) return;
-    try { remplacer(ouvrirNwc(lien)); } catch { /* lien enregistré devenu invalide : on l'ignore */ }
+    if (lien) {
+      try { remplacer(ouvrirNwc(lien)); } catch { /* lien enregistré devenu invalide : on l'ignore */ }
+    } else if (lireDemo()) {
+      remplacer(ouvrirDemo());
+    }
     return () => courant.current?.fermer();
   }, [remplacer]);
 
@@ -41,12 +54,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     portefeuille,
     connecter(url) {
       const p = ouvrirNwc(url); // lève ErreurWallet si le lien est invalide
-      try { localStorage.setItem(CLE, url.trim()); } catch { /* ignoré */ }
+      ecrire(CLE, url.trim());
+      ecrire(CLE_DEMO, null);
       remplacer(p);
     },
-    activerDemo() { remplacer(ouvrirDemo()); },
+    activerDemo() {
+      ecrire(CLE_DEMO, "1");
+      remplacer(ouvrirDemo());
+    },
     deconnecter() {
-      try { localStorage.removeItem(CLE); } catch { /* ignoré */ }
+      ecrire(CLE, null);
+      ecrire(CLE_DEMO, null);
       remplacer(null);
     },
   }), [portefeuille, remplacer]);

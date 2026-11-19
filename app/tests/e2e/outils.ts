@@ -30,7 +30,25 @@ export async function declarerVente(page: Page, texte: string, montant: string):
 
 /** Audit axe : aucune violation « grave » ou « critique » (WCAG 2.1 A/AA). */
 export async function auditAccessibilite(page: Page): Promise<void> {
+  // Attendre la fin des animations d'apparition : mesuré pendant un fondu, un texte à moitié
+  // transparent échoue au contraste alors que l'écran posé le respecte. Les boucles infinies
+  // (pièce, rubans) sont ignorées.
+  // Écran posé : plus de squelette de chargement (les résultats de la vue prêteur arrivent après
+  // la vérification, avec un fondu de 140 ms sur chaque chiffre).
+  await page.waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: 15_000 });
+  // Une animation en pause (hors écran) ne finit jamais : on n'attend que celles qui jouent, 1 s au plus.
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(
+        document.getAnimations()
+          .filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => undefined)),
+      ),
+      new Promise((ok) => setTimeout(ok, 1000)),
+    ]),
+  );
   const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   const graves = r.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-  expect(graves.map((v) => `${v.id} (${v.nodes.length}) : ${v.help}`), page.url()).toEqual([]);
+  const detail = graves.map((v) => `${v.id} : ${v.help} → ${v.nodes.map((n) => `${n.target.join(" ")} [${n.any[0]?.message ?? ""}]`).join(" | ")}`);
+  expect(detail, page.url()).toEqual([]);
 }

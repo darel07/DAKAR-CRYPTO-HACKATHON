@@ -21,6 +21,8 @@ const ApercuDesignSystem = lazy(() => import("./pages/ApercuDesignSystem"));
 const VuePreteur = lazy(() => import("./pages/VuePreteur").then((m) => ({ default: m.VuePreteur })));
 // Reçu ouvert par le CLIENT (E13) : chargé à la demande, comme la vue prêteur.
 const RecuClient = lazy(() => import("./pages/RecuClient"));
+// E2 : vu une ou deux fois dans la vie de l'application, hors du bundle de l'Accueil.
+const SauvegardeCle = lazy(() => import("./pages/SauvegardeCle").then((m) => ({ default: m.SauvegardeCle })));
 
 /** Routes de la coque (dock + balayage). Aussi utilisée pour la page voisine d'un balayage. */
 function pageDeCoque(chemin: string): ReactNode {
@@ -77,6 +79,8 @@ function Ecran() {
   // Écrans de flux : sans barre de navigation (§6.2).
   if (chemin === "/paiement") return <Paiement />;
   if (chemin === "/recu") return <PaiementRecu />;
+  // E2 : écran de flux, après la connexion du portefeuille ou depuis les Réglages.
+  if (chemin === "/cle") return <Suspense fallback={null}><SauvegardeCle /></Suspense>;
 
   // E6 Vente déclarée est un écran de flux : sans dock (§6.2).
   return <Coque chemin={chemin} rendre={pageDeCoque} navigation={chemin !== "/declarer"} />;

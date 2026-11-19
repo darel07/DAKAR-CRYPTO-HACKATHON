@@ -3,7 +3,7 @@ import type { ClipboardEvent, FormEvent, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
   Bitcoin, ChevronRight, Code, Download, Fingerprint, FlaskConical, Info, KeyRound, Languages,
-  RotateCcw, ShieldCheck, SunMoon, Trash2, Wallet,
+  RotateCcw, ShieldCheck, Smartphone, SunMoon, Trash2, Wallet,
 } from "lucide-react";
 import { Badge, Button, Confirmation, Field, Segmented, Sheet, Switch, WalletStatus, afficherToast } from "../components/ui";
 import type { EtatPortefeuille } from "../components/ui";
@@ -12,6 +12,7 @@ import { telechargerHistorique } from "../lib/domain/historique";
 import { supprimerToutes, useVentes } from "../lib/domain/ventesStore";
 import { useWallet } from "../lib/lightning/WalletContext";
 import { aller } from "../lib/useRoute";
+import { CONSIGNE_IOS, estInstallee, estIos, installer, peutInstaller } from "../lib/pwa";
 import { NOMBRE_MOTS, restaurerDepuisMots } from "../lib/nostr/mots";
 import { clePublique } from "../lib/nostr/passeport";
 import { modifierPreferences, PLAFOND_MAX, usePreferences } from "../lib/preferences";
@@ -135,6 +136,13 @@ function RestaurationCle({ ouvert, onFermer }: { ouvert: boolean; onFermer(): vo
   );
 }
 
+/** Invitation du navigateur si elle est disponible ; sinon la marche à suivre (iOS, ou
+ *  navigateur qui a déjà refusé l'invitation automatique). */
+async function installerApplication(): Promise<void> {
+  if (peutInstaller()) { await installer(); return; }
+  afficherToast(estIos() ? CONSIGNE_IOS : "Ouvrez le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil ».", { duree: 10_000 });
+}
+
 /** E11 : réglages, en liste groupée. */
 export function Reglages() {
   const { portefeuille, activerDemo, deconnecter } = useWallet();
@@ -233,6 +241,12 @@ export function Reglages() {
           </Button>
         </div>
       </Groupe>
+
+      {!estInstallee() && (
+        <Groupe titre="Application">
+          <Ligne icone={<Smartphone />} libelle="Installer sur l'écran d'accueil" onClick={installerApplication} />
+        </Groupe>
+      )}
 
       <Groupe titre="À propos">
         <Ligne icone={<Info />} libelle="Version"><span className="chiffres">{__VERSION_APP__}</span></Ligne>

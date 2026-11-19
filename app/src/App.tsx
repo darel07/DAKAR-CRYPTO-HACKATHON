@@ -1,7 +1,9 @@
-import { lazy, Suspense, useLayoutEffect } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 import { WalletProvider } from "./lib/lightning/WalletContext";
 import { remplacer, useRoute } from "./lib/useRoute";
+import { useVentes } from "./lib/domain/ventesStore";
+import { proposerInstallation } from "./lib/pwa";
 import { preferencesEnregistrees } from "./lib/preferences";
 import { Coque } from "./components/layout/Coque";
 import { ToastRegion } from "./components/ui";
@@ -86,12 +88,20 @@ function Ecran() {
   return <Coque chemin={chemin} rendre={pageDeCoque} navigation={chemin !== "/declarer"} />;
 }
 
+/** Invitation à installer la caisse après la 2e vente (§9), une seule fois. */
+function InvitationInstallation() {
+  const nb = useVentes().length;
+  useEffect(() => { proposerInstallation(nb); }, [nb]);
+  return null;
+}
+
 export function App() {
   // Le portefeuille vit au-dessus des routes : passer de l'Accueil au Paiement ne doit
   // jamais fermer la connexion (ni effacer les factures du mode démonstration).
   return (
     <WalletProvider>
       <Ecran />
+      <InvitationInstallation />
       <ToastRegion />
     </WalletProvider>
   );

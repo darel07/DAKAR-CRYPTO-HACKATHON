@@ -215,15 +215,16 @@
 /* ---------- StatCard ---------- */
 .stat {
   display: grid; gap: var(--e-1); align-content: start; padding: var(--e-4);
-  background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon);
+  background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte);
 }
 .stat__valeur {
   font-size: var(--t-stat); font-weight: 700; line-height: 1.2; color: var(--c-texte);
   animation: apparition var(--d-rapide) var(--ease-sortie);
 }
-.stat__libelle, .stat__variation { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
-.stat--prouve { background: var(--c-prouve-fond); border-color: transparent; }
-.stat--declare { background: var(--c-declare-fond); border-color: transparent; }
+.stat__libelle { font-size: var(--t-secondaire); font-weight: 600; color: var(--c-texte); }
+.stat__variation { font-size: var(--t-secondaire); color: var(--c-texte-doux); }
+.stat--prouve { background: var(--c-prouve-fond); border-color: transparent; box-shadow: none; }
+.stat--declare { background: var(--c-declare-fond); border-color: transparent; box-shadow: none; }
 .stat--prouve :is(.stat__valeur, .stat__libelle, .stat__variation) { color: var(--c-prouve-texte); }
 .stat--declare :is(.stat__valeur, .stat__libelle, .stat__variation) { color: var(--c-declare-texte); }
 

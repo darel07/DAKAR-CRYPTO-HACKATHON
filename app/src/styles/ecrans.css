@@ -194,9 +194,13 @@
 @keyframes fond-prouve { from { background-color: var(--c-fond); } }
 .flux--recu h1 { color: var(--c-prouve-texte); }
 .flux--recu h1:focus { outline: none; }
-.recu__details { display: grid; justify-items: center; gap: var(--e-2); font-size: var(--t-secondaire); color: var(--c-texte-doux); }
-/* La pastille « Prouvé » a le même vert que le fond de l'écran : posée sur une surface, elle reste lisible comme pastille. */
-.flux--recu .pastille--prouve { background: var(--c-surface); }
+/* Détails du reçu : un ticket (statut, date, référence) posé sur le vert du succès. */
+.recu__details {
+  display: grid; justify-items: center; gap: var(--e-2); inline-size: 100%; padding: var(--e-3) var(--e-4);
+  font-size: var(--t-secondaire); color: var(--c-texte-doux);
+  background: var(--c-surface); border-radius: var(--rayon); box-shadow: var(--ombre-carte); border: 1px solid var(--c-bord-carte);
+}
+.flux--recu .montant--secondaire .montant__valeur { font-size: clamp(2.5rem, 12vw, 3rem); }
 /* La pièce et le reçu sont centrés dans la hauteur libre, les actions restent en bas. */
 .flux--recu > .piece { margin-block-start: auto; }
 @media (max-height: 740px) {
@@ -221,7 +225,7 @@
 .detail__lignes dd { margin: 0; font-weight: 600; text-align: end; }
 
 /* ---- Passeport et vue prêteur ---- */
-.chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.chiffre-cle { display: grid; gap: var(--e-1); padding: var(--e-5); background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
 .chiffre-cle__valeur { font-family: var(--f-titre); font-size: var(--t-stat); font-weight: 700; }
 .chiffre-cle__libelle { color: var(--c-texte-doux); font-size: var(--t-secondaire); }
 .lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
@@ -250,7 +254,11 @@
 .rubrique { display: grid; gap: var(--e-3); }
 /* E9 : 4 StatCard en 2 × 2, carte « Résumé du jour », mentions de la feuille « Passeport signé ». */
 .passeport__stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
-.carte { display: grid; gap: var(--e-2); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord); border-radius: var(--rayon); }
+.carte { display: grid; gap: var(--e-2); padding: var(--e-4); background: var(--c-surface); border: 1px solid var(--c-bord-carte); border-radius: var(--rayon); box-shadow: var(--ombre-carte); }
+/* Résumé du jour : un liseré ambre le distingue des chiffres (liseré = usage d'accent permis, §4.2). */
+.resume { border-inline-start: 4px solid var(--c-ambre); }
+/* Total du passeport : le chiffre que l'agent retiendra, à la taille d'un montant. */
+.rubrique .chiffre-cle__valeur { font-size: var(--t-montant-2); line-height: 1.1; letter-spacing: var(--interlettrage-titre); }
 .carte__titre { font-size: var(--t-sous-titre); font-weight: 600; color: var(--c-primaire); }
 .passeport__validite { text-align: center; }
 /* ---- Aperçu du design system (#/apercu-design-system) ---- */

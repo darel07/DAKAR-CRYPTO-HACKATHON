@@ -184,7 +184,7 @@ export function Passeport() {
             libelle="Part prouvée"
           />
         </div>
-        <MiniBarChart jours={jours} />
+        <div className="carte"><MiniBarChart jours={jours} /></div>
       </section>
 
       <ResumeDuJour ventes={ventes} />

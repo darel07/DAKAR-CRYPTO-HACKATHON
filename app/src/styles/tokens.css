@@ -57,6 +57,10 @@
   --ombre-1:   0 1px 2px rgb(23 38 53 / 0.06), 0 4px 12px rgb(23 38 53 / 0.05);
   /* Register (Home): the amount display is the one raised surface, keys are soft fills below it. */
   --c-ecran-caisse: var(--c-surface);
+  /* Cards and tiles: no border in light (a soft navy-tinted shadow separates them), a hairline in dark
+     where shadows are invisible. One surface language everywhere. */
+  --c-bord-carte: transparent;
+  --ombre-carte: var(--ombre-1);
   --ombre-ecran: 0 1px 2px rgb(23 38 53 / 0.06), 0 10px 28px rgb(23 38 53 / 0.08);
   --c-touche: var(--c-surface-h);      /* digits 13.4:1 */
   --c-touche-appui: var(--c-bord);
@@ -183,6 +187,8 @@
 
   --ombre-1: none;
   --c-ecran-caisse: var(--c-surface-2);
+  --c-bord-carte: var(--c-bord);
+  --ombre-carte: none;
   --ombre-ecran: inset 0 1px 0 rgb(255 255 255 / 0.05);
   --c-touche: var(--c-surface);         /* digits 15.3:1 */
   --c-touche-appui: var(--c-surface-h);

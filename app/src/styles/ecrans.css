@@ -10,17 +10,117 @@
   padding: var(--e-4) var(--gouttiere) calc(var(--nav-hauteur) + var(--nav-marge) + var(--e-3) + env(safe-area-inset-bottom));
 }
 
-.barre {
-  position: fixed; inset: auto 0 0 0; max-width: var(--largeur-app); margin-inline: auto;
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  padding-bottom: env(safe-area-inset-bottom);
-  background: var(--c-surface); border-top: 1px solid var(--c-bord);
+/* Balayage entre onglets (§6.2) : la page suit le doigt horizontalement. Le navigateur garde le
+   défilement vertical et le zoom ; la colonne rogne ce qui sort sur les côtés. */
+.coque { overflow-x: clip; }
+.coque__contenu { touch-action: pan-y pinch-zoom; }
+.coque__contenu[data-glisse] { user-select: none; -webkit-user-select: none; will-change: translate; }
+.coque--sans-nav .coque__contenu { padding-block-end: calc(var(--e-5) + env(safe-area-inset-bottom)); }
+/* Page voisine pendant un balayage : couche fixe sur la colonne, qui entre par le côté. */
+.coque__voisin {
+  position: fixed; z-index: 1; inset-block-end: 0; display: flex;
+  overflow: hidden; pointer-events: none;
 }
-.barre__lien {
-  display: grid; justify-items: center; gap: var(--e-1); padding: var(--e-3) var(--e-1);
-  min-height: var(--cible-min); color: var(--c-texte-doux); text-decoration: none; font-size: var(--t-nav); font-weight: 600;
+/* Seule la page voisine est opaque : la couche elle-même laisse voir la page courante. */
+.coque__voisin > .coque__contenu { flex: 1; min-height: 100%; background: var(--c-fond); will-change: translate; }
+
+/* ---- Dock de navigation (§6.2) : barre flottante en verre, pastille « liquid glass » ---- */
+.dock {
+  --onglets: 4;
+  position: fixed; z-index: 10;
+  inset-inline: max(var(--gouttiere), (100% - var(--largeur-app)) / 2 + var(--gouttiere));
+  inset-block-end: calc(var(--nav-marge) + env(safe-area-inset-bottom));
+  height: var(--nav-hauteur);
+  display: grid; grid-template-columns: repeat(var(--onglets), 1fr);
+  padding-inline: var(--dock-marge-interne);
+  border: 1px solid var(--c-verre-bord); border-radius: var(--rayon-rond);
+  background: var(--c-surface);
+  box-shadow: var(--ombre-nav), inset 0 1px 0 var(--c-verre-reflet);
 }
-.barre__lien[aria-current="page"] { color: var(--c-primaire); }
+/* Verre seulement si le flou d'arrière-plan existe, et jamais quand la transparence réduite est demandée. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .dock { background: var(--c-verre); -webkit-backdrop-filter: var(--verre-flou); backdrop-filter: var(--verre-flou); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dock { background: var(--c-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* Pastille : ses bords gauche et droit sont calés sur l'onglet --ind. Le bord avant (côté
+   destination) arrive en 220 ms, le bord arrière suit en ressort : la capsule s'étire puis se reforme. */
+.dock__indicateur {
+  --pas: calc((100% - 2 * var(--dock-marge-interne)) / var(--onglets));
+  position: absolute; inset-block: 0; margin-block: auto; height: var(--indicateur-h);
+  left: calc(var(--dock-marge-interne) + (var(--ind, 0) + 0.5) * var(--pas) - var(--indicateur-l) / 2);
+  right: calc(var(--dock-marge-interne) + (var(--onglets) - var(--ind, 0) - 0.5) * var(--pas) - var(--indicateur-l) / 2);
+  border-radius: var(--rayon-rond);
+  background:
+    radial-gradient(ellipse at 50% 18%, var(--c-indicateur-reflet), transparent 55%),
+    linear-gradient(180deg, var(--c-indicateur-haut), var(--c-indicateur-bas));
+  box-shadow: 0 0 18px var(--c-indicateur-lueur), inset 0 0 0 1px var(--c-indicateur-lisere), inset 0 -6px 12px var(--c-indicateur-ombre);
+  pointer-events: none;
+}
+.dock[data-pret] .dock__indicateur {
+  transition:
+    right var(--d-bord-avant) var(--ease-sortie),
+    left var(--d-bord-arriere) var(--ease-ressort) var(--d-bord-retard);
+}
+.dock[data-pret][data-sens="gauche"] .dock__indicateur {
+  transition:
+    left var(--d-bord-avant) var(--ease-sortie),
+    right var(--d-bord-arriere) var(--ease-ressort) var(--d-bord-retard);
+}
+
+/* Onglet : zone tactile fixe (toute la hauteur, un quart de largeur). Seul son contenu se
+   place sur l'arc, selon sa distance d à --progression (fractionnaire pendant un balayage). */
+.dock__onglet {
+  --d: calc(var(--i) - var(--progression, 0));
+  --d-abs: max(var(--d), -1 * var(--d));
+  position: relative; display: grid; place-items: center; min-width: var(--cible-min);
+  color: var(--c-texte-doux); text-decoration: none; -webkit-tap-highlight-color: transparent;
+}
+.dock__onglet:focus-visible { outline-offset: calc(var(--anneau-focus) * -2); border-radius: var(--rayon-rond); }
+.dock__onglet[aria-current="page"] { color: var(--c-onglet-actif); }
+.dock__onglet[data-recouvert] { color: var(--c-onglet-recouvert); }
+@media (hover: hover) {
+  .dock__onglet:not([aria-current="page"]):hover { color: var(--c-texte); }
+}
+.dock__contenu {
+  display: grid; justify-items: center; gap: 2px;
+  translate: 0 calc(var(--d) * var(--d) * var(--arc-descente));
+  rotate: calc(var(--d) * var(--arc-inclinaison));
+  scale: max(var(--arc-echelle-min), var(--arc-echelle-max) - var(--d-abs) * var(--arc-echelle-pas));
+}
+.dock__icone {
+  width: var(--icone); height: var(--icone);
+  fill: currentColor; fill-opacity: 0; stroke-width: var(--trait);
+  opacity: max(var(--arc-opacite-min), 1 - var(--d-abs) * var(--arc-opacite-pas));
+}
+.dock__libelle { font-size: var(--t-nav); font-weight: 600; line-height: 1.2; }
+/* Onglet actif : icône pleine à 15 %, trait 2,25, libellé 700, remplis quand la pastille arrive. */
+.dock__onglet[aria-current="page"] .dock__icone { fill-opacity: 0.15; stroke-width: 2.25; }
+.dock__onglet[aria-current="page"] .dock__libelle { font-weight: 700; }
+/* Flou de mouvement des icônes inactives, pendant un balayage rapide seulement. */
+.dock__onglet:not([aria-current="page"]) .dock__icone { filter: blur(var(--flou, 0px)); }
+
+.dock[data-pret] .dock__onglet { transition: color var(--d-rapide) ease; }
+.dock[data-pret] .dock__contenu {
+  transition: translate var(--d-glisse) var(--ease-ressort), rotate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
+}
+.dock[data-pret] .dock__icone {
+  transition:
+    fill-opacity var(--d-apparition) ease var(--d-remplissage-retard),
+    stroke-width var(--d-apparition) ease var(--d-remplissage-retard),
+    opacity var(--d-glisse) ease, filter var(--d-flou) ease;
+}
+/* Pendant le glissement, l'arc suit le doigt sans retard. */
+.dock[data-glisse] .dock__contenu, .dock[data-glisse] .dock__icone { transition: none; }
+
+/* Mouvement réduit : ni arc, ni rotation, ni flou (et durées à 0 dans tokens.css). */
+@media (prefers-reduced-motion: reduce) {
+  .dock__contenu { translate: none; rotate: none; scale: none; }
+  .dock__icone { opacity: 1; }
+  .dock__onglet .dock__icone { filter: none; }
+}
 
 .page-titre { display: grid; gap: var(--e-1); }
 .page-titre p { color: var(--c-texte-doux); font-size: var(--t-secondaire); }

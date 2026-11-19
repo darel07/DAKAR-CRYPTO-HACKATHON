@@ -39,6 +39,18 @@
   --c-verre-bord:    rgb(227 233 239 / 0.9);
   --c-verre-reflet:  rgb(255 255 255 / 0.8);
   --c-scrim:         rgb(23 38 53 / 0.45);    /* behind sheets and modals */
+  --verre-flou:      blur(16px) saturate(1.4);
+
+  /* Navigation dock (§6.2): amber "liquid glass" indicator. */
+  --c-indicateur-haut:   rgb(242 194 122 / 0.55);
+  --c-indicateur-bas:    rgb(217 154 69 / 0.38);
+  --c-indicateur-reflet: rgb(255 255 255 / 0.75);
+  --c-indicateur-lueur:  rgb(217 154 69 / 0.45);
+  --c-indicateur-lisere: rgb(255 255 255 / 0.55);
+  --c-indicateur-ombre:  rgb(217 154 69 / 0.25);
+  --c-onglet-actif:      var(--c-primaire);      /* navy on the light pill: >= 9:1 (scripts/contraste.mjs) */
+  --c-onglet-recouvert:  var(--c-declare-texte); /* amber tint while the pill stretches over a tab (<= 420 ms);
+                                                    dark amber in light, light amber in dark: readable on the glass */
   --c-qr-fond:       #FFFFFF; /* QR: black on white in BOTH themes (scanners expect it) */
   --c-qr-module:     #000000;
 
@@ -87,6 +99,18 @@
   --graphe-h: 88px;      /* MiniBarChart bars area */
   --poignee-l: 40px;     /* sheet drag handle */
   --bandeau-rubans: 180px; /* ribbon band at the top of Home */
+  --indicateur-l: 78px;  /* dock pill. FIXED (prompt 68 px): "Passeport" is 67 px wide at the active 1.12 scale */
+  --indicateur-h: 56px;
+  --dock-marge-interne: 4px;
+
+  /* Dock arc (§6.2, softened so every tab stays inside the 72 px bar: 0, 1, 4, 9 px and 0 to 9 deg). */
+  --arc-descente: 1px;      /* x d squared */
+  --arc-inclinaison: 3deg;  /* x d */
+  --arc-echelle-max: 1.12;
+  --arc-echelle-pas: 0.07;
+  --arc-echelle-min: 0.92;
+  --arc-opacite-pas: 0.14;
+  --arc-opacite-min: 0.72;
 
   /* ---------- Motion (§4.4) ---------- */
   --d-instant: 80ms;
@@ -95,6 +119,13 @@
   --d-normale: 240ms;
   --d-lente: 420ms;
   --d-reflet: 1400ms;    /* skeleton shimmer loop (off under reduced motion) */
+  --d-bord-avant: 220ms;   /* dock pill: leading edge */
+  --d-bord-arriere: 380ms; /* dock pill: trailing edge (spring) */
+  --d-bord-retard: 40ms;
+  --d-etirement: 420ms;    /* pill height bump while stretched */
+  --d-remplissage-retard: 120ms; /* active icon fills once the pill arrives */
+  --d-glisse: 320ms;       /* page swipe release */
+  --d-flou: 120ms;         /* motion blur fades out */
   --ease-sortie: cubic-bezier(0.16, 1, 0.3, 1);
   /* Light spring (~4 % overshoot), no library: */
   --ease-ressort: linear(0, 0.18 7%, 0.6 18%, 0.92 30%, 1.03 42%, 1.04 50%, 1.01 64%, 1);
@@ -126,6 +157,16 @@
   --c-declare-fond: #3A2A0F; --c-declare-texte: #F5C97E; /* 8.92:1 */
   --c-erreur-fond: #3F1714;  --c-erreur-texte: #FF9E96;  /* 7.87:1 */
 
+  /* Dark: a translucent amber pill over dark glass is a mid tone where neither light nor amber
+     text reaches 3:1. The pill becomes a near-solid amber with dark content, like dark CTAs. */
+  --c-indicateur-haut:   rgb(242 179 92 / 0.94);
+  --c-indicateur-bas:    rgb(217 154 69 / 0.9);
+  --c-indicateur-reflet: rgb(255 255 255 / 0.4);
+  --c-indicateur-lueur:  rgb(242 179 92 / 0.35);
+  --c-indicateur-lisere: rgb(255 255 255 / 0.3);
+  --c-indicateur-ombre:  rgb(138 90 18 / 0.35);
+  --c-onglet-actif:      var(--c-sur-primaire);
+
   --c-verre: rgb(23 36 51 / 0.72);
   --c-verre-bord: var(--c-bord);
   --c-verre-reflet: rgb(255 255 255 / 0.06);
@@ -140,6 +181,8 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --d-instant: 0ms; --d-rapide: 0ms; --d-apparition: 0ms; --d-normale: 0ms; --d-lente: 0ms;
+    --d-bord-avant: 0ms; --d-bord-arriere: 0ms; --d-bord-retard: 0ms; --d-etirement: 0ms;
+    --d-remplissage-retard: 0ms; --d-glisse: 0ms; --d-flou: 0ms;
     --echelle-appui: 1; --echelle-touche: 1;
   }
 }

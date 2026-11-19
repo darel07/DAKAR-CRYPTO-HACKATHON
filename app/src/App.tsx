@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import type { ReactNode } from "react";
 import { WalletProvider } from "./lib/lightning/WalletContext";
 import { useRoute } from "./lib/useRoute";
 import { Coque } from "./components/layout/Coque";
@@ -15,6 +16,17 @@ import { VuePreteur } from "./pages/VuePreteur";
 // Page interne, jamais vue par le commerçant : chargée à la demande (budget JS §3.2).
 const ApercuDesignSystem = lazy(() => import("./pages/ApercuDesignSystem"));
 
+/** Routes de la coque (dock + balayage). Aussi utilisée pour la page voisine d'un balayage. */
+function pageDeCoque(chemin: string): ReactNode {
+  switch (chemin) {
+    case "/declarer": return <Declarer />;
+    case "/ventes": case "/historique": return <Historique />;
+    case "/passeport": return <Passeport />;
+    case "/reglages": return <Reglages />;
+    default: return <Accueil />;
+  }
+}
+
 function Ecran() {
   const { chemin, param } = useRoute();
 
@@ -27,15 +39,8 @@ function Ecran() {
   if (chemin === "/paiement") return <Paiement />;
   if (chemin === "/recu") return <PaiementRecu />;
 
-  return (
-    <Coque chemin={chemin}>
-      {chemin === "/declarer" ? <Declarer />
-        : chemin === "/ventes" || chemin === "/historique" ? <Historique />
-        : chemin === "/passeport" ? <Passeport />
-        : chemin === "/reglages" ? <Reglages />
-        : <Accueil />}
-    </Coque>
-  );
+  // E6 Vente déclarée est un écran de flux : sans dock (§6.2).
+  return <Coque chemin={chemin} rendre={pageDeCoque} navigation={chemin !== "/declarer"} />;
 }
 
 export function App() {

@@ -46,5 +46,42 @@ for (const [nom, theme] of [["clair", clair], ["sombre", sombre]]) {
 const s1 = ratio("#FFFFFF", clair["c-succes"]), s2 = ratio(sombre["c-succes"], sombre["c-fond"]);
 console.log(`\nblanc sur c-succes (clair) ${s1.toFixed(2)}:1, c-succes sur fond (sombre) ${s2.toFixed(2)}:1`);
 if (s1 < 4.5 || s2 < 4.5) echecs++;
+// ---- Navigation dock: composite colours (pill over glass over page background) ----
+// Translucent layers are blended as the browser paints them; the radial highlight of the pill
+// is taken at its strongest where the icon sits, which is the worst case for light content.
+const brut = (sel) => Object.fromEntries([...bloc(sel).matchAll(/--(c-[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+const tousClair = brut(":root {"), tousSombre = { ...tousClair, ...brut(':root[data-theme="sombre"]') };
+const rgba = (jetons, nom) => {
+  let v = jetons[nom];
+  for (let i = 0; v?.startsWith("var(") && i < 5; i++) v = jetons[v.slice(6, -1)];
+  if (v?.startsWith("#")) return [1, 3, 5].map((i) => parseInt(v.slice(i, i + 2), 16)).concat(1);
+  const m = v?.match(/rgb\((\d+) (\d+) (\d+) \/ ([\d.]+)\)/);
+  if (!m) throw new Error(`jeton illisible : ${nom} = ${v}`);
+  return [+m[1], +m[2], +m[3], +m[4]];
+};
+const poser = (dessus, dessous) => dessous.map((c, i) => (i < 3 ? dessus[i] * dessus[3] + c * (1 - dessus[3]) : 1));
+const hex = (c) => "#" + c.slice(0, 3).map((x) => Math.round(x).toString(16).padStart(2, "0")).join("");
+const attenuer = (c, opacite, fond) => poser([...c.slice(0, 3), opacite], fond);
+for (const [nom, j] of [["clair", tousClair], ["sombre", tousSombre]]) {
+  console.log(`\n== Dock, thème ${nom}`);
+  const verre = poser(rgba(j, "c-verre"), rgba(j, "c-fond"));
+  const haut = poser(rgba(j, "c-indicateur-haut"), verre);
+  const icone = poser([...rgba(j, "c-indicateur-reflet").slice(0, 3), rgba(j, "c-indicateur-reflet")[3] * 0.5], haut); // reflet à mi-force sur l'icône
+  const bas = poser(rgba(j, "c-indicateur-bas"), verre);
+  const libelle = haut.map((c, i) => c * 0.3 + bas[i] * 0.7);
+  const verifs = [
+    ["icône active sur la pastille", rgba(j, "c-onglet-actif"), icone, 3],
+    ["libellé actif sur la pastille", rgba(j, "c-onglet-actif"), libelle, 4.5],
+    ["icône recouverte (teinte de passage) sur le verre", rgba(j, "c-onglet-recouvert"), verre, 3],
+    ["icône inactive la plus éloignée (opacité 0,72)", attenuer(rgba(j, "c-texte-doux"), 0.72, verre), verre, 3],
+    ["libellé inactif sur le verre", rgba(j, "c-texte-doux"), verre, 4.5],
+  ];
+  for (const [quoi, av, ar, min] of verifs) {
+    const r = ratio(hex(av), hex(ar));
+    if (r < min) echecs++;
+    console.log(`${r >= min ? "ok   " : "ÉCHEC"} ${quoi.padEnd(48)} ${r.toFixed(2)}:1 (min ${min})`);
+  }
+}
+
 console.log(echecs ? `\n${echecs} paire(s) en échec` : "\nToutes les paires passent.");
 process.exit(echecs ? 1 : 0);

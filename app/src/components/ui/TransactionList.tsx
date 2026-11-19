@@ -24,10 +24,12 @@ interface TransactionListProps {
   ventes: Vente[];
   /** Lien vers le détail d'une vente (« #/ventes/<id> »). */
   lien?(vente: Vente): string;
+  /** Vente dont le détail est affiché à côté de la liste (version ordinateur). */
+  selection?: string | null;
 }
 
 /** Liste groupée par jour (« Aujourd'hui », « Hier », « lundi 16 novembre »), en-têtes collants. */
-export function TransactionList({ ventes, lien }: TransactionListProps) {
+export function TransactionList({ ventes, lien, selection = null }: TransactionListProps) {
   const [limite, setLimite] = useState(TRANCHE);
   const decoupe = ventes.length > SEUIL;
   const jours = useMemo(
@@ -44,7 +46,7 @@ export function TransactionList({ ventes, lien }: TransactionListProps) {
             <h2 className="transactions__titre">{libelleJour(premier.ts)}</h2>
             <ul className="transactions__liste">
               {groupe.map((v) => (
-                <li key={v.id}><TransactionCard vente={v} href={lien?.(v)} /></li>
+                <li key={v.id}><TransactionCard vente={v} href={lien?.(v)} actif={v.id === selection} /></li>
               ))}
             </ul>
           </section>

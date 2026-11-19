@@ -115,6 +115,9 @@
   --piece-dock: 40px;    /* rolling coin under the active icon */
   --piece-tour: 240deg;  /* coin turn per tab: one step (~85 px) / radius (20 px), so it rolls, not slides */
   --dock-ecart: 8px;     /* icon to label: room for the coin above the label */
+  --nav-largeur: 96px;   /* desktop (>= 1024 px): the dock becomes a vertical sidebar */
+  --nav-pas-vertical: 76px;
+  --piece-tour-vertical: 218deg; /* one vertical step (76 px) / coin radius (20 px) */
   --dock-marge-interne: 4px;
 
   /* Dock depth (§6.2): distant tabs get slightly smaller and lighter. Icons never tilt: the coin is

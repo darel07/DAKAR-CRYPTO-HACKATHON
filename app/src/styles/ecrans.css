@@ -502,3 +502,47 @@ button.reglage { cursor: pointer; }
 .mots--lecture .mots__mot { display: flex; align-items: baseline; gap: var(--e-2); }
 /* Recopier à la main, pas copier : un presse-papiers est lu par d'autres applications. */
 .mots--lecture .mots__texte { font-size: var(--t-texte); font-weight: 600; user-select: none; -webkit-user-select: none; }
+
+/* ---- Version ordinateur (≥ 1024 px, §7) ----
+   Même contenu dans la colonne de 480 px. La barre devient une barre latérale verticale à gauche
+   de la colonne, avec la même pièce, qui roule de haut en bas. L'historique passe en deux colonnes
+   (liste + détail). Seuil partagé avec lib/useEcranLarge.ts. */
+@media (min-width: 1024px) {
+  :root { --colonne: var(--largeur-app); }
+  /* Deux colonnes de 480 px si la fenêtre le permet, sinon plus étroites : la barre latérale et
+     ses marges gardent toujours leur place à gauche. */
+  :root:has(.historique--deux-colonnes) {
+    --colonne: min(2 * var(--largeur-app) + var(--e-6), 100vw - 2 * (var(--nav-largeur) + 2 * var(--e-6)));
+  }
+  .coque { max-width: var(--colonne); }
+  .coque__contenu { padding-block-end: var(--e-6); }
+
+  .dock {
+    inset-inline: max(var(--e-5), (100% - var(--colonne)) / 2 - var(--nav-largeur) - var(--e-6)) auto;
+    inset-block: 0; margin-block: auto;
+    inline-size: var(--nav-largeur);
+    block-size: calc(var(--onglets) * var(--nav-pas-vertical) + 2 * var(--dock-marge-interne));
+    grid-template-columns: none; grid-template-rows: repeat(var(--onglets), 1fr);
+    padding: var(--dock-marge-interne) 0;
+  }
+  .dock__piece {
+    --pas: calc((100% - 2 * var(--dock-marge-interne)) / var(--onglets));
+    --piece-tour: var(--piece-tour-vertical);
+    left: calc(50% - var(--piece-dock) / 2);
+    top: calc(var(--dock-marge-interne) + (var(--progression, 0) + 0.5) * var(--pas) - (var(--dock-ecart) + 1.2 * var(--t-nav)) / 2 - var(--piece-dock) / 2);
+  }
+  .dock[data-pret] .dock__piece {
+    transition: top var(--d-roule) var(--ease-ressort), rotate var(--d-roule) var(--ease-ressort);
+  }
+
+  .historique--deux-colonnes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6); align-items: start; }
+  .historique__liste { display: flex; flex-direction: column; gap: var(--e-4); min-inline-size: 0; }
+  /* Le détail reste en vue pendant qu'on parcourt une longue liste. */
+  .historique__detail { position: sticky; inset-block-start: var(--e-4); }
+  .historique__detail .detail { gap: var(--e-3); }
+  .historique__detail-entete { display: flex; align-items: baseline; justify-content: space-between; gap: var(--e-3); }
+  .historique__detail-entete h2 { font-size: var(--t-titre-section); }
+  /* La vente affichée à droite est marquée dans la liste. */
+  .transactions__liste .transaction[aria-current="true"] { background: var(--c-surface-h); box-shadow: inset 3px 0 0 var(--c-ambre); }
+}
+

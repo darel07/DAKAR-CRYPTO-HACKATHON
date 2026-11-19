@@ -103,7 +103,71 @@ Dans les **Réglages**, collez le lien de connexion NWC d'Alby Hub ou LNbits, ou
 | Passeport signé (Nostr), lien et QR | fait |
 | Vue prêteur : signature, préimages, plafond indicatif | fait (testé sur signature et falsification) |
 | Contresignature client, budgets vendeurs (écrans C12, C13, P1) | à faire |
-| Résumé du jour par IA, wolof, `docker compose up` | à faire |
+| Backend : cours en cache, analyse et résumé par Claude, liens courts, `docker compose up` | fait côté serveur (branche `back`) ; à brancher dans le front |
+| Wolof | à faire |
+
+## 4 ter. Backend
+
+Une petite API **sans compte et sans secret utilisateur** (dossier `backend/`, Fastify 5 et TypeScript). Le backend ne voit jamais le lien de connexion du portefeuille, la clé de signature ni une facture : le paiement se passe entre le téléphone et le portefeuille. S'il est éteint, le front continue de marcher.
+
+### Installation en une commande
+
+```bash
+docker compose up        # puis http://localhost:8080
+```
+
+Sans aucune variable : application, passeport de démonstration (`http://localhost:8080/#/preteur/p/demo000000`), analyse et résumé par règles locales. Pour activer Claude : `ANTHROPIC_API_KEY=... docker compose up`.
+
+Développement du back seul :
+
+```bash
+cd backend
+npm install
+cp .env.example .env     # DATABASE_PATH=./caisse.sqlite pour travailler en local
+npm run dev              # http://localhost:8080, documentation sur /api/docs
+npm test                 # tests unitaires, d'abus et de contrat
+```
+
+### Routes
+
+| Route | Rôle | Limite |
+|---|---|---|
+| `GET /api/sante` | État du service (lit la mémoire, aucun appel externe) | 120/min |
+| `GET /api/taux` | Cours FCFA pour 1 BTC : CoinGecko puis mempool.space, cache 60 s, dernier cours en base | 120/min |
+| `POST /api/ia/analyser` | Phrase du commerçant vers vente structurée (proposition, confirmation exigée) | 20/min, partagée avec le résumé |
+| `POST /api/ia/resume` | Résumé du jour à partir de chiffres agrégés | idem |
+| `POST /api/passeports` | Lien court pour un passeport signé, vérifié avant stockage, 30 jours | 10/h |
+| `GET /api/passeports/:id` | Charge d'un passeport raccourci | 60/min |
+
+Documentation OpenAPI : `/api/docs` (interface) et `/api/openapi.json`. Erreurs : toujours `{ "error": { "code", "message" } }`, codes `VALIDATION_ERROR`, `NOT_FOUND`, `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `SERVICE_UNAVAILABLE`, `INTERNAL_ERROR`.
+
+### Variables d'environnement
+
+Toutes facultatives ; voir `backend/.env.example`. Les principales : `ANTHROPIC_API_KEY` (absente : règles locales), `IA_MODELE` (`claude-opus-5-5`), `PUBLIC_URL`, `CORS_ORIGINS` (jamais `*`), `DATABASE_PATH`, `TRUST_PROXY`, `SEED_DEMO`. Une valeur invalide empêche le démarrage, avec un message qui donne les valeurs admises.
+
+### Mode dégradé
+
+| Panne | Comportement |
+|---|---|
+| Claude absent, en erreur, trop lent (8 s) ou qui refuse | Règle locale, réponse 200 avec `"source": "regle"` ; jamais de 5xx |
+| Résumé de Claude qui cite un chiffre absent des entrées | Résumé par gabarit (`"source": "modele"`) |
+| CoinGecko en panne | mempool.space |
+| Tous les fournisseurs de cours en panne | Dernier cours connu (`"enCache": true`) ; 503 seulement si aucun cours n'a jamais été obtenu |
+| Backend éteint | Le front appelle CoinGecko directement, analyse par règle, lien de passeport long |
+
+### Sécurité
+
+- Validation stricte de chaque entrée (zod), corps limité à 72 Kio, passeport à 64 Kio, décompression plafonnée (pas de « bombe » deflate).
+- Un passeport n'est stocké que si sa signature Nostr est valide : le service ne peut pas servir d'hébergement gratuit. Il ne recalcule rien ; la vue prêteur re-vérifie tout.
+- Journaux sans texte de vente, sans charge de passeport, sans clé d'API, avec IP tronquée au /24 ; erreurs internes renvoyées sans détail.
+- CSP stricte, `Referrer-Policy: no-referrer` (le lien du passeport ne fuit pas), CORS sur liste explicite, conteneur non root en lecture seule sauf `/data`.
+- CI : prettier, eslint sans avertissement, tsc, tests, `docker compose up --wait`, gitleaks sur tout l'historique.
+
+### Limites connues
+
+- Un seul réplica : les compteurs de débit, le cache des cours et le nettoyage horaire des passeports expirés vivent dans le processus.
+- SQLite dans un volume : suffisant pour la démo et un pilote, pas pour plusieurs serveurs.
+- L'appel réel à Claude n'a pas encore été testé avec une clé ; les replis le sont.
 
 ## 5. Livrables de soumission Devpost
 - [ ] Description du projet (texte ou vidéo).

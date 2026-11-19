@@ -434,7 +434,7 @@ button.reglage { cursor: pointer; }
   padding-block-start: env(safe-area-inset-top);
 }
 /* Les rubans remplissent la scène et se fondent dans le fond de la page avant le titre. */
-.bienvenue__fond { position: absolute; inset: 0; z-index: -1; mask-image: linear-gradient(to bottom, #000 62%, transparent); }
+.bienvenue__fond { position: absolute; inset: 0; z-index: -1; mask-image: linear-gradient(to bottom, black 62%, transparent); }
 .bienvenue__pause {
   position: absolute; z-index: 1;
   inset-block-start: calc(env(safe-area-inset-top) + var(--e-3)); inset-inline-end: var(--gouttiere);

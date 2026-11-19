@@ -87,7 +87,8 @@
 .dock__contenu {
   display: grid; justify-items: center; gap: 2px;
   translate: 0 calc(var(--d) * var(--d) * var(--arc-descente));
-  rotate: calc(var(--d) * var(--arc-inclinaison));
+  /* Droites au repos ; rotation de roue pendant le mouvement seulement (§6.2 corrigé le 19 nov.). */
+  rotate: var(--rotation-roue);
   scale: max(var(--arc-echelle-min), var(--arc-echelle-max) - var(--d-abs) * var(--arc-echelle-pas));
 }
 .dock__icone {
@@ -104,8 +105,12 @@
 
 .dock[data-pret] .dock__onglet { transition: color var(--d-rapide) ease; }
 .dock[data-pret] .dock__contenu {
-  transition: translate var(--d-glisse) var(--ease-ressort), rotate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
+  transition: translate var(--d-glisse) var(--ease-ressort), scale var(--d-glisse) var(--ease-ressort);
 }
+/* Rotation de roue : une seule variable pour toutes les icônes, écrite à chaque image pendant le
+   balayage (sans transition), puis ramenée à 0 avec le ressort quand la roue s'arrête. */
+@property --rotation-roue { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.dock[data-pret]:not([data-glisse]) { transition: --rotation-roue var(--d-glisse) var(--ease-ressort); }
 .dock[data-pret] .dock__icone {
   transition:
     fill-opacity var(--d-apparition) ease var(--d-remplissage-retard),

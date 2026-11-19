@@ -102,9 +102,9 @@
   --indicateur-h: 56px;
   --dock-marge-interne: 4px;
 
-  /* Dock arc (§6.2, softened so every tab stays inside the 72 px bar: 0, 1, 4, 9 px and 0 to 9 deg). */
+  /* Dock arc (§6.2, softened so every tab stays inside the 72 px bar: 0, 1, 4, 9 px). No tilt at
+     rest: icons only spin while the wheel moves (--rotation-roue, BottomNavigation.tsx). */
   --arc-descente: 1px;      /* x d squared */
-  --arc-inclinaison: 3deg;  /* x d */
   --arc-echelle-max: 1.12;
   --arc-echelle-pas: 0.07;
   --arc-echelle-min: 0.92;

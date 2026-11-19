@@ -281,7 +281,9 @@ Chaque composant : un fichier < 300 lignes, rendu < 30 lignes par fonction, vari
 - Variable continue `--progression` = index de l'onglet actif (0 à 3), fractionnaire pendant un glissement.
 - Pour chaque onglet `i`, avec `d = i - progression` :
   - `translateY = d² × 5 px` (les onglets éloignés descendent : effet d'arc) ;
-  - `rotate = d × 5 deg` (tangente à l'arc, comme les icônes inclinées de la vidéo) ;
+  - **Pas d'inclinaison au repos** (correction du 19 nov., retour de Yanis) : quand `--progression` est entier, toutes les icônes sont droites (`rotate: 0`). L'effet de la vidéo est une **rotation de roue pendant le mouvement**, pas une icône penchée en permanence.
+  - Pendant un changement d'onglet (tap ou balayage), chaque icône tourne sur elle-même en suivant le mouvement de la roue : `rotate = vitesse de --progression × k`, de même signe que le déplacement, plafonné à ±18°, avec `k` réglé pour atteindre environ 12° sur un tap. La rotation revient à 0 avec le ressort (`--ease-ressort`, 320 ms) à l'arrêt. Calculer la vitesse dans la boucle `requestAnimationFrame` qui écrit déjà `--progression` (variable `--rotation-roue`), jamais avec `useState`.
+  - À valider image par image contre `assets/nagivationbar scrolling animation.webm` (0,75 s à 1,25 s) et `assets/references/navigation_arc_planche.jpg`, puis par Yanis sur téléphone ;
   - `scale = 1.12` à `d = 0`, décroissant de 0,07 par unité de distance (minimum 0,92) ;
   - `opacity = 1` à `d = 0`, puis `max(0.72, 1 - |d| × 0.14)` : les icônes latérales restent identifiables (contraste ≥ 3:1 vérifié avec l'opacité).
 - **Balayage horizontal** sur le contenu de la page (pas sur la barre) : gestes pointeur avec verrouillage d'axe (si l'angle initial dépasse 30° de l'horizontale, c'est un défilement vertical et on n'intervient pas). Pendant le glissement, `--progression` suit le doigt et la page glisse latéralement (`translateX`), la page voisine entrant par le côté. Au relâchement : changement d'onglet si le déplacement dépasse 25 % de la largeur ou la vitesse 0,5 px/ms, sinon retour. Animation finale : 320 ms `--ease-ressort`.

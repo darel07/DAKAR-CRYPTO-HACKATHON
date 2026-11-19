@@ -189,10 +189,6 @@
 .qr { display: grid; justify-items: center; gap: var(--e-4); text-align: center; }
 
 /* ---- Historique ---- */
-.totaux { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
-.total { display: grid; gap: var(--e-1); padding: var(--e-4); border-radius: var(--rayon); }
-.total--prouve { background: var(--c-prouve-fond); color: var(--c-prouve-texte); }
-.total--declare { background: var(--c-declare-fond); color: var(--c-declare-texte); }
 .total__valeur { font-family: var(--f-titre); font-size: var(--t-titre-section); font-weight: 700; }
 .total__libelle { font-size: var(--t-secondaire); font-weight: 700; }
 
@@ -212,6 +208,25 @@
 .lien-partage { word-break: break-all; font-family: var(--f-titre); font-size: var(--t-secondaire); padding: var(--e-3); background: var(--c-surface-h); border-radius: var(--rayon); max-height: 6rem; overflow: auto; }
 .liste-verif { display: grid; gap: var(--e-2); padding: 0; margin: 0; list-style: none; }
 .liste-verif li { display: flex; gap: var(--e-2); align-items: flex-start; }
+.liste-verif svg { flex: none; inline-size: var(--icone); block-size: var(--icone); }
+.liste-verif__ok svg { color: var(--c-prouve-texte); }
+.liste-verif__attention svg { color: var(--c-declare-texte); }
+
+/* ---- E12 Vue prêteur : document à lire, comparer et imprimer (thème clair forcé) ---- */
+.preteur__entete { display: grid; gap: var(--e-2); }
+.preteur__marque { display: flex; align-items: center; gap: var(--e-2); font-family: var(--f-titre); font-weight: 700; color: var(--c-primaire); }
+.preteur__marque img { border-radius: var(--rayon-s); }
+.preteur__squelettes { display: grid; gap: var(--e-3); }
+.preteur__periode { display: grid; gap: var(--e-1); justify-items: center; text-align: center; }
+.preteur__totaux, .preteur__plafonds { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.preteur__cle { font-weight: 600; }
+
+@media print {
+  /* Le relevé tient sur une page : sans bouton, sans marges d'écran, couleurs des cartes gardées. */
+  .preteur__imprimer, .toasts, .bandeau-reseau { display: none !important; }
+  .coque--libre { max-width: none; padding: 0; gap: var(--e-4); }
+  .preteur :is(.stat, .alerte, .rubrique, .preteur__periode) { break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
 
 .rubrique { display: grid; gap: var(--e-3); }
 /* E9 : 4 StatCard en 2 × 2, carte « Résumé du jour », mentions de la feuille « Passeport signé ». */

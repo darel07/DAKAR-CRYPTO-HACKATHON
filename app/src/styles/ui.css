@@ -76,6 +76,11 @@
 .alerte__corps { display: grid; gap: var(--e-1); min-width: 0; }
 .alerte__titre { font-weight: 700; }
 .alerte a { color: inherit; font-weight: 700; }
+/* Action d'alerte qui n'est pas une navigation (« Réessayer ») : un bouton qui a l'air d'un lien. */
+.alerte .lien-action {
+  font: inherit; font-weight: 700; color: inherit; background: none; border: 0; padding: 0;
+  min-block-size: 24px; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer;
+}
 .alerte--compact { gap: var(--e-2); padding: var(--e-2) var(--e-3); font-size: var(--t-secondaire); }
 .alerte--compact .alerte__corps { display: block; }
 .alerte--compact .alerte__action { margin-inline-start: var(--e-1); }

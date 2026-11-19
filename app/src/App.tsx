@@ -28,11 +28,12 @@ function pageDeCoque(chemin: string): ReactNode {
 }
 
 function Ecran() {
-  const { chemin, param } = useRoute();
+  const { chemin, param, suite } = useRoute();
 
   // Pages autonomes : la vue prêteur est ouverte par une autre personne
   // (agent de microfinance) qui n'a pas l'application.
-  if (chemin === "/preteur") return <VuePreteur charge={param} />;
+  // #/preteur/<charge> (lien long) ou #/preteur/p/<id> (lien court, charge lue sur le serveur).
+  if (chemin === "/preteur") return param === "p" ? <VuePreteur id={suite[1] ?? ""} /> : <VuePreteur charge={param} />;
   if (chemin === "/apercu-design-system") return <Suspense fallback={null}><ApercuDesignSystem /></Suspense>;
 
   // Écrans de flux : sans barre de navigation (§6.2).

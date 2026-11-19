@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 
-export interface Route { chemin: string; param: string | null }
+export interface Route {
+  chemin: string;
+  /** Premier segment après le chemin (« #/ventes/<id> » → id). */
+  param: string | null;
+  /** Tous les segments après le chemin (« #/preteur/p/<id> » → ["p", id]). */
+  suite: string[];
+}
 
 function lire(): Route {
   const brut = window.location.hash.replace(/^#/, "") || "/";
-  const [, premier = "", param] = brut.split("/");
-  return { chemin: `/${premier}`, param: param ?? null };
+  const [, premier = "", ...suite] = brut.split("/");
+  return { chemin: `/${premier}`, param: suite[0] ?? null, suite };
 }
 
 /** Routage par hash : le lien du passeport fonctionne sans serveur ni réécriture d'URL. */

@@ -90,6 +90,9 @@
   /* Droites au repos ; rotation de roue pendant le mouvement seulement (§6.2 corrigé le 19 nov.). */
   rotate: var(--rotation-roue);
   scale: max(var(--arc-echelle-min), var(--arc-echelle-max) - var(--d-abs) * var(--arc-echelle-pas));
+  /* Grandit depuis sa base : tous les libellés restent sur la même ligne (depuis le centre, ils
+     glissaient de 1 px par onglet et la barre paraissait penchée). L'onglet actif dépasse vers le haut. */
+  transform-origin: 50% 100%;
 }
 .dock__icone {
   width: var(--icone); height: var(--icone);

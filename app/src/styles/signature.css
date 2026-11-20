@@ -1,6 +1,6 @@
 /* Signature animations (assets/PROMPT_FRONTEND.md §6). Like tokens.css, this file
    may hold literal colours and timings: they ARE the signature, measured against
-   the reference videos (assets/references/*_planche.*).
+   the reference videos (third-party material, not published in this repo).
    Rule for every loop here: the static state is the default, motion is opted in
    under prefers-reduced-motion: no-preference and off on modest devices
    ([data-simple]); [data-pause] freezes it (hidden tab, off screen, pause button). */
@@ -15,7 +15,7 @@
   --piece-medaillon: calc(var(--piece-taille) * 1.375);  /* 220 px at 160 */
   --piece-medaillon-rayon: 24px;
 
-  /* Glass (from references_coin_to_put_Dakar_currency_sign.png) */
+  /* Glass (from a third-party coin reference image, not published) */
   --piece-reflet: rgb(255 255 255 / 0.35);
   --piece-verre-1: rgb(70 185 138 / 0.28);
   --piece-verre-2: rgb(22 134 91 / 0.1);

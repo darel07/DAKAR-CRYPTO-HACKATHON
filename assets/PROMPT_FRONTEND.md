@@ -20,8 +20,7 @@ Construire une **PWA mobile-first** en français qui transforme le téléphone d
 |---|---|
 | ce fichier | **Fait foi** en cas de conflit avec les autres |
 | `assets/Caisse_Lightning_Brief_UI_UX.docx` | Brief UI/UX d'origine (palette, ton, textes). Ce prompt l'applique et l'ajuste (section 1.1) |
-| `assets/references/*.jpg|png` | Planches d'images clés des animations à reproduire (section 6) |
-| `assets/*.webm`, `assets/*.png` | Vidéos et images de référence d'origine |
+| `assets/references/*.jpg|png`, `assets/*.webm`, `assets/*.png` | Planches, vidéos et images de référence des animations (section 6). **Retirées du dépôt public** : ce sont des œuvres de tiers, utilisées seulement comme inspiration. Les noms cités plus bas restent pour l'historique |
 | `docs/PARCOURS_ET_ECRANS.md` | Acteurs et parcours |
 | `docs/ECRANS_APP.md` | État du code existant |
 | `app/src/lib/**` | **Logique métier existante à réutiliser telle quelle** (section 3.3) |

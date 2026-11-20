@@ -147,6 +147,10 @@ npm test                 # tests unitaires, d'abus et de contrat
 npm run essai-ia         # interroge le vrai Claude sur des phrases de marché (clé dans .env)
 ```
 
+### Mettre en ligne (Render, gratuit)
+
+Le dépôt contient un `render.yaml`. Sur [render.com](https://render.com) : New → Blueprint → choisir ce dépôt → Apply. Render construit l'image Docker (front + API) et donne une adresse `https://…onrender.com`. Renseigner ensuite `PUBLIC_URL` et `CORS_ORIGINS` avec cette adresse. Limites de l'offre gratuite : mise en veille après 15 minutes sans visite (premier chargement d'environ 1 minute), base effacée à chaque redéploiement (le passeport de démonstration est recréé). Vercel ne convient pas : l'API garde un processus et une base SQLite, que les fonctions de Vercel ne conservent pas.
+
 ### Routes
 
 | Route | Rôle | Limite |

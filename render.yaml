@@ -1,0 +1,30 @@
+# Déploiement sur Render (offre gratuite, HTTPS) : Dashboard → New → Blueprint → ce dépôt.
+# L'image est construite depuis le Dockerfile (front + API) ; aucune clé n'est nécessaire.
+services:
+  - type: web
+    name: caisse-lightning
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/sante
+    envVars:
+      # Render fournit PORT ; l'API l'utilise. Le proxy de Render transmet l'IP réelle.
+      - key: TRUST_PROXY
+        value: "true"
+      # Passeport de démonstration « demo000000 » recréé à chaque démarrage.
+      - key: SEED_DEMO
+        value: "true"
+      # À renseigner après le premier déploiement : l'adresse https donnée par Render.
+      - key: PUBLIC_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      # IA facultative (sinon règles locales) : par exemple Groq, gratuit.
+      - key: IA_FOURNISSEUR
+        value: compatible-openai
+      - key: IA_URL_BASE
+        value: https://api.groq.com/openai/v1
+      - key: IA_CLE
+        sync: false
+      - key: IA_MODELE
+        sync: false

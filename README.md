@@ -311,14 +311,13 @@ Conséquences :
 - [`docs/DEVPOST.md`](docs/DEVPOST.md) : texte de la page de soumission Devpost (français et anglais).
 
 ## 11. Répartition de l’équipe
-À compléter une fois les compétences de chacun connues.
 
 | Rôle | Personne | Tâches |
 |---|---|---|
-| Wallet / backend | ? | NWC, factures, confirmation de paiement |
-| Front / UX | ? | Interface PWA, QR code, historique, passeport |
-| IA / Nostr | ? | Saisie en langage naturel, signature, contresignature, vérification |
-| Docs / pitch | ? | README, schéma, vidéo, soumission Devpost |
+| Wallet / backend | Darel | NWC, factures, confirmation de paiement |
+| Front / UX | Yanis, Raoul | Interface PWA, QR code, historique, passeport |
+| IA / Nostr | Jean-Victor | Saisie en langage naturel, signature, contresignature, vérification |
+| Docs / pitch | Shalom, Darel | README, schéma, vidéo, soumission Devpost |
 
 ## Licence
 

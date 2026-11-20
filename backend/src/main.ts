@@ -15,6 +15,9 @@ async function demarrer(): Promise<void> {
 
   if (!etat.ia.active) app.log.warn("IA non configurée : analyse et résumé par règles locales");
   if (config.seedDemo) semerDemo(etat.depotPasseports);
+  // Un modèle local se charge en mémoire au premier appel (7 s mesurées) : on le fait au démarrage
+  // plutôt que devant le premier client. Sans effet visible si l'IA est absente ou en panne.
+  if (etat.ia.active) void etat.ia.analyser("riz 100", app.log);
 
   // Nettoyage des passeports et reçus expirés dans le processus (limite connue : un seul réplica).
   const nettoyage = setInterval(() => {

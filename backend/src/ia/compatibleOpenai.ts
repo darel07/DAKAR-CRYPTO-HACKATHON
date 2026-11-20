@@ -13,7 +13,16 @@ const DELAI_MS = 8_000;
 const FORMAT_JSON = `
 Réponds uniquement par un objet JSON avec exactement ces clés :
 {"libelle": string (80 caractères max), "quantite": entier ou null, "montantFcfa": entier ou null,
- "moyen": "especes" | "wave" | "orange_money" | "autre" | null, "confiance": "haute" | "moyenne" | "basse"}`;
+ "moyen": "especes" | "wave" | "orange_money" | "autre" | null, "confiance": "haute" | "moyenne" | "basse"}
+
+Exemples (entrée → sortie) :
+« 2 sacs de riz, 15 000 » → {"libelle":"2 sacs de riz","quantite":2,"montantFcfa":15000,"moyen":null,"confiance":"haute"}
+« tissu 12k orange money » → {"libelle":"tissu","quantite":null,"montantFcfa":12000,"moyen":"orange_money","confiance":"haute"}
+« savon 2 mille en espèces » → {"libelle":"savon","quantite":null,"montantFcfa":2000,"moyen":"especes","confiance":"haute"}
+« quinze mille pour le sucre » → {"libelle":"sucre","quantite":null,"montantFcfa":15000,"moyen":null,"confiance":"moyenne"}
+« 3 pains à 150 » → {"libelle":"3 pains","quantite":3,"montantFcfa":450,"moyen":null,"confiance":"moyenne"}
+« merci » → {"libelle":"","quantite":null,"montantFcfa":null,"moyen":null,"confiance":"basse"}
+Le libellé ne reprend jamais un exemple : il vient uniquement de la phrase reçue.`;
 
 interface ReponseChat {
   choices?: { message?: { content?: string | null }; finish_reason?: string }[];

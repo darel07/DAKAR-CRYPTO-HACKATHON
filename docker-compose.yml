@@ -12,6 +12,8 @@ services:
       IA_URL_BASE: ${IA_URL_BASE:-}
       IA_CLE: ${IA_CLE:-}
       IA_MODELE: ${IA_MODELE:-}
+    # Permet d'utiliser un modèle local (Ollama) de la machine hôte : IA_URL_BASE=http://host.docker.internal:11434/v1
+    extra_hosts: ["host.docker.internal:host-gateway"]
     volumes: ["caisse-data:/data"]
     read_only: true
     tmpfs: ["/tmp"]

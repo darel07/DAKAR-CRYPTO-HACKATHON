@@ -1,6 +1,7 @@
 import type { FastifyBaseLogger } from "fastify";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClientIA } from "./claude.js";
+import { rendreCoherent } from "./coherence.js";
 import { analyserParRegle } from "./regle.js";
 import { resumeAcceptable, resumeParGabarit } from "./resume.js";
 import type { CorpsResume, ReponseAnalyse, ReponseResume } from "./schemas.js";
@@ -47,7 +48,7 @@ export function creerServiceIA(client: ClientIA | null, delaiMs = DELAI_IA_MS): 
       if (client) {
         try {
           const vente = await avecDelai(client.analyser(texte), delaiMs);
-          if (vente) return { ...vente, source: "ia" };
+          if (vente) return { ...rendreCoherent(texte, vente), source: "ia" };
           log.warn({ operation: "analyser", genre: "refus_ou_vide" }, "IA sans réponse, repli local");
         } catch (err) {
           noterPanne(log, "analyser", err);

@@ -83,7 +83,10 @@ Bitcoin et Nostr servent ici moins à payer qu'à **rendre une donnée vérifiab
 
 ## Équipe
 
-[Prénoms et rôles]
+- **Darel** : wallet et backend (NWC, factures, confirmation de paiement), docs et pitch
+- **Yanis** et **Raoul** : front et UX (interface PWA, QR code, historique, passeport)
+- **Jean-Victor** : IA et Nostr (saisie en langage naturel, signature, contresignature, vérification)
+- **Shalom** : docs et pitch (README, schéma, vidéo, soumission Devpost)
 
 ---
 
@@ -100,3 +103,5 @@ Bitcoin et Nostr servent ici moins à payer qu'à **rendre une donnée vérifiab
 **Built with.** React 19, TypeScript, Vite, PWA, @getalby/sdk (NWC), nostr-tools, Fastify, SQLite, zod, Docker, Claude or any OpenAI-compatible model including a local Ollama model (8/9 correct, 2 to 3 s on CPU). 117 API tests, 13 front tests, 18 browser journeys on every change; Lighthouse mobile: performance 91, accessibility 100. One command: `docker compose up`.
 
 **What's next.** A pilot with a Senegalese microfinance institution, XOF settlement through a licensed partner, capped and revocable connections for shop staff, and voice input in Wolof.
+
+**Team.** Darel: wallet and backend, docs and pitch. Yanis and Raoul: front end and UX. Jean-Victor: AI and Nostr. Shalom: docs and pitch.

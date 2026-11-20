@@ -1,8 +1,8 @@
-# Passeport de revenus : la caisse qui ouvre l'accès au microcrédit
+# Caisse Lightning : le passeport de revenus des petits commerçants
 
 Projet pour le **Dakar Bitcoin Hack 2026** (Btrust) : https://dakar-bitcoin-hack-2026.devpost.com/
 
-> Nom de travail. Le produit était d'abord pensé comme une « caisse Lightning ». L'étude de marché (voir `docs/ETUDE_MARCHE.md`) a montré que ce positionnement est déjà très occupé. Le projet vend désormais une **preuve de revenus vérifiable**, la caisse Lightning n'étant que la source des données.
+> Le produit était d'abord pensé comme une simple « caisse Lightning ». L'étude de marché (voir `docs/ETUDE_MARCHE.md`) a montré que ce positionnement est déjà très occupé. Le projet garde ce nom mais vend désormais une **preuve de revenus vérifiable**, la caisse Lightning n'étant que la source des données.
 
 ## 1. Récap du hackathon
 

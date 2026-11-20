@@ -1,6 +1,6 @@
 # Parcours et écrans
 
-Document de référence pour le design et le développement du front. Nom de travail du produit : **Passeport de revenus**.
+Document de référence pour le design et le développement du front. Nom du produit : **Caisse Lightning : le passeport de revenus des petits commerçants**.
 
 ## 1. Acteurs
 

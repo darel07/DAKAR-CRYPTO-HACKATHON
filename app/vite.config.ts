@@ -45,7 +45,7 @@ export default defineConfig({
       injectRegister: null, // enregistré à la main, après le chargement (lib/pwa.ts)
       includeAssets: ["icone.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Caisse Lightning",
+        name: "Caisse Lightning : le passeport de revenus des petits commerçants",
         short_name: "Caisse",
         description: "Encaissez en FCFA, recevez en bitcoin Lightning et prouvez vos revenus pour obtenir un crédit.",
         lang: "fr",

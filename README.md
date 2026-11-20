@@ -308,6 +308,7 @@ Conséquences :
 - [`docs/ECRANS_APP.md`](docs/ECRANS_APP.md) : écrans réels de l'application, décision PWA, issues proposées.
 - [`docs/ETUDE_MARCHE.md`](docs/ETUDE_MARCHE.md) : synthèse de l'étude de marché et de concurrence.
 - [`docs/SCRIPT_DEMO.md`](docs/SCRIPT_DEMO.md) : script de la vidéo de démo, plan par plan, avec préparation et consignes de montage.
+- [`docs/DEVPOST.md`](docs/DEVPOST.md) : texte de la page de soumission Devpost (français et anglais).
 
 ## 11. Répartition de l’équipe
 À compléter une fois les compétences de chacun connues.

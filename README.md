@@ -319,3 +319,7 @@ Conséquences :
 | Front / UX | ? | Interface PWA, QR code, historique, passeport |
 | IA / Nostr | ? | Saisie en langage naturel, signature, contresignature, vérification |
 | Docs / pitch | ? | README, schéma, vidéo, soumission Devpost |
+
+## Licence
+
+Code publié sous licence MIT : voir [`LICENSE`](LICENSE).
